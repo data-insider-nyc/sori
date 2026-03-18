@@ -1,0 +1,94 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --font-sans: "Noto Sans KR", system-ui, sans-serif;
+}
+
+* {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+html { scroll-behavior: smooth; }
+
+/*
+  RULE: Never use CSS variables inside Tailwind arbitrary values with
+  opacity modifiers, e.g. bg-[--color]/30 → NOT supported.
+  Always use explicit hex: bg-[#FF5C5C]/30 ✅
+*/
+
+@layer components {
+
+  .btn-coral {
+    @apply bg-[#FF5C5C] hover:bg-[#E03E3E] text-white font-semibold
+           px-5 py-2.5 rounded-xl transition-all duration-150
+           active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  .btn-outline {
+    @apply border border-gray-200 hover:border-[#FF5C5C]
+           text-gray-700 hover:text-[#FF5C5C] font-medium
+           px-5 py-2.5 rounded-xl transition-all duration-150 active:scale-95;
+  }
+
+  .card {
+    @apply bg-white border border-gray-100 rounded-2xl shadow-sm
+           hover:shadow-md hover:border-[#FF5C5C]
+           transition-all duration-200 cursor-pointer;
+  }
+
+  .chip {
+    @apply inline-flex items-center gap-1.5 border border-gray-200
+           text-gray-600 text-sm font-medium px-3 py-1.5 rounded-full
+           hover:border-[#FF5C5C] hover:text-[#FF5C5C]
+           cursor-pointer transition-all duration-150;
+  }
+
+  .chip-active {
+    @apply bg-[#FF5C5C] border-[#FF5C5C] text-white
+           hover:bg-[#E03E3E] hover:border-[#E03E3E] hover:text-white;
+  }
+
+  .badge-verified {
+    @apply inline-flex items-center gap-1 bg-emerald-50 text-emerald-600
+           text-[11px] font-semibold px-2 py-0.5 rounded-full;
+  }
+
+  .badge-premium {
+    @apply inline-flex items-center gap-1 bg-amber-50 text-amber-600
+           text-[11px] font-semibold px-2 py-0.5 rounded-full;
+  }
+
+  .input-field {
+    @apply w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3
+           text-sm text-gray-900 placeholder-gray-400
+           focus:outline-none focus:ring-2 focus:ring-[#FF5C5C]/20
+           focus:border-[#FF5C5C] transition-all duration-150;
+  }
+
+  .tag {
+    @apply inline-block bg-[#FFF0F0] text-[#FF5C5C]
+           text-[11px] font-semibold px-2.5 py-0.5 rounded-full;
+  }
+
+  .section-header { @apply flex items-center justify-between mb-4; }
+  .section-title  { @apply text-lg font-bold text-gray-900; }
+  .see-all-link   { @apply text-sm text-[#FF5C5C] hover:underline; }
+}
+
+.scrollbar-hide                      { -ms-overflow-style: none; scrollbar-width: none; }
+.scrollbar-hide::-webkit-scrollbar   { display: none; }
+
+.hero-gradient { background: linear-gradient(135deg, #0F1B2D 0%, #1E3050 100%); }
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.animate-fade-in-up { animation: fadeInUp 0.35s ease-out both; }
+.stagger-1 { animation-delay: 0.05s; }
+.stagger-2 { animation-delay: 0.10s; }
+.stagger-3 { animation-delay: 0.15s; }
+.stagger-4 { animation-delay: 0.20s; }
