@@ -35,22 +35,32 @@ npm run dev                  # http://localhost:3000
 
 ```
 sori/
-├── app/
+├── app/                      # Next.js 앱 (사용자가 보는 것)
 │   ├── page.tsx              # 홈
 │   ├── directory/page.tsx    # 비즈니스 디렉토리
 │   ├── community/page.tsx    # 커뮤니티 피드
-│   └── api/businesses/       # REST API
-├── components/
+│   └── api/                  # REST API Routes
+├── components/               # UI 컴포넌트
 │   ├── layout/               # Header, MobileNav
 │   ├── home/                 # HeroCard, CategoryGrid, FeaturedBusinesses ...
 │   ├── directory/            # BusinessCard, BusinessSearch, BusinessList ...
 │   ├── community/            # PostCard, HotTopics, CreatePostButton
 │   └── ui/                   # 공통 UI
-├── lib/
+├── lib/                      # 공용 유틸리티
 │   ├── constants.ts          # 카테고리, 브랜드 상수
 │   ├── supabase.ts           # DB 클라이언트
 │   └── utils.ts              # 유틸 함수
-└── types/index.ts            # 전체 타입 정의
+├── types/index.ts            # 전체 타입 정의
+│
+├── scripts/                  # 개발/운영 도구 (앱 코드 아님)
+│   ├── setup-github.sh       # GitHub Issues/Labels/Milestones 자동 생성
+│   └── scraper/              # 데이터 스크래핑
+│       ├── heykorean.py      # Heykorean 비즈니스 스크래퍼
+│       └── requirements.txt  # Python 의존성
+│
+└── supabase/                 # DB 관련 모든 것
+    └── migrations/
+        └── 001_initial.sql   # 최초 스키마 + seed 데이터
 ```
 
 ---
