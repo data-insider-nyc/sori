@@ -1,18 +1,41 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Star, CheckCircle, Crown } from "lucide-react";
+import { supabase } from "@/lib/supabase";
 import { CATEGORIES } from "@/lib/constants";
 import type { Business } from "@/types";
 
-const FEATURED: Business[] = [
-  { id: "1", name: "포트리 한인 내과", category: "hospital", subcategory: "가정의학과·내과", address: "", city: "Fort Lee", state: "NJ", zip: "", languages: ["ko","en"], is_verified: true, is_premium: true, rating: 4.9, review_count: 127, images: [], created_at: "", updated_at: "" },
-  { id: "2", name: "김앤파트너스 법률", category: "lawyer", subcategory: "이민법·형사법", address: "", city: "Manhattan", state: "NY", zip: "", languages: ["ko","en"], is_verified: true, is_premium: true, rating: 4.7, review_count: 89, images: [], created_at: "", updated_at: "" },
-  { id: "3", name: "이성민 CPA", category: "accountant", subcategory: "세금·법인회계", address: "", city: "Palisades Park", state: "NJ", zip: "", languages: ["ko","en"], is_verified: true, is_premium: false, rating: 4.8, review_count: 54, images: [], created_at: "", updated_at: "" },
-];
-
 export function FeaturedBusinesses() {
+  const [businesses, setBusinesses] = useState<Business[]>([]);
+  const [loading, setLoading]       = useState(true);
+
+  useEffect(() => {
+    async function load() {
+      const { data } = await supabase
+        .from("businesses")
+        .select("*")
+        .eq("is_premium", true)
+        .order("rating", { ascending: false })
+        .limit(3);
+      setBusinesses((data ?? []) as Business[]);
+      setLoading(false);
+    }
+    load();
+  }, []);
+
+  if (loading) return (
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      {[1, 2, 3].map((i) => (
+        <div key={i} className="h-52 bg-gray-100 rounded-2xl animate-pulse" />
+      ))}
+    </div>
+  );
+
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-      {FEATURED.map((biz) => {
+      {businesses.map((biz) => {
         const cat = CATEGORIES[biz.category];
         return (
           <Link key={biz.id} href={`/directory/${biz.id}`} className="block">
