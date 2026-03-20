@@ -26,3 +26,20 @@ export const POST_CATEGORIES: Record<PostCategory, string> = {
   visa:        "비자·이민",
   general:     "자유게시판",
 };
+
+// ─── Hyperlocal target cities (English only, no Edgewater)
+export const TARGET_CITIES = [
+  { value: "",                label: "All Cities" },
+  { value: "Fort Lee",        label: "Fort Lee, NJ" },
+  { value: "Palisades Park",  label: "Palisades Park, NJ" },
+  { value: "Flushing",        label: "Flushing, NY" },
+  { value: "Manhattan",       label: "Manhattan, NY" },
+] as const;
+
+// ─── Google Places API search centers (5km radius)
+export const SCRAPER_CENTERS = [
+  { name: "Fort Lee, NJ",       lat: 40.8504, lng: -73.9710 },
+  { name: "Palisades Park, NJ", lat: 40.8468, lng: -73.9932 },
+  { name: "Flushing, NY",       lat: 40.7675, lng: -73.8330 },
+  { name: "Manhattan, NY",      lat: 40.7580, lng: -73.9855 },
+] as const;

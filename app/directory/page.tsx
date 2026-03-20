@@ -1,55 +1,61 @@
-import { BusinessSearch }     from "@/components/directory/BusinessSearch";
-import { BusinessList }       from "@/components/directory/BusinessList";
-import { CategoryFilterBar }  from "@/components/directory/CategoryFilterBar";
-import type { BusinessFilters } from "@/types";
+"use client";
 
-// Next.js 16: searchParams must be awaited
-interface Props {
-  searchParams: Promise<{
-    category?: string;
-    city?: string;
-    q?: string;
-    verified?: string;
-    page?: string;
-  }>;
-}
+import { useSearchParams, useRouter } from "next/navigation";
+import { BusinessSearch }    from "@/components/directory/BusinessSearch";
+import { BusinessList }      from "@/components/directory/BusinessList";
+import { CategoryFilterBar } from "@/components/directory/CategoryFilterBar";
+import { TARGET_CITIES }     from "@/lib/constants";
 
-export default async function DirectoryPage({ searchParams }: Props) {
-  const sp = await searchParams;
+export default function DirectoryPage() {
+  const searchParams = useSearchParams();
+  const router       = useRouter();
 
-  const filters: BusinessFilters = {
-    category:    sp.category as BusinessFilters["category"],
-    city:        sp.city,
-    search:      sp.q,
-    is_verified: sp.verified === "true",
-  };
+  const category = searchParams.get("category") ?? undefined;
+  const city     = searchParams.get("city")     ?? undefined;
+  const q        = searchParams.get("q")        ?? undefined;
+  const page     = Number(searchParams.get("page") ?? 1);
+
+  function setCity(value: string) {
+    const params = new URLSearchParams(searchParams.toString());
+    value ? params.set("city", value) : params.delete("city");
+    params.delete("page");
+    router.push(`/directory?${params.toString()}`);
+  }
 
   return (
     <div className="py-4 lg:py-8">
       <div className="mb-6">
-        <h1 className="text-2xl lg:text-3xl font-bold text-gray-900">비즈니스 찾기</h1>
-        <p className="text-gray-500 mt-1 text-sm">뉴욕·뉴저지 한인 비즈니스 디렉토리</p>
+        <h1 className="text-3xl font-black text-gray-900 tracking-tight">비즈니스 찾기</h1>
+        <p className="text-gray-400 mt-1 text-sm font-medium">뉴욕 · 뉴저지 한인 비즈니스 디렉토리</p>
       </div>
 
-      <BusinessSearch defaultValue={sp.q} />
-      <CategoryFilterBar activeCategory={sp.category} />
+      <BusinessSearch defaultValue={q} />
+      <CategoryFilterBar activeCategory={category} />
 
+      {/* 지역 필터 */}
       <div className="flex flex-wrap gap-2 mb-6">
-        <select
-          className="text-sm border border-gray-200 rounded-lg px-3 py-2 bg-white text-gray-700
-                     focus:outline-none focus:ring-2 focus:ring-[#FF5C5C]/20"
-          defaultValue={sp.city ?? ""}
-        >
-          <option value="">지역 전체</option>
-          <option value="Fort Lee">포트리 NJ</option>
-          <option value="Palisades Park">팰리세이즈파크 NJ</option>
-          <option value="Flushing">플러싱 NY</option>
-          <option value="Manhattan">맨해튼 NY</option>
-          <option value="Edgewater">엣지워터 NJ</option>
-        </select>
+        {TARGET_CITIES.map((c) => (
+          <button
+            key={c.value}
+            onClick={() => setCity(c.value)}
+            className={[
+              "px-4 py-2 rounded-full text-sm font-700 transition-all border",
+              city === c.value || (!city && c.value === "")
+                ? "bg-gray-900 text-white border-gray-900"
+                : "bg-white text-gray-600 border-gray-200 hover:border-gray-400"
+            ].join(" ")}
+          >
+            {c.label}
+          </button>
+        ))}
       </div>
 
-      <BusinessList filters={filters} />
+      <BusinessList
+        category={category}
+        city={city}
+        search={q}
+        page={page}
+      />
     </div>
   );
 }

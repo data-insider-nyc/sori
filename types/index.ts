@@ -1,10 +1,23 @@
 export type Category =
-  | "hospital" | "lawyer" | "accountant" | "restaurant"
-  | "beauty" | "realestate" | "education" | "jobs" | "other";
+  | "hospital"
+  | "lawyer"
+  | "accountant"
+  | "restaurant"
+  | "beauty"
+  | "realestate"
+  | "education"
+  | "jobs"
+  | "other";
 
 export type PostCategory =
-  | "all" | "hospital" | "jobs" | "realestate"
-  | "kids" | "classifieds" | "visa" | "general";
+  | "all"
+  | "hospital"
+  | "jobs"
+  | "realestate"
+  | "kids"
+  | "classifieds"
+  | "visa"
+  | "general";
 
 export interface Business {
   id: string;
@@ -19,6 +32,7 @@ export interface Business {
   zip: string;
   phone?: string;
   website?: string;
+  hours?: Record<string, string>;
   languages: ("ko" | "en")[];
   is_verified: boolean;
   is_premium: boolean;
