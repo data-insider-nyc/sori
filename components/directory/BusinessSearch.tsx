@@ -4,22 +4,32 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { Search, X } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 
-export function BusinessSearch({ defaultValue = "" }: { defaultValue?: string }) {
-  const router       = useRouter();
+export function BusinessSearch({
+  defaultValue = "",
+}: {
+  defaultValue?: string;
+}) {
+  const router = useRouter();
   const searchParams = useSearchParams();
   const [value, setValue] = useState(defaultValue);
-  const timer = useRef<ReturnType<typeof setTimeout>>();
+  const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // 디바운스 — 500ms 후 URL 업데이트
   useEffect(() => {
-    clearTimeout(timer.current);
+    if (timer.current) {
+      clearTimeout(timer.current);
+    }
     timer.current = setTimeout(() => {
       const params = new URLSearchParams(searchParams.toString());
       value.trim() ? params.set("q", value.trim()) : params.delete("q");
       params.delete("page");
       router.push(`/directory?${params.toString()}`);
     }, 500);
-    return () => clearTimeout(timer.current);
+    return () => {
+      if (timer.current) {
+        clearTimeout(timer.current);
+      }
+    };
   }, [value]);
 
   return (
