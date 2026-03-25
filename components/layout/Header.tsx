@@ -6,7 +6,9 @@ import { UserMenu, LoginButton } from "./UserMenu";
 
 export async function Header() {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
   let nickname: string | null = null;
   if (user) {
@@ -45,6 +47,7 @@ export async function Header() {
         <NavLinks />
 
         <div className="flex items-center gap-2 ml-auto">
+          {user && nickname ? <span>반가워요!</span> : null}
           {user && nickname ? (
             <UserMenu nickname={nickname} />
           ) : (

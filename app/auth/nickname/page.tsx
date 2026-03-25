@@ -6,7 +6,7 @@ import { RefreshCw } from "lucide-react";
 import { createClient } from "@/lib/supabase-browser";
 import { generateNickname } from "@/lib/nickname";
 
-const NICKNAME_REGEX = /^[가-힣a-zA-Z0-9_]{2,20}$/;
+const NICKNAME_REGEX = /^[가-힣a-zA-Z0-9]{3,10}$/;
 
 export default function NicknamePage() {
   const [generated, setGenerated] = useState("");
@@ -32,7 +32,7 @@ export default function NicknamePage() {
 
   async function handleConfirm() {
     if (custom.trim() && !NICKNAME_REGEX.test(custom.trim())) {
-      setError("한글, 영문, 숫자, 밑줄(_)만 사용 가능하며 2~20자이어야 해요.");
+      setError("한글, 영문, 숫자만 사용 가능하며 3~10자이어야 해요.");
       return;
     }
     setLoading(true);
@@ -99,7 +99,7 @@ export default function NicknamePage() {
           className="input-field text-center mb-2"
           disabled={loading}
         />
-        <p className="text-[11px] text-gray-400 mb-5">한글·영문·숫자·밑줄(_) 사용 가능</p>
+        <p className="text-[11px] text-gray-400 mb-5">한글·영문·숫자만 가능, 3~10자</p>
 
         {error && <p className="text-xs text-red-500 mb-4">{error}</p>}
 

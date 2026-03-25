@@ -6,7 +6,7 @@ import { RefreshCw } from "lucide-react";
 import { createClient } from "@/lib/supabase-browser";
 import { generateNickname } from "@/lib/nickname";
 
-const NICKNAME_REGEX = /^[가-힣a-zA-Z0-9_]{2,20}$/;
+const NICKNAME_REGEX = /^[가-힣a-zA-Z0-9]{3,10}$/;
 
 interface Props {
   userId: string;
@@ -32,7 +32,7 @@ export function NicknameEditor({ userId, currentNickname, cooldownDays }: Props)
       return;
     }
     if (custom.trim() && !NICKNAME_REGEX.test(custom.trim())) {
-      setError("한글, 영문, 숫자, 밑줄(_)만 사용 가능하며 2~20자이어야 해요.");
+      setError("한글, 영문, 숫자만 사용 가능하며 3~10자이어야 해요.");
       return;
     }
     setLoading(true);
@@ -101,8 +101,8 @@ export function NicknameEditor({ userId, currentNickname, cooldownDays }: Props)
         type="text"
         value={custom}
         onChange={(e) => { setCustom(e.target.value); setError(""); }}
-        placeholder="원하는 닉네임 (2~20자)"
-        maxLength={20}
+        placeholder="원하는 닉네임 (3~10자)"
+        maxLength={10}
         className="input-field"
         disabled={loading}
       />

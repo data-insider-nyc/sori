@@ -36,36 +36,36 @@ export function UserMenu({ nickname }: Props) {
       {open && (
         <>
           {/* Backdrop */}
-          <div
-            className="fixed inset-0 z-10"
-            onClick={() => setOpen(false)}
-          />
+          <div className="fixed inset-0 z-10" onClick={() => setOpen(false)} />
           {/* Dropdown */}
-          <div className="absolute right-0 top-11 z-20 bg-white border border-gray-100
-                          rounded-2xl shadow-lg py-2 w-44">
+          <div
+            className="absolute right-0 top-11 z-20 bg-white border border-gray-100
+                          rounded-2xl shadow-lg py-2 w-44"
+          >
             <div className="px-4 py-2 border-b border-gray-100">
               <p className="text-xs text-gray-400">닉네임</p>
-              <p className="text-sm font-semibold text-gray-900 truncate">{nickname}</p>
+              <p className="text-sm font-semibold text-gray-900 truncate">
+                {nickname}
+              </p>
             </div>
-          <div className="py-1">
-            <Link
-              href="/profile"
-              onClick={() => setOpen(false)}
-              className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-gray-600
+            <div className="py-1">
+              <Link
+                href="/profile"
+                onClick={() => setOpen(false)}
+                className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-gray-600
                          hover:bg-gray-50 hover:text-gray-900 transition-colors"
-            >
-              <UserCircle className="w-4 h-4" />
-              내 프로필
-            </Link>
-            <button
-              onClick={handleLogout}
-              className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-gray-600
+              >
+                <UserCircle className="w-4 h-4" />내 프로필
+              </Link>
+              <button
+                onClick={handleLogout}
+                className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-gray-600
                          hover:bg-gray-50 hover:text-gray-900 transition-colors"
-            >
-              <LogOut className="w-4 h-4" />
-              로그아웃
-            </button>
-          </div>
+              >
+                <LogOut className="w-4 h-4" />
+                로그아웃
+              </button>
+            </div>
           </div>
         </>
       )}
