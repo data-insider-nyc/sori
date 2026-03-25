@@ -44,7 +44,7 @@ export function getCategoryEmoji(value: string): string {
   return COMMUNITY_CATEGORIES.find((c) => c.value === value)?.emoji ?? "💬";
 }
 
-// ─── Hyperlocal target cities ─────────────────────────────────────────────────
+// ─── Hyperlocal target cities (business directory only) ──────────────────────
 
 export const TARGET_CITIES = [
   { value: "",              label: "All Cities" },
@@ -54,4 +54,38 @@ export const TARGET_CITIES = [
   { value: "Manhattan",     label: "Manhattan, NY" },
   { value: "Dallas",        label: "Dallas, TX" },
 ] as const;
+
+// ─── Community metro regions ──────────────────────────────────────────────────
+// Metro-level regions for community posts. Separate from TARGET_CITIES.
+// region = null on a post means "nationwide / all communities".
+//
+// status:
+//   "open" — fully live, users can post & filter
+//   "soon" — tab visible but locked (coming soon badge), no posts yet
+//   "hidden" — not shown in UI
+
+export const REGIONS = [
+  // Open
+  { value: "nyc",     label: "NY / NJ",       emoji: "🗽", status: "open" },
+  // Coming soon — visible, locked
+  { value: "la",      label: "Los Angeles",   emoji: "🌴", status: "soon" },
+  { value: "atl",     label: "Atlanta",       emoji: "🍑", status: "soon" },
+  { value: "dc",      label: "DC / Virginia", emoji: "🏛️",  status: "soon" },
+  { value: "bay",     label: "Bay Area",      emoji: "🌉", status: "soon" },
+  { value: "chicago", label: "Chicago",       emoji: "🌬️",  status: "soon" },
+  { value: "seattle", label: "Seattle",       emoji: "☕", status: "soon" },
+  { value: "dallas",  label: "Dallas",        emoji: "⭐", status: "soon" },
+  // Hidden: Houston, Philadelphia — not shown yet
+] as const;
+
+export type Region = typeof REGIONS[number]["value"];
+
+// Categories whose posts are inherently local (default to user's region).
+// All other categories default to null (= nationwide).
+export const LOCAL_CATEGORIES = new Set<PostCategory>([
+  "realestate",
+  "hospital",
+  "kids",
+  "classifieds",
+]);
 

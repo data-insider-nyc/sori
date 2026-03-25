@@ -20,14 +20,20 @@ export function CommunityFeed() {
         .limit(5);
 
       const rawPosts = raw ?? [];
-      if (rawPosts.length === 0) { setPosts([]); setLoading(false); return; }
+      const seen = new Set<string>();
+      const dedupedPosts = rawPosts.filter((p: any) => {
+        if (seen.has(p.id)) return false;
+        seen.add(p.id);
+        return true;
+      });
+      if (dedupedPosts.length === 0) { setPosts([]); setLoading(false); return; }
 
-      const userIds = [...new Set(rawPosts.map((p: any) => p.user_id as string))];
+      const userIds = [...new Set(dedupedPosts.map((p: any) => p.user_id as string))];
       const { data: profiles } = await supabase
         .from("profiles").select("id, nickname").in("id", userIds);
       const profileMap = Object.fromEntries((profiles ?? []).map((p: any) => [p.id, p]));
 
-      const list: Post[] = rawPosts.map((p: any) => ({
+      const list: Post[] = dedupedPosts.map((p: any) => ({
         ...p,
         author: profileMap[p.user_id] ?? { id: p.user_id, nickname: "알 수 없음" },
       }));

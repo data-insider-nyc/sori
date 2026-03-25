@@ -52,9 +52,9 @@ export async function Header() {
           ) : (
             <LoginButton />
           )}
-          <Link href="/advertise" className="btn-coral text-sm !py-1.5 !px-4">
+          {/* <Link href="/advertise" className="btn-coral text-sm !py-1.5 !px-4">
             광고 시작
-          </Link>
+          </Link> */}
         </div>
       </div>
     </header>
