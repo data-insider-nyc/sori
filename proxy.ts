@@ -28,11 +28,9 @@ export async function proxy(request: NextRequest) {
   // Refresh session so it doesn't expire mid-visit
   const { data: { user } } = await supabase.auth.getUser();
 
-  // /auth/nickname requires an active session
-  if (
-    request.nextUrl.pathname.startsWith("/auth/nickname") &&
-    !user
-  ) {
+  // Protected routes: must be logged in
+  const protectedPaths = ["/auth/nickname", "/profile"];
+  if (protectedPaths.some((p) => request.nextUrl.pathname.startsWith(p)) && !user) {
     return NextResponse.redirect(new URL("/auth/login", request.url));
   }
 

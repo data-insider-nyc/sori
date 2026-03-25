@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { LogOut, User } from "lucide-react";
+import Link from "next/link";
+import { LogOut, UserCircle, User } from "lucide-react";
 import { createClient } from "@/lib/supabase-browser";
 import { getInitials, avatarColor } from "@/lib/utils";
 
@@ -46,6 +47,16 @@ export function UserMenu({ nickname }: Props) {
               <p className="text-xs text-gray-400">닉네임</p>
               <p className="text-sm font-semibold text-gray-900 truncate">{nickname}</p>
             </div>
+          <div className="py-1">
+            <Link
+              href="/profile"
+              onClick={() => setOpen(false)}
+              className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-gray-600
+                         hover:bg-gray-50 hover:text-gray-900 transition-colors"
+            >
+              <UserCircle className="w-4 h-4" />
+              내 프로필
+            </Link>
             <button
               onClick={handleLogout}
               className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-gray-600
@@ -54,6 +65,7 @@ export function UserMenu({ nickname }: Props) {
               <LogOut className="w-4 h-4" />
               로그아웃
             </button>
+          </div>
           </div>
         </>
       )}
