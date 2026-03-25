@@ -39,10 +39,10 @@ export function PostCard({ post, userId = null }: Props) {
       <div className="flex items-center gap-3 mb-3">
         <div
             style={{ color: avatarTextColor(post.author.nickname) }}
-            className="w-8 h-8 rounded-lg bg-gray-100 flex items-center justify-center text-xs font-bold flex-shrink-0"
+            className="w-8 h-8 rounded-lg bg-gray-100 flex items-center justify-center text-[10px] font-bold flex-shrink-0"
           >
             {getInitials(post.author.nickname)}
-        </div>
+          </div>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">
             <span className="text-sm font-semibold text-gray-900">{post.author.nickname}</span>

@@ -21,6 +21,10 @@ export function formatPhone(phone: string): string {
 }
 
 export function getInitials(name: string): string {
+  const parts = name.trim().split(" ");
+  // For generated nicknames (3-part: 형용사고 형용사한 엔티티), show the entity (last word)
+  if (parts.length >= 2) return parts[parts.length - 1];
+  // For custom nicknames, show first 2 chars
   return name.substring(0, 2).toUpperCase();
 }
 

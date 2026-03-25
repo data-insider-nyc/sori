@@ -238,7 +238,7 @@ function CommentItem({
       {isReply && <CornerDownRight className="w-3.5 h-3.5 text-gray-300 mt-2 flex-shrink-0" />}
       <div
         style={{ color: avatarTextColor(comment.author.nickname) }}
-        className="w-7 h-7 rounded-md bg-gray-100 flex items-center justify-center text-xs font-bold flex-shrink-0"
+        className="w-7 h-7 rounded-md bg-gray-100 flex items-center justify-center text-[9px] font-bold flex-shrink-0"
       >
         {getInitials(comment.author.nickname)}
       </div>

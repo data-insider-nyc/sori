@@ -58,7 +58,7 @@ export default async function PostDetailPage({ params }: { params: Promise<{ id:
         <div className="flex items-center gap-2.5 mb-5">
           <div
               style={{ color: avatarTextColor(author?.nickname ?? "?") }}
-              className="w-8 h-8 rounded-lg bg-gray-100 flex items-center justify-center text-xs font-bold flex-shrink-0"
+              className="w-8 h-8 rounded-lg bg-gray-100 flex items-center justify-center text-[10px] font-bold flex-shrink-0"
             >
               {getInitials(author?.nickname ?? "?")}
           </div>
