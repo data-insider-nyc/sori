@@ -21,8 +21,7 @@ export function formatPhone(phone: string): string {
 }
 
 export function getInitials(name: string): string {
-  // return name.charAt(0).toUpperCase();
-  return name.substring(0, 1).toUpperCase();
+  return name.substring(0, 2).toUpperCase();
 }
 
 const AVATAR_COLORS = [
@@ -36,4 +35,46 @@ const AVATAR_COLORS = [
 
 export function avatarColor(name: string): string {
   return AVATAR_COLORS[name.charCodeAt(0) % AVATAR_COLORS.length];
+}
+
+// Vivid version for large profile avatars — white text on saturated background
+const VIVID_AVATAR_COLORS = [
+  "bg-[#FF5C5C] text-white",    // coral
+  "bg-blue-500 text-white",
+  "bg-emerald-500 text-white",
+  "bg-violet-500 text-white",
+  "bg-orange-500 text-white",
+  "bg-pink-500 text-white",
+];
+
+export function avatarColorVivid(name: string): string {
+  return VIVID_AVATAR_COLORS[name.charCodeAt(0) % VIVID_AVATAR_COLORS.length];
+}
+
+// Text-only colors for avatars — use inline style to avoid Tailwind purge
+const AVATAR_TEXT_COLORS = [
+  "#E03E3E",  // coral-dark
+  "#2563EB",  // blue-600
+  "#059669",  // emerald-600
+  "#7C3AED",  // violet-600
+  "#F97316",  // orange-500
+  "#DB2777",  // pink-600
+];
+
+export function avatarTextColor(name: string): string {
+  return AVATAR_TEXT_COLORS[name.charCodeAt(0) % AVATAR_TEXT_COLORS.length];
+}
+
+
+const AVATAR_GRADIENTS = [
+  "linear-gradient(135deg, #FF5C5C 0%, #FF8C42 100%)",  // coral → orange
+  "linear-gradient(135deg, #4F46E5 0%, #818CF8 100%)",  // indigo → lavender
+  "linear-gradient(135deg, #059669 0%, #34D399 100%)",  // emerald
+  "linear-gradient(135deg, #DB2777 0%, #F472B6 100%)",  // pink
+  "linear-gradient(135deg, #2563EB 0%, #60A5FA 100%)",  // blue
+  "linear-gradient(135deg, #D97706 0%, #FCD34D 100%)",  // amber
+];
+
+export function avatarGradient(name: string): string {
+  return AVATAR_GRADIENTS[name.charCodeAt(0) % AVATAR_GRADIENTS.length];
 }

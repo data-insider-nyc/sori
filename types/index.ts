@@ -9,15 +9,9 @@ export type Category =
   | "jobs"
   | "other";
 
-export type PostCategory =
-  | "all"
-  | "hospital"
-  | "jobs"
-  | "realestate"
-  | "kids"
-  | "classifieds"
-  | "visa"
-  | "general";
+// PostCategory is defined in lib/constants.ts — do not duplicate here.
+import type { PostCategory } from "@/lib/constants";
+export type { PostCategory };
 
 export interface Business {
   id: string;
@@ -47,7 +41,7 @@ export interface Post {
   id: string;
   author: { id: string; nickname: string; avatar_url?: string };
   category: PostCategory;
-  title?: string;
+  title: string;
   content: string;
   tags: string[];
   images?: string[];
@@ -56,6 +50,16 @@ export interface Post {
   is_liked?: boolean;
   location?: string;
   created_at: string;
+}
+
+export interface Comment {
+  id: string;
+  post_id: string;
+  parent_id: string | null;
+  author: { id: string; nickname: string };
+  content: string;
+  created_at: string;
+  replies?: Comment[];
 }
 
 export interface BusinessFilters {

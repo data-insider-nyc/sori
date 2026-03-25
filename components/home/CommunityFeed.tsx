@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { supabase } from "@/lib/supabase";
+import { createClient } from "@/lib/supabase-browser";
 import { PostCard } from "@/components/community/PostCard";
 import type { Post } from "@/types";
 
@@ -11,12 +11,28 @@ export function CommunityFeed() {
 
   useEffect(() => {
     async function load() {
-      const { data } = await supabase
+      const supabase = createClient();
+
+      const { data: raw } = await supabase
         .from("posts")
-        .select("*, author:profiles(id, nickname, avatar_url)")
+        .select("*")
         .order("created_at", { ascending: false })
         .limit(5);
-      setPosts((data ?? []) as Post[]);
+
+      const rawPosts = raw ?? [];
+      if (rawPosts.length === 0) { setPosts([]); setLoading(false); return; }
+
+      const userIds = [...new Set(rawPosts.map((p: any) => p.user_id as string))];
+      const { data: profiles } = await supabase
+        .from("profiles").select("id, nickname").in("id", userIds);
+      const profileMap = Object.fromEntries((profiles ?? []).map((p: any) => [p.id, p]));
+
+      const list: Post[] = rawPosts.map((p: any) => ({
+        ...p,
+        author: profileMap[p.user_id] ?? { id: p.user_id, nickname: "알 수 없음" },
+      }));
+
+      setPosts(list);
       setLoading(false);
     }
     load();
