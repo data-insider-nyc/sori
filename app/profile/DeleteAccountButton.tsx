@@ -32,6 +32,7 @@ export function DeleteAccountButton() {
     }
 
     await supabase.auth.signOut();
+    router.refresh();
     router.replace("/");
   }
 

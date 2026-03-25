@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
-import Image from "next/image";
 import { createClient } from "@/lib/supabase-server";
 import { getInitials, avatarColor } from "@/lib/utils";
 import { NicknameEditor } from "./NicknameEditor";
@@ -30,7 +29,7 @@ export default async function ProfilePage() {
 
   const { data: profile } = await supabase
     .from("profiles")
-    .select("nickname, avatar_url, joined_at, nickname_changed_at")
+    .select("nickname, joined_at, nickname_changed_at")
     .eq("id", user.id)
     .single();
 
@@ -46,20 +45,8 @@ export default async function ProfilePage() {
       <div className="bg-white border border-gray-100 rounded-2xl shadow-sm p-6 space-y-6">
         {/* Avatar + info */}
         <div className="flex items-center gap-4">
-          <div className="w-16 h-16 rounded-full overflow-hidden flex-shrink-0">
-            {profile.avatar_url ? (
-              <Image
-                src={profile.avatar_url}
-                alt={profile.nickname}
-                width={64}
-                height={64}
-                className="w-full h-full object-cover"
-              />
-            ) : (
-              <div className={`w-full h-full flex items-center justify-center text-2xl font-bold ${colorClass}`}>
-                {getInitials(profile.nickname)}
-              </div>
-            )}
+          <div className={`w-16 h-16 rounded-full flex-shrink-0 flex items-center justify-center text-2xl font-bold ${colorClass}`}>
+            {getInitials(profile.nickname)}
           </div>
           <div>
             <p className="text-lg font-bold text-gray-900">{profile.nickname}</p>

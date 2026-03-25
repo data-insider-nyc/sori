@@ -44,7 +44,6 @@ export default function NicknamePage() {
     const { error: upsertError } = await supabase.from("profiles").upsert({
       id: user.id,
       nickname: finalNickname,
-      avatar_url: user.user_metadata?.avatar_url ?? user.user_metadata?.picture ?? null,
     });
 
     if (upsertError) {
@@ -53,6 +52,7 @@ export default function NicknamePage() {
       return;
     }
 
+    router.refresh();
     router.replace("/");
   }
 
