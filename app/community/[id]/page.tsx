@@ -5,6 +5,7 @@ import { getCategoryLabel, getCategoryEmoji } from "@/lib/constants";
 import { getInitials, avatarTextColor, timeAgo } from "@/lib/utils";
 import { PostInteractions } from "./PostInteractions";
 import { CommentSection }   from "./CommentSection";
+import { UserPopover } from "@/components/community/UserPopover";
 
 export default async function PostDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -55,18 +56,33 @@ export default async function PostDetailPage({ params }: { params: Promise<{ id:
         <h1 className="text-xl font-black text-gray-900 mb-3 leading-snug">{post.title}</h1>
 
         {/* Author */}
-        <div className="flex items-center gap-2.5 mb-5">
-          <div
-              style={{ color: avatarTextColor(author?.nickname ?? "?") }}
-              className="w-8 h-8 rounded-lg bg-gray-100 flex items-center justify-center text-[10px] font-bold flex-shrink-0"
-            >
-              {getInitials(author?.nickname ?? "?")}
+        {author && (
+          <UserPopover userId={author.id} nickname={author.nickname}>
+            <div className="flex items-center gap-2.5 mb-5 w-fit cursor-pointer">
+              <div
+                  style={{ color: avatarTextColor(author.nickname) }}
+                  className="w-8 h-8 rounded-lg bg-gray-100 flex items-center justify-center text-[10px] font-bold flex-shrink-0"
+                >
+                  {getInitials(author.nickname)}
+              </div>
+              <div>
+                <p className="text-sm font-semibold text-gray-900">{author.nickname}</p>
+                <p className="text-xs text-gray-400">{timeAgo(post.created_at)}</p>
+              </div>
+            </div>
+          </UserPopover>
+        )}
+        {!author && (
+          <div className="flex items-center gap-2.5 mb-5">
+            <div className="w-8 h-8 rounded-lg bg-gray-100 flex items-center justify-center text-[10px] font-bold flex-shrink-0 text-gray-400">
+              ?
+            </div>
+            <div>
+              <p className="text-sm font-semibold text-gray-900">알 수 없음</p>
+              <p className="text-xs text-gray-400">{timeAgo(post.created_at)}</p>
+            </div>
           </div>
-          <div>
-            <p className="text-sm font-semibold text-gray-900">{author?.nickname ?? "알 수 없음"}</p>
-            <p className="text-xs text-gray-400">{timeAgo(post.created_at)}</p>
-          </div>
-        </div>
+        )}
 
         {/* Content */}
         <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap">{post.content}</p>

@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase-server";
-import { avatarTextColor } from "@/lib/utils";
+import { avatarTextColor, getInitials } from "@/lib/utils";
 import { NicknameEditor } from "./NicknameEditor";
 import { DeleteAccountButton } from "./DeleteAccountButton";
 import { ProfileActivity } from "./ProfileActivity";
+import { BioEditor } from "./BioEditor";
 
 export const metadata: Metadata = { title: "내 프로필" };
 
@@ -34,7 +35,7 @@ export default async function ProfilePage() {
 
   const { data: profile } = await supabase
     .from("profiles")
-    .select("nickname, joined_at, nickname_changed_at")
+    .select("nickname, bio, joined_at, nickname_changed_at")
     .eq("id", user.id)
     .single();
 
@@ -54,7 +55,7 @@ export default async function ProfilePage() {
   ]);
 
   const textColor = avatarTextColor(profile.nickname);
-  const avatarChar = profile.nickname.substring(0, 2);
+  const avatarChar = getInitials(profile.nickname);
 
   return (
     <div className="py-8 max-w-lg mx-auto space-y-4">
@@ -86,6 +87,11 @@ export default async function ProfilePage() {
         initialPostCount={postCount ?? 0}
         initialCommentCount={commentCount ?? 0}
       />
+
+      {/* ── Bio card ──────────────────────────────────────────────── */}
+      <div className="bg-white border border-gray-100 rounded-2xl shadow-sm p-6">
+        <BioEditor userId={user.id} currentBio={profile.bio} />
+      </div>
 
       {/* ── Nickname change card ───────────────────────────────────── */}
       <div className="bg-white border border-gray-100 rounded-2xl shadow-sm p-6">

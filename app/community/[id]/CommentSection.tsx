@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import { CornerDownRight, Trash2 } from "lucide-react";
 import { cn, timeAgo, getInitials, avatarTextColor } from "@/lib/utils";
 import { createClient } from "@/lib/supabase-browser";
+import { UserPopover } from "@/components/community/UserPopover";
 import type { Comment } from "@/types";
 
 interface Props {
@@ -236,15 +237,21 @@ function CommentItem({
   return (
     <div className={cn("flex gap-2.5", isReply && "items-start")}>
       {isReply && <CornerDownRight className="w-3.5 h-3.5 text-gray-300 mt-2 flex-shrink-0" />}
-      <div
-        style={{ color: avatarTextColor(comment.author.nickname) }}
-        className="w-7 h-7 rounded-md bg-gray-100 flex items-center justify-center text-[9px] font-bold flex-shrink-0"
-      >
-        {getInitials(comment.author.nickname)}
-      </div>
+      <UserPopover userId={comment.author.id} nickname={comment.author.nickname}>
+        <div
+          style={{ color: avatarTextColor(comment.author.nickname) }}
+          className="w-7 h-7 rounded-md bg-gray-100 flex items-center justify-center text-[9px] font-bold flex-shrink-0"
+        >
+          {getInitials(comment.author.nickname)}
+        </div>
+      </UserPopover>
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2 mb-0.5">
-          <span className="text-xs font-semibold text-gray-900">{comment.author.nickname}</span>
+          <UserPopover userId={comment.author.id} nickname={comment.author.nickname}>
+            <span className="text-xs font-semibold text-gray-900 cursor-pointer hover:text-[#FF5C5C] transition-colors">
+              {comment.author.nickname}
+            </span>
+          </UserPopover>
           <span className="text-[10px] text-gray-400">{timeAgo(comment.created_at)}</span>
         </div>
         <p className="text-sm text-gray-700 leading-relaxed">{comment.content}</p>

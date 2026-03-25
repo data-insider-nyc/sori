@@ -6,6 +6,7 @@ import { Heart, MessageCircle } from "lucide-react";
 import { cn, timeAgo, getInitials, avatarTextColor } from "@/lib/utils";
 import { getCategoryLabel } from "@/lib/constants";
 import { createClient } from "@/lib/supabase-browser";
+import { UserPopover } from "./UserPopover";
 import type { Post } from "@/types";
 
 interface Props {
@@ -36,23 +37,25 @@ export function PostCard({ post, userId = null }: Props) {
   return (
     <div className="bg-white border border-gray-100 rounded-2xl p-5 shadow-sm hover:border-[#FF5C5C]/30 transition-colors">
       {/* Author row */}
-      <div className="flex items-center gap-3 mb-3">
-        <div
-            style={{ color: avatarTextColor(post.author.nickname) }}
-            className="w-8 h-8 rounded-lg bg-gray-100 flex items-center justify-center text-[10px] font-bold flex-shrink-0"
-          >
-            {getInitials(post.author.nickname)}
+      <UserPopover userId={post.author.id} nickname={post.author.nickname}>
+        <div className="flex items-center gap-3 mb-3">
+          <div
+              style={{ color: avatarTextColor(post.author.nickname) }}
+              className="w-8 h-8 rounded-lg bg-gray-100 flex items-center justify-center text-[10px] font-bold flex-shrink-0"
+            >
+              {getInitials(post.author.nickname)}
+            </div>
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2">
+              <span className="text-sm font-semibold text-gray-900">{post.author.nickname}</span>
+              <span className="text-[10px] bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full">
+                {getCategoryLabel(post.category)}
+              </span>
+            </div>
+            <span className="text-xs text-gray-400">{timeAgo(post.created_at)}</span>
           </div>
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2">
-            <span className="text-sm font-semibold text-gray-900">{post.author.nickname}</span>
-            <span className="text-[10px] bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full">
-              {getCategoryLabel(post.category)}
-            </span>
-          </div>
-          <span className="text-xs text-gray-400">{timeAgo(post.created_at)}</span>
         </div>
-      </div>
+      </UserPopover>
 
       {/* Title + content */}
       <Link href={`/community/${post.id}`} className="block group">
