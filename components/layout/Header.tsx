@@ -11,13 +11,15 @@ export async function Header() {
   } = await supabase.auth.getUser();
 
   let nickname: string | null = null;
+  let avatarUrl: string | null = null;
   if (user) {
     const { data: profile } = await supabase
       .from("profiles")
-      .select("nickname")
+      .select("nickname, avatar_url")
       .eq("id", user.id)
       .single();
-    nickname = profile?.nickname ?? null;
+    nickname  = profile?.nickname  ?? null;
+    avatarUrl = profile?.avatar_url ?? null;
   }
 
   return (
@@ -47,9 +49,8 @@ export async function Header() {
         <NavLinks />
 
         <div className="flex items-center gap-2 ml-auto">
-          {user && nickname ? <span>반가워요!</span> : null}
           {user && nickname ? (
-            <UserMenu nickname={nickname} />
+            <UserMenu nickname={nickname} avatarUrl={avatarUrl} />
           ) : (
             <LoginButton />
           )}

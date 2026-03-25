@@ -1,44 +1,54 @@
-// Nickname generation: 형용사 + 동물 + 명사
-// Rules: each word ≤ 3 Korean chars → max combo = 9 chars (within 10-char limit)
+// Nickname generation: 형용사-고 + 형용사-한/은 + 엔티티(동물 or 인물)
+// Rules:
+//   ADJECTIVES_GO  ≤ 4 chars (e.g. 귀엽고=3, 다정하고=4)
+//   ADJECTIVES_HAN ≤ 3 chars (e.g. 씩씩한=3, 빠른=2)
+//   ENTITIES       ≤ 3 chars (e.g. 수달=2, 탐험가=3)
+//   Max total = 4+3+3 = 10 chars ✓
+// Two adj arrays use different base words to avoid "귀엽고귀여운" combos.
 
-const ADJECTIVES: string[] = [
-  // 2자
-  "빠른", "강한", "밝은", "날쌘", "멋진", "선한", "힘찬",
+// 형용사 -고 형태 (≤4자)
+const ADJECTIVES_GO: string[] = [
   // 3자
-  "귀여운", "씩씩한", "용감한", "현명한", "활발한", "다정한", "든든한",
-  "느긋한", "차분한", "명랑한", "순수한", "총명한", "대담한", "뜨거운",
-  "시원한", "찬란한", "상냥한", "깔끔한", "의연한", "조용한", "활기찬",
-  "기발한", "포근한", "늠름한", "발랄한", "청량한", "고요한", "우아한",
-  "산뜻한", "재빠른", "온화한", "진실한", "겸손한", "솔직한", "꼼꼼한",
-  "경쾌한", "강인한", "탁월한",
+  "귀엽고", "빠르고", "강하고", "멋지고", "선하고", "힘차고", "날쌔고",
+  // 4자
+  "씩씩하고", "다정하고", "명랑하고", "순수하고", "총명하고", "대담하고",
+  "느긋하고", "차분하고", "상냥하고", "깔끔하고", "의연하고", "조용하고",
+  "활기차고", "기발하고", "포근하고", "늠름하고", "발랄하고", "청량하고",
+  "고요하고", "우아하고", "온화하고", "겸손하고", "솔직하고", "꼼꼼하고",
+  "경쾌하고", "강인하고", "탁월하고",
 ];
 
-const ANIMALS: string[] = [
-  // 2자 — 친숙한 동물만
+// 형용사 -한/은 형태 (≤3자, ADJECTIVES_GO와 겹치지 않는 단어)
+const ADJECTIVES_HAN: string[] = [
+  // 2자
+  "밝은", "따뜻한", "세찬", "맑은",
+  // 3자
+  "용감한", "현명한", "활발한", "든든한", "뜨거운", "시원한", "찬란한",
+  "산뜻한", "재빠른", "진실한", "당당한", "유연한",
+  "비범한", "독특한", "화끈한", "묵직한", "열렬한", "호탕한",
+  "눈부신", "풍성한", "예리한", "명석한", "활달한", "반듯한",
+  "날렵한", "통쾌한",
+];
+
+// 엔티티: 동물 + 인물/역할 명사 (모두 ≤3자)
+const ENTITIES: string[] = [
+  // 동물 (친숙한 것만)
   "사자", "늑대", "여우", "표범", "토끼", "고래", "상어", "오리",
   "기린", "판다", "수달", "까치", "펭귄", "하마", "치타", "참새",
   "낙타", "순록",
-  // 3자 — 친숙한 동물만
   "호랑이", "고양이", "강아지", "다람쥐", "코끼리", "코알라", "올빼미",
   "두루미", "앵무새", "독수리", "까마귀", "너구리", "재규어", "부엉이",
   "캥거루", "얼룩말",
-];
-
-const NOUNS: string[] = [
-  // 2자
-  "전사", "기사", "용사", "영웅", "별빛", "달빛", "바람", "폭풍",
-  "번개", "태양", "새벽", "노을", "불꽃", "얼음", "날개", "발톱",
-  "승리", "영광", "자유", "평화", "빙하", "천둥", "물결", "보물",
-  "희망", "용기", "지혜", "위엄", "혜성",
-  // 3자
-  "탐험가", "모험가", "파수꾼", "수호자", "개척자", "나침반", "오로라",
-  "무지개",
+  // 인물·역할 명사
+  "전사", "기사", "용사", "영웅", "탐험가", "모험가", "파수꾼",
+  "수호자", "개척자", "선구자", "마법사", "대장", "고수",
 ];
 
 export function generateNickname(): string {
-  const adj    = ADJECTIVES[Math.floor(Math.random() * ADJECTIVES.length)];
-  const animal = ANIMALS[Math.floor(Math.random() * ANIMALS.length)];
-  const noun   = NOUNS[Math.floor(Math.random() * NOUNS.length)];
-  return `${adj}${animal}${noun}`;
+  const go  = ADJECTIVES_GO[Math.floor(Math.random() * ADJECTIVES_GO.length)];
+  const han = ADJECTIVES_HAN[Math.floor(Math.random() * ADJECTIVES_HAN.length)];
+  const ent = ENTITIES[Math.floor(Math.random() * ENTITIES.length)];
+  return `${go}${han}${ent}`;
 }
+
 
