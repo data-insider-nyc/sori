@@ -111,13 +111,13 @@ ON CONFLICT (id) DO NOTHING;
 -- 2. profiles
 -- ─────────────────────────────────────────────────────────────────────────────
 INSERT INTO profiles (id, nickname, location, bio, joined_at) VALUES
-  (uid_a, '따뜻한고양이', 'Fort Lee, NJ',        '포트리 5년차. 맛집 탐방 중.',          NOW() - INTERVAL '45 days'),
-  (uid_b, '멋진독수리',   'Palisades Park, NJ',   '팰팍 거주. 커리어 상담 환영.',         NOW() - INTERVAL '38 days'),
-  (uid_c, '행복한토끼',   'Flushing, NY',         '플러싱 육아맘. 정보 공유해요!',        NOW() - INTERVAL '30 days'),
-  (uid_d, '빠른여우',     'Manhattan, NY',        '맨해튼 직장인. 주말엔 NJ.',            NOW() - INTERVAL '25 days'),
-  (uid_e, '조용한곰',     'Fort Lee, NJ',         '포트리 3년차. 조용히 정보 수집 중.',   NOW() - INTERVAL '20 days'),
-  (uid_f, '용감한매',     'Palisades Park, NJ',   '팰팍 이민 10년차. 뭐든 물어보세요.', NOW() - INTERVAL '15 days'),
-  (uid_g, '차분한늑대',   'Flushing, NY',         '플러싱 자영업자.',                     NOW() - INTERVAL '10 days')
+  (uid_a, '다정하고 따뜻한 수달',   'Fort Lee, NJ',        '포트리 5년차. 맛집 탐방 중.',          NOW() - INTERVAL '45 days'),
+  (uid_b, '씩씩하고 든든한 독수리', 'Palisades Park, NJ',   '팰팍 거주. 커리어 상담 환영.',         NOW() - INTERVAL '38 days'),
+  (uid_c, '명랑하고 활발한 토끼',   'Flushing, NY',         '플러싱 육아맘. 정보 공유해요!',        NOW() - INTERVAL '30 days'),
+  (uid_d, '빠르고 예리한 여우',     'Manhattan, NY',        '맨해튼 직장인. 주말엔 NJ.',            NOW() - INTERVAL '25 days'),
+  (uid_e, '조용하고 현명한 너구리', 'Fort Lee, NJ',         '포트리 3년차. 조용히 정보 수집 중.',   NOW() - INTERVAL '20 days'),
+  (uid_f, '늠름하고 화끈한 호랑이', 'Palisades Park, NJ',   '팰팍 이민 10년차. 뭐든 물어보세요.', NOW() - INTERVAL '15 days'),
+  (uid_g, '차분하고 반듯한 늑대',   'Flushing, NY',         '플러싱 자영업자.',                     NOW() - INTERVAL '10 days')
 ON CONFLICT (id) DO NOTHING;
 
 -- ─────────────────────────────────────────────────────────────────────────────
