@@ -1,10 +1,24 @@
 "use client";
+import { useRouter } from "next/navigation";
 import { PenSquare } from "lucide-react";
+import { createClient } from "@/lib/supabase-browser";
 
 export function CreatePostButton() {
+  const router = useRouter();
+
+  async function handleClick() {
+    const supabase = createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      router.push("/auth/login");
+      return;
+    }
+    // TODO: open post creation modal (issue #5)
+  }
+
   return (
     <button
-      onClick={() => alert("로그인 후 글쓰기가 가능합니다.")}
+      onClick={handleClick}
       className="btn-coral flex items-center gap-2 text-sm"
     >
       <PenSquare className="w-4 h-4" />
