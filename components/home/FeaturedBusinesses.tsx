@@ -1,37 +1,13 @@
-"use client";
-
-import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Star, CheckCircle, Crown } from "lucide-react";
-import { supabase } from "@/lib/supabase";
 import { CATEGORIES } from "@/lib/constants";
+import { getFeaturedBusinesses } from "@/lib/queries";
 import type { Business } from "@/types";
 
-export function FeaturedBusinesses() {
-  const [businesses, setBusinesses] = useState<Business[]>([]);
-  const [loading, setLoading]       = useState(true);
+export async function FeaturedBusinesses() {
+  const businesses = await getFeaturedBusinesses();
 
-  useEffect(() => {
-    async function load() {
-      const { data } = await supabase
-        .from("businesses")
-        .select("*")
-        .eq("is_premium", true)
-        .order("rating", { ascending: false })
-        .limit(3);
-      setBusinesses((data ?? []) as Business[]);
-      setLoading(false);
-    }
-    load();
-  }, []);
-
-  if (loading) return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-      {[1, 2, 3].map((i) => (
-        <div key={i} className="h-52 bg-gray-100 rounded-2xl animate-pulse" />
-      ))}
-    </div>
-  );
+  if (businesses.length === 0) return null;
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">

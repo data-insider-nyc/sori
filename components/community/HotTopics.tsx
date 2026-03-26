@@ -1,17 +1,8 @@
 import Link from "next/link";
-import { createClient } from "@/lib/supabase-server";
+import { getHotTopics } from "@/lib/queries";
 
 export async function HotTopics() {
-  const supabase = await createClient();
-
-  const { data: posts } = await supabase
-    .from("posts")
-    .select("id, title, comment_count")
-    .order("comment_count", { ascending: false })
-    .order("created_at", { ascending: false })
-    .limit(5);
-
-  const topics = posts ?? [];
+  const topics = await getHotTopics();
 
   return (
     <div className="bg-gray-50 rounded-2xl p-5">

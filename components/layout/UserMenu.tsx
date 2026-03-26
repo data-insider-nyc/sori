@@ -17,7 +17,7 @@ export function UserMenu({ nickname }: Props) {
 
   async function handleLogout() {
     await supabase.auth.signOut();
-    router.refresh();
+    router.push("/");
   }
 
   return (

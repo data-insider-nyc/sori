@@ -66,7 +66,7 @@ export default async function ProfilePage() {
         {/* Avatar — neutral bg, colored text */}
         <div
           style={{ color: textColor }}
-          className="w-14 h-14 rounded-xl flex-shrink-0 flex items-center justify-center text-2xl font-black bg-gray-100 select-none"
+          className="w-14 h-14 rounded-xl flex-shrink-0 flex items-center justify-center text-xl font-black bg-gray-100 select-none"
         >
           {avatarChar}
         </div>

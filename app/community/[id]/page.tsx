@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase-server";
+import { getCachedPost } from "@/lib/queries";
 import { getCategoryLabel, getCategoryEmoji } from "@/lib/constants";
 import { getInitials, avatarTextColor, timeAgo } from "@/lib/utils";
 import { PostInteractions } from "./PostInteractions";
@@ -9,26 +10,17 @@ import { UserPopover } from "@/components/community/UserPopover";
 
 export default async function PostDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
+
+  // post + author from cache (10 min TTL) — eliminates 2 separate DB round-trips
+  const post = await getCachedPost(id);
+  if (!post) notFound();
+
+  const author = post.author ?? null;
+
+  // Auth + isLiked are user-specific — always fresh
   const supabase = await createClient();
-
-  const { data: post, error: postError } = await supabase
-    .from("posts")
-    .select("*")
-    .eq("id", id)
-    .single();
-
-  if (postError || !post) notFound();
-
-  // Fetch author separately to avoid FK join cache issues
-  const { data: author } = await supabase
-    .from("profiles")
-    .select("id, nickname")
-    .eq("id", post.user_id)
-    .single();
-
   const { data: { user } } = await supabase.auth.getUser();
 
-  // Check if current user liked this post
   let isLiked = false;
   if (user) {
     const { data: like } = await supabase

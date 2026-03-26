@@ -14,10 +14,18 @@ interface Props {
 
 const COMMENT_MAX = 500;
 const REPLY_MAX   = 300;
+const CACHE_TTL   = 3 * 60 * 1000; // 3 minutes
+
+// Module-level cache keyed by postId
+type CommentCacheEntry = { comments: Comment[]; ts: number };
+const commentCache = new Map<string, CommentCacheEntry>();
 
 export function CommentSection({ postId, userId }: Props) {
-  const [comments,    setComments]    = useState<Comment[]>([]);
-  const [loading,     setLoading]     = useState(true);
+  const cached = commentCache.get(postId);
+  const fresh  = cached && Date.now() - cached.ts < CACHE_TTL;
+
+  const [comments,    setComments]    = useState<Comment[]>(fresh ? cached.comments : []);
+  const [loading,     setLoading]     = useState(!fresh);
   const [commentText, setCommentText] = useState("");
   const [submitting,  setSubmitting]  = useState(false);
   const [commentError, setCommentError] = useState("");
@@ -26,33 +34,34 @@ export function CommentSection({ postId, userId }: Props) {
 
   const supabase = createClient();
 
-  const fetchComments = useCallback(async () => {
-    // 1. Fetch comments (no FK join)
+  const fetchComments = useCallback(async ({ bust = false }: { bust?: boolean } = {}) => {
+    const entry = commentCache.get(postId);
+    const isFresh = !bust && entry && Date.now() - entry.ts < CACHE_TTL;
+    if (isFresh) {
+      setComments(entry.comments);
+      setLoading(false);
+      return;
+    }
+
+    // Single query: comments + author via FK join (no separate profiles round-trip)
     const { data: raw } = await supabase
       .from("comments")
-      .select("*")
+      .select("*, author:profiles!user_id(id, nickname)")
       .eq("post_id", postId)
       .order("created_at", { ascending: true });
 
     const rawComments = raw ?? [];
     if (rawComments.length === 0) {
       setComments([]);
+      commentCache.set(postId, { comments: [], ts: Date.now() });
       setLoading(false);
       return;
     }
 
-    // 2. Batch-fetch profiles
-    const userIds = [...new Set(rawComments.map((c: any) => c.user_id).filter(Boolean))];
-    const { data: profiles } = await supabase
-      .from("profiles")
-      .select("id, nickname")
-      .in("id", userIds);
-    const profileMap = Object.fromEntries((profiles ?? []).map((p: any) => [p.id, p]));
-
-    // 3. Merge + build tree
+    // Build tree
     const all: Comment[] = rawComments.map((c: any) => ({
       ...c,
-      author: profileMap[c.user_id] ?? { id: c.user_id ?? "", nickname: "알 수 없음" },
+      author: c.author ?? { id: c.user_id ?? "", nickname: "알 수 없음" },
     }));
 
     const top     = all.filter((c) => !c.parent_id);
@@ -61,6 +70,8 @@ export function CommentSection({ postId, userId }: Props) {
       ...c,
       replies: replies.filter((r) => r.parent_id === c.id),
     }));
+
+    commentCache.set(postId, { comments: tree, ts: Date.now() });
     setComments(tree);
     setLoading(false);
   }, [postId]);
@@ -83,7 +94,7 @@ export function CommentSection({ postId, userId }: Props) {
       return;
     }
     setCommentText("");
-    await fetchComments();
+    await fetchComments({ bust: true });
     setSubmitting(false);
   }
 
@@ -105,13 +116,13 @@ export function CommentSection({ postId, userId }: Props) {
     }
     setReplyText("");
     setReplyingTo(null);
-    await fetchComments();
+    await fetchComments({ bust: true });
     setSubmitting(false);
   }
 
   async function deleteComment(commentId: string) {
     await supabase.from("comments").delete().eq("id", commentId);
-    await fetchComments();
+    await fetchComments({ bust: true });
   }
 
   return (

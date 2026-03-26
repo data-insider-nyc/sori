@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase-browser";
+import { clearFeedCache } from "@/app/community/CommunityClient";
 import {
   COMMUNITY_CATEGORIES, DEFAULT_CATEGORY,
   REGIONS, LOCAL_CATEGORIES,
@@ -77,6 +78,7 @@ export default function NewPostPage() {
       return;
     }
 
+    clearFeedCache();
     router.replace(`/community/${post.id}`);
   }
 

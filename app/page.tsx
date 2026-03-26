@@ -1,3 +1,4 @@
+import { Suspense }           from "react";
 import { HeroCard }           from "@/components/home/HeroCard";
 import { CategoryGrid }       from "@/components/home/CategoryGrid";
 import { FeaturedBusinesses } from "@/components/home/FeaturedBusinesses";
@@ -23,7 +24,13 @@ export default function HomePage() {
           <h2 className="section-title">추천 비즈니스</h2>
           <a href="/directory" className="see-all-link">전체 보기 →</a>
         </div>
-        <FeaturedBusinesses />
+        <Suspense fallback={
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {[1, 2, 3].map((i) => <div key={i} className="h-52 bg-gray-100 rounded-2xl animate-pulse" />)}
+          </div>
+        }>
+          <FeaturedBusinesses />
+        </Suspense>
       </section>
 
       <JobsBanner />

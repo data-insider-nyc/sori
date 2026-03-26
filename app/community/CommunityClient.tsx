@@ -9,6 +9,23 @@ import { cn } from "@/lib/utils";
 import type { Post } from "@/types";
 
 const PAGE_SIZE = 20;
+const CACHE_TTL = 10 * 60 * 1000; // 10 minutes
+
+// ─── Module-level cache ────────────────────────────────────────────────────────
+// Survives component unmount/remount (same browser tab session).
+// Like Python's @cache(ttl=120) — "back and forth" navigation is instant.
+type CacheEntry = { posts: Post[]; cursor: string | null; hasMore: boolean; ts: number };
+const feedCache = new Map<string, CacheEntry>();
+
+function makeCacheKey(region: string, category: string, q: string) {
+  return `${region}:${category}:${q}`;
+}
+
+/** Call this after creating a new post so the feed refreshes on next visit. */
+export function clearFeedCache() {
+  feedCache.clear();
+}
+// ──────────────────────────────────────────────────────────────────────────────
 
 export function CommunityClient() {
   const searchParams = useSearchParams();
@@ -18,53 +35,78 @@ export function CommunityClient() {
   const region   = searchParams.get("region")   ?? "all";
   const q        = searchParams.get("q")        ?? "";
 
-  const [posts,       setPosts]       = useState<Post[]>([]);
-  const [loading,     setLoading]     = useState(true);
+  const key    = makeCacheKey(region, category, q);
+  const cached = feedCache.get(key);
+  const fresh  = cached && Date.now() - cached.ts < CACHE_TTL;
+
+  // Initialise from cache so returning users see posts immediately (no skeleton)
+  const [posts,       setPosts]       = useState<Post[]>(fresh ? cached.posts : []);
+  const [loading,     setLoading]     = useState(!fresh);
   const [loadingMore, setLoadingMore] = useState(false);
-  const [hasMore,     setHasMore]     = useState(false);
-  const [cursor,      setCursor]      = useState<string | null>(null);
+  const [hasMore,     setHasMore]     = useState(fresh ? cached.hasMore : false);
+  const [cursor,      setCursor]      = useState<string | null>(fresh ? cached.cursor : null);
   const [userId,      setUserId]      = useState<string | null>(null);
-  const [userReady,   setUserReady]   = useState(false);
   const [searchInput, setSearchInput] = useState(q);
   const debounceRef = useRef<ReturnType<typeof setTimeout>>(undefined);
 
-  // Resolve auth once before first fetch
+  // Resolve auth (non-blocking — posts load in parallel)
   useEffect(() => {
     createClient().auth
       .getUser()
-      .then(({ data: { user } }) => {
-        setUserId(user?.id ?? null);
-        setUserReady(true);
-      });
+      .then(({ data: { user } }) => setUserId(user?.id ?? null));
   }, []);
 
-  // Fresh load whenever filters or auth state change
+  // Load when filters change — use cache if fresh, otherwise fetch
   useEffect(() => {
-    if (!userReady) return;
+    const entry = feedCache.get(makeCacheKey(region, category, q));
+    const isFresh = entry && Date.now() - entry.ts < CACHE_TTL;
+    if (isFresh) {
+      setPosts(entry.posts);
+      setHasMore(entry.hasMore);
+      setCursor(entry.cursor);
+      setLoading(false);
+      return;
+    }
     setPosts([]);
     setCursor(null);
     setHasMore(false);
     load({ afterCursor: null, append: false });
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [category, region, q, userId, userReady]);
+  }, [category, region, q]);
 
-  // Keep search input in sync when URL changes externally (e.g. back/forward)
+  // Overlay like status once userId is known (non-blocking)
+  useEffect(() => {
+    if (!userId || posts.length === 0) return;
+    overlayLikes(posts, userId).then((updated) => {
+      setPosts(updated);
+      const entry = feedCache.get(key);
+      if (entry) feedCache.set(key, { ...entry, posts: updated });
+    });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [userId]);
+
   useEffect(() => { setSearchInput(q); }, [q]);
 
-  async function load({
-    afterCursor,
-    append,
-  }: {
-    afterCursor: string | null;
-    append: boolean;
-  }) {
+  async function overlayLikes(list: Post[], uid: string): Promise<Post[]> {
+    const { data: likes } = await createClient()
+      .from("post_likes")
+      .select("post_id")
+      .eq("user_id", uid)
+      .in("post_id", list.map((p) => p.id));
+    const liked = new Set((likes ?? []).map((l: any) => l.post_id));
+    return list.map((p) => ({ ...p, is_liked: liked.has(p.id) }));
+  }
+
+  async function load({ afterCursor, append }: { afterCursor: string | null; append: boolean }) {
     if (append) setLoadingMore(true);
     else setLoading(true);
 
     const supabase = createClient();
+
+    // Single query: posts + author profile via FK join (no separate profiles round-trip)
     let query = supabase
       .from("posts")
-      .select("*")
+      .select("*, author:profiles!user_id(id, nickname)")
       .order("created_at", { ascending: false })
       .limit(PAGE_SIZE);
 
@@ -74,17 +116,9 @@ export function CommunityClient() {
     if (afterCursor)        query = query.lt("created_at", afterCursor);
 
     const { data: raw } = await query;
-    const rawPosts = raw ?? [];
+    const rows = (raw ?? []) as any[];
 
-    // Dedupe by id
-    const seen = new Set<string>();
-    const deduped = rawPosts.filter((p: any) => {
-      if (seen.has(p.id)) return false;
-      seen.add(p.id);
-      return true;
-    });
-
-    if (deduped.length === 0) {
+    if (rows.length === 0) {
       if (!append) setPosts([]);
       setHasMore(false);
       setLoading(false);
@@ -92,40 +126,44 @@ export function CommunityClient() {
       return;
     }
 
-    // Batch-fetch author profiles
-    const userIds = [...new Set(deduped.map((p: any) => p.user_id as string))];
-    const { data: profiles } = await supabase
-      .from("profiles")
-      .select("id, nickname")
-      .in("id", userIds);
-    const profileMap = Object.fromEntries(
-      (profiles ?? []).map((p: any) => [p.id, p]),
-    );
+    // Dedupe by id
+    const seen = new Set<string>();
+    const deduped = rows.filter((p) => { if (seen.has(p.id)) return false; seen.add(p.id); return true; });
 
-    // Batch-fetch liked post IDs
-    let likedSet = new Set<string>();
-    if (userId) {
-      const { data: likes } = await supabase
-        .from("post_likes")
-        .select("post_id")
-        .eq("user_id", userId)
-        .in("post_id", deduped.map((p: any) => p.id));
-      likedSet = new Set((likes ?? []).map((l: any) => l.post_id));
-    }
-
-    const list: Post[] = deduped.map((p: any) => ({
+    const list: Post[] = deduped.map((p) => ({
       ...p,
-      author:   profileMap[p.user_id] ?? { id: p.user_id, nickname: "알 수 없음" },
-      is_liked: likedSet.has(p.id),
+      author:   p.author ?? { id: p.user_id, nickname: "알 수 없음" },
+      is_liked: false, // overlaid asynchronously after userId resolves
     }));
 
-    if (append) setPosts((prev) => [...prev, ...list]);
-    else setPosts(list);
+    const newPosts  = append ? [...posts, ...list] : list;
+    const newCursor = deduped[deduped.length - 1].created_at;
+    const newHasMore = deduped.length === PAGE_SIZE;
 
-    setHasMore(deduped.length === PAGE_SIZE);
-    setCursor(deduped[deduped.length - 1].created_at);
+    setPosts(newPosts);
+    setHasMore(newHasMore);
+    setCursor(newCursor);
     setLoading(false);
     setLoadingMore(false);
+
+    // Cache first page only
+    if (!append) {
+      feedCache.set(makeCacheKey(region, category, q), {
+        posts: list, cursor: newCursor, hasMore: newHasMore, ts: Date.now(),
+      });
+    }
+
+    // Overlay likes if userId already resolved
+    if (userId) {
+      overlayLikes(newPosts, userId).then((updated) => {
+        setPosts(updated);
+        if (!append) {
+          feedCache.set(makeCacheKey(region, category, q), {
+            posts: updated, cursor: newCursor, hasMore: newHasMore, ts: Date.now(),
+          });
+        }
+      });
+    }
   }
 
   function setParam(key: string, value: string) {
@@ -271,6 +309,3 @@ export function CommunityClient() {
     </div>
   );
 }
-
-
-
