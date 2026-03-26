@@ -2,6 +2,11 @@ import { Suspense } from "react";
 import { HotTopics }        from "@/components/community/HotTopics";
 import { CommunityClient }  from "./CommunityClient";
 
+// Page shell (title, layout, HotTopics) cached at Vercel edge for 5 min.
+// CommunityClient is a client component — it runs in the browser and uses
+// its own feedCache, so this revalidate doesn't affect data freshness.
+export const revalidate = 300;
+
 function FeedSkeleton() {
   return (
     <div className="space-y-4">
