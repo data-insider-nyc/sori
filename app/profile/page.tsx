@@ -1,11 +1,12 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase-server";
-import { avatarTextColor, getInitials } from "@/lib/utils";
+import { ProfileCard } from "@/components/ui/ProfileCard";
 import { NicknameEditor } from "./NicknameEditor";
 import { DeleteAccountButton } from "./DeleteAccountButton";
 import { ProfileActivity } from "./ProfileActivity";
 import { BioEditor } from "./BioEditor";
+import { LocationEditor } from "./LocationEditor";
 
 export const metadata: Metadata = { title: "내 프로필" };
 
@@ -35,13 +36,25 @@ export default async function ProfilePage() {
 
   const { data: profile } = await supabase
     .from("profiles")
-    .select("nickname, bio, joined_at, nickname_changed_at")
+    .select(
+      "nickname, display_name, handle, bio, location, joined_at, nickname_changed_at, handle_changed_at",
+    )
     .eq("id", user.id)
     .single();
 
   if (!profile) redirect("/auth/nickname");
 
+  function daysUntilChange90(changedAt: string | null): number | null {
+    if (!changedAt) return null;
+    const elapsed = Math.floor(
+      (Date.now() - new Date(changedAt).getTime()) / (1000 * 60 * 60 * 24),
+    );
+    const remaining = 90 - elapsed;
+    return remaining > 0 ? remaining : null;
+  }
+
   const cooldownDays = daysUntilChange(profile.nickname_changed_at);
+  const handleCooldownDays = daysUntilChange90(profile.handle_changed_at);
 
   const [{ count: postCount }, { count: commentCount }] = await Promise.all([
     supabase
@@ -54,31 +67,21 @@ export default async function ProfilePage() {
       .eq("user_id", user.id),
   ]);
 
-  const textColor = avatarTextColor(profile.nickname);
-  const avatarChar = getInitials(profile.nickname);
-
   return (
     <div className="py-8 max-w-lg mx-auto space-y-4">
       <h1 className="text-2xl font-black text-gray-900">내 프로필</h1>
 
       {/* ── Hero card ────────────────────────────────────────────── */}
-      <div className="bg-white border border-gray-100 rounded-2xl shadow-sm p-5 flex items-center gap-4">
-        {/* Avatar — neutral bg, colored text */}
-        <div
-          style={{ color: textColor }}
-          className="w-14 h-14 rounded-xl flex-shrink-0 flex items-center justify-center text-xl font-black bg-gray-100 select-none"
-        >
-          {avatarChar}
-        </div>
-
-        <div className="flex-1 min-w-0">
-          <p className="text-lg font-black text-gray-900 truncate">
-            {profile.nickname}
-          </p>
-          <p className="text-xs text-gray-400 mt-0.5">
-            가입일 {formatDate(profile.joined_at)}
-          </p>
-        </div>
+      <div className="bg-white border border-gray-100 rounded-2xl shadow-sm p-5">
+        <ProfileCard
+          nickname={profile.nickname}
+          handle={profile.handle}
+          location={profile.location}
+          size="lg"
+        />
+        <p className="text-xs text-gray-400 mt-3 ml-[70px]">
+          가입일 {formatDate(profile.joined_at)}
+        </p>
       </div>
 
       {/* ── Activity: tabs with stats ─────────────────────────────── */}
@@ -91,6 +94,11 @@ export default async function ProfilePage() {
       {/* ── Bio card ──────────────────────────────────────────────── */}
       <div className="bg-white border border-gray-100 rounded-2xl shadow-sm p-6">
         <BioEditor userId={user.id} currentBio={profile.bio} />
+      </div>
+
+      {/* ── Location card ─────────────────────────────────────────── */}
+      <div className="bg-white border border-gray-100 rounded-2xl shadow-sm p-6">
+        <LocationEditor userId={user.id} currentLocation={profile.location ?? null} />
       </div>
 
       {/* ── Nickname change card ───────────────────────────────────── */}
@@ -109,7 +117,9 @@ export default async function ProfilePage() {
         <NicknameEditor
           userId={user.id}
           currentNickname={profile.nickname}
+          currentHandle={profile.handle ?? null}
           cooldownDays={cooldownDays}
+          handleCooldown={handleCooldownDays}
         />
       </div>
 

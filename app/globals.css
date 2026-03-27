@@ -78,6 +78,30 @@ html { scroll-behavior: smooth; }
   .section-header { @apply flex items-center justify-between mb-4; }
   .section-title  { @apply text-lg font-bold text-gray-900; }
   .see-all-link   { @apply text-sm text-[#FF5C5C] hover:underline; }
+
+  /* ── Profile card system ─────────────────────────────────────────── */
+  .profile-card {
+    @apply flex items-center gap-3.5;
+  }
+  .profile-info {
+    @apply flex flex-col min-w-0;
+  }
+  .display-name {
+    @apply flex items-center gap-1.5 text-sm font-medium text-gray-900 truncate leading-snug;
+  }
+  .handle {
+    @apply text-xs text-gray-400 font-normal leading-snug;
+  }
+  .badge-loc {
+    @apply inline-block text-[10px] font-medium px-2 py-0.5 rounded-full
+           bg-gray-100 text-gray-500 flex-shrink-0 leading-none;
+  }
+
+  /* Avatar — shape/layout only; colors applied via inline style */
+  .avatar {
+    @apply rounded-full flex items-center justify-center font-medium
+           flex-shrink-0 select-none leading-none;
+  }
 }
 
 .scrollbar-hide                      { -ms-overflow-style: none; scrollbar-width: none; }

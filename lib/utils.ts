@@ -80,15 +80,17 @@ export function avatarTextColor(name: string): string {
 }
 
 
-const AVATAR_GRADIENTS = [
-  "linear-gradient(135deg, #FF5C5C 0%, #FF8C42 100%)",  // coral → orange
-  "linear-gradient(135deg, #4F46E5 0%, #818CF8 100%)",  // indigo → lavender
-  "linear-gradient(135deg, #059669 0%, #34D399 100%)",  // emerald
-  "linear-gradient(135deg, #DB2777 0%, #F472B6 100%)",  // pink
-  "linear-gradient(135deg, #2563EB 0%, #60A5FA 100%)",  // blue
-  "linear-gradient(135deg, #D97706 0%, #FCD34D 100%)",  // amber
+// Soft pastel bg + matching text — matches reference design (av1–av6)
+const AVATAR_PALETTES = [
+  { background: "#FFF0EE", color: "#E8321C" }, // coral/red
+  { background: "#EEF2FF", color: "#4F46E5" }, // indigo
+  { background: "#EDFDF5", color: "#059669" }, // green
+  { background: "#FDF2F8", color: "#DB2777" }, // pink
+  { background: "#FFF8EE", color: "#D97706" }, // amber
+  { background: "#EFF6FF", color: "#2563EB" }, // blue
 ];
 
-export function avatarGradient(name: string): string {
-  return AVATAR_GRADIENTS[name.charCodeAt(0) % AVATAR_GRADIENTS.length];
+export function avatarPalette(name: string): { background: string; color: string } {
+  const hash = [...name].reduce((acc, ch) => (acc * 31 + ch.charCodeAt(0)) | 0, 0);
+  return AVATAR_PALETTES[Math.abs(hash) % AVATAR_PALETTES.length];
 }

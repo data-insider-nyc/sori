@@ -135,9 +135,75 @@ const ENTITIES: string[] = [
   "고수",
 ];
 
+// export function generateNickname(): string {
+//   const go = ADJECTIVES_GO[Math.floor(Math.random() * ADJECTIVES_GO.length)];
+//   const han = ADJECTIVES_HAN[Math.floor(Math.random() * ADJECTIVES_HAN.length)];
+//   const ent = ENTITIES[Math.floor(Math.random() * ENTITIES.length)];
+//   return `${go} ${han} ${ent}`;
+// }
+
+// 기존 generateNickname() 유지 (display_name용)
+// handle 자동 생성 추가
+
+const HANDLE_ADJECTIVES = [
+  "happy",
+  "sunny",
+  "brave",
+  "swift",
+  "calm",
+  "cool",
+  "kind",
+  "bold",
+  "wise",
+  "pure",
+  "keen",
+  "warm",
+  "free",
+  "true",
+  "epic",
+  "wild",
+];
+
+const HANDLE_NOUNS = [
+  "tiger",
+  "panda",
+  "whale",
+  "eagle",
+  "fox",
+  "wolf",
+  "bear",
+  "deer",
+  "star",
+  "moon",
+  "sky",
+  "sea",
+  "wind",
+  "fire",
+  "snow",
+  "leaf",
+];
+
+export function generateHandle(seed?: string): string {
+  // Google 이메일에서 자동 생성 시도
+  if (seed) {
+    const base = seed
+      .split("@")[0]
+      .toLowerCase()
+      .replace(/[^a-z0-9]/g, "")
+      .slice(0, 12);
+    if (base.length >= 3) return base;
+  }
+  // 랜덤 생성
+  const adj =
+    HANDLE_ADJECTIVES[Math.floor(Math.random() * HANDLE_ADJECTIVES.length)];
+  const noun = HANDLE_NOUNS[Math.floor(Math.random() * HANDLE_NOUNS.length)];
+  const num = Math.floor(Math.random() * 99) + 1;
+  return `${adj}${noun}${num}`;
+}
+
 export function generateNickname(): string {
   const go = ADJECTIVES_GO[Math.floor(Math.random() * ADJECTIVES_GO.length)];
   const han = ADJECTIVES_HAN[Math.floor(Math.random() * ADJECTIVES_HAN.length)];
   const ent = ENTITIES[Math.floor(Math.random() * ENTITIES.length)];
-  return `${go} ${han} ${ent}`;
+  return `${go}${han}${ent}`;
 }

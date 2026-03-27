@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { LogOut, UserCircle, User, ChevronDown } from "lucide-react";
 import { createClient } from "@/lib/supabase-browser";
+import { ProfileAvatar } from "@/components/ui/ProfileCard";
 
 interface Props {
   nickname: string;
@@ -17,6 +18,7 @@ export function UserMenu({ nickname }: Props) {
 
   async function handleLogout() {
     await supabase.auth.signOut();
+    router.refresh();
     router.push("/");
   }
 
@@ -24,13 +26,11 @@ export function UserMenu({ nickname }: Props) {
     <div className="relative">
       <button
         onClick={() => setOpen((v) => !v)}
-        className="flex items-center gap-1.5 text-sm font-medium text-gray-700
+        className="flex items-center gap-2 text-sm font-medium text-gray-700
                    hover:text-[#FF5C5C] transition-colors"
       >
-        <span>
-          <span className="text-gray-400 font-normal">반가워요! </span>
-          <span className="font-bold text-gray-900">{nickname}</span>
-        </span>
+        <ProfileAvatar nickname={nickname} size="sm" className="w-7 h-7 text-xs" />
+        <span className="font-semibold text-gray-900">{nickname}</span>
         <ChevronDown className={`w-3.5 h-3.5 text-gray-400 transition-transform ${open ? "rotate-180" : ""}`} />
       </button>
 
@@ -77,4 +77,3 @@ export function LoginButton() {
     </a>
   );
 }
-

@@ -1,12 +1,13 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { MapPin, Calendar } from "lucide-react";
+import { Calendar } from "lucide-react";
 import { createClient } from "@/lib/supabase-browser";
-import { getInitials, avatarTextColor } from "@/lib/utils";
+import { ProfileCard } from "@/components/ui/ProfileCard";
 
 interface PopoverProfile {
   nickname: string;
+  handle: string | null;
   location: string | null;
   bio: string | null;
   joined_at: string;
@@ -61,7 +62,7 @@ export function UserPopover({ userId, nickname, children }: Props) {
     const [{ data: prof }, { count }] = await Promise.all([
       supabase
         .from("profiles")
-        .select("nickname, location, bio, joined_at")
+        .select("nickname, handle, location, bio, joined_at")
         .eq("id", userId)
         .single(),
       supabase
@@ -73,7 +74,6 @@ export function UserPopover({ userId, nickname, children }: Props) {
     setLoading(false);
   }
 
-  // Mobile tap: toggle open/close
   function handleClick(e: React.MouseEvent) {
     e.preventDefault();
     e.stopPropagation();
@@ -94,7 +94,6 @@ export function UserPopover({ userId, nickname, children }: Props) {
     }
   }
 
-  // Close on Escape
   useEffect(() => {
     if (!open) return;
     function onKey(e: KeyboardEvent) { if (e.key === "Escape") setOpen(false); }
@@ -102,11 +101,7 @@ export function UserPopover({ userId, nickname, children }: Props) {
     return () => document.removeEventListener("keydown", onKey);
   }, [open]);
 
-  // Cleanup timers on unmount
   useEffect(() => () => { cancelOpen(); cancelClose(); }, []);
-
-  const initials = getInitials(nickname);
-  const textColor = avatarTextColor(nickname);
 
   return (
     <>
@@ -142,33 +137,20 @@ export function UserPopover({ userId, nickname, children }: Props) {
             </div>
           ) : (
             <>
-              {/* Header */}
-              <div className="flex items-center gap-3 mb-3">
-                <div
-                  style={{ color: textColor }}
-                  className="w-10 h-10 rounded-xl bg-gray-100 flex items-center justify-center text-sm font-bold flex-shrink-0"
-                >
-                  {initials}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-bold text-gray-900 truncate">{profile.nickname}</p>
-                  {profile.location && (
-                    <p className="text-xs text-gray-400 flex items-center gap-0.5 mt-0.5">
-                      <MapPin className="w-3 h-3" />
-                      {profile.location}
-                    </p>
-                  )}
-                </div>
-              </div>
+              <ProfileCard
+                nickname={profile.nickname}
+                handle={profile.handle}
+                location={profile.location}
+                size="md"
+                className="mb-3"
+              />
 
-              {/* Bio */}
               {profile.bio && (
                 <p className="text-xs text-gray-600 leading-relaxed border-t border-gray-50 pt-3 mb-3">
                   {profile.bio}
                 </p>
               )}
 
-              {/* Footer stats */}
               <div className="flex items-center gap-3 text-[11px] text-gray-400 border-t border-gray-50 pt-3">
                 <span className="flex items-center gap-1">
                   <Calendar className="w-3 h-3" />

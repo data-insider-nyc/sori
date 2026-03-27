@@ -5,10 +5,10 @@ import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 
 const NAV = [
-  { href: "/",          label: "홈" },
-  { href: "/directory", label: "비즈니스" },
+  { href: "/", label: "홈" },
   { href: "/community", label: "커뮤니티" },
-  { href: "/jobs",      label: "채용" },
+  { href: "/directory", label: "비즈니스" },
+  { href: "/jobs", label: "채용" },
 ];
 
 export function NavLinks() {

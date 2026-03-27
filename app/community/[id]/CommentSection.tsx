@@ -2,9 +2,10 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { CornerDownRight, Trash2 } from "lucide-react";
-import { cn, timeAgo, getInitials, avatarTextColor } from "@/lib/utils";
+import { cn, timeAgo } from "@/lib/utils";
 import { createClient } from "@/lib/supabase-browser";
 import { UserPopover } from "@/components/community/UserPopover";
+import { ProfileAvatar } from "@/components/ui/ProfileCard";
 import type { Comment } from "@/types";
 
 interface Props {
@@ -46,7 +47,7 @@ export function CommentSection({ postId, userId }: Props) {
     // Single query: comments + author via FK join (no separate profiles round-trip)
     const { data: raw } = await supabase
       .from("comments")
-      .select("*, author:profiles!user_id(id, nickname)")
+      .select("*, author:profiles!user_id(id, nickname, handle)")
       .eq("post_id", postId)
       .order("created_at", { ascending: true });
 
@@ -249,12 +250,7 @@ function CommentItem({
     <div className={cn("flex gap-2.5", isReply && "items-start")}>
       {isReply && <CornerDownRight className="w-3.5 h-3.5 text-gray-300 mt-2 flex-shrink-0" />}
       <UserPopover userId={comment.author.id} nickname={comment.author.nickname}>
-        <div
-          style={{ color: avatarTextColor(comment.author.nickname) }}
-          className="w-7 h-7 rounded-md bg-gray-100 flex items-center justify-center text-[9px] font-bold flex-shrink-0"
-        >
-          {getInitials(comment.author.nickname)}
-        </div>
+        <ProfileAvatar nickname={comment.author.nickname} size="sm" className="w-7 h-7 text-xs" />
       </UserPopover>
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2 mb-0.5">
@@ -263,6 +259,9 @@ function CommentItem({
               {comment.author.nickname}
             </span>
           </UserPopover>
+          {comment.author.handle && (
+            <span className="text-[10px] text-gray-400">@{comment.author.handle}</span>
+          )}
           <span className="text-[10px] text-gray-400">{timeAgo(comment.created_at)}</span>
         </div>
         <p className="text-sm text-gray-700 leading-relaxed">{comment.content}</p>

@@ -4,7 +4,8 @@ import type { Metadata } from "next";
 import { createClient } from "@/lib/supabase-server";
 import { getCachedPost } from "@/lib/queries";
 import { getCategoryLabel, getCategoryEmoji } from "@/lib/constants";
-import { getInitials, avatarTextColor, timeAgo } from "@/lib/utils";
+import { timeAgo } from "@/lib/utils";
+import { ProfileCard } from "@/components/ui/ProfileCard";
 import { PostInteractions } from "./PostInteractions";
 import { CommentSection }   from "./CommentSection";
 import { UserPopover } from "@/components/community/UserPopover";
@@ -77,28 +78,25 @@ export default async function PostDetailPage({ params }: { params: Promise<{ id:
         {/* Author */}
         {author && (
           <UserPopover userId={author.id} nickname={author.nickname}>
-            <div className="flex items-center gap-2.5 mb-5 w-fit cursor-pointer">
-              <div
-                  style={{ color: avatarTextColor(author.nickname) }}
-                  className="w-8 h-8 rounded-lg bg-gray-100 flex items-center justify-center text-[10px] font-bold flex-shrink-0"
-                >
-                  {getInitials(author.nickname)}
-              </div>
-              <div>
-                <p className="text-sm font-semibold text-gray-900">{author.nickname}</p>
-                <p className="text-xs text-gray-400">{timeAgo(post.created_at)}</p>
-              </div>
+            <div className="mb-5 w-fit cursor-pointer">
+              <ProfileCard
+                nickname={author.nickname}
+                handle={(author as any).handle}
+                location={(author as any).location}
+                size="md"
+              />
+              <p className="text-xs text-gray-400 mt-1 ml-[52px]">{timeAgo(post.created_at)}</p>
             </div>
           </UserPopover>
         )}
         {!author && (
-          <div className="flex items-center gap-2.5 mb-5">
-            <div className="w-8 h-8 rounded-lg bg-gray-100 flex items-center justify-center text-[10px] font-bold flex-shrink-0 text-gray-400">
-              ?
-            </div>
-            <div>
-              <p className="text-sm font-semibold text-gray-900">알 수 없음</p>
-              <p className="text-xs text-gray-400">{timeAgo(post.created_at)}</p>
+          <div className="mb-5">
+            <div className="profile-card">
+              <div className="avatar av1 w-8 h-8 text-sm opacity-30">?</div>
+              <div className="profile-info">
+                <div className="display-name">알 수 없음</div>
+                <div className="text-xs text-gray-400">{timeAgo(post.created_at)}</div>
+              </div>
             </div>
           </div>
         )}

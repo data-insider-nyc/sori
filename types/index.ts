@@ -1,3 +1,4 @@
+// types/index.ts
 export type Category =
   | "hospital"
   | "lawyer"
@@ -39,7 +40,7 @@ export interface Business {
 
 export interface Post {
   id: string;
-  author: { id: string; nickname: string; avatar_url?: string };
+  author: { id: string; nickname: string; handle?: string | null; location?: string | null; avatar_url?: string };
   category: PostCategory;
   region: Region | null;
   title: string;
@@ -57,7 +58,7 @@ export interface Comment {
   id: string;
   post_id: string;
   parent_id: string | null;
-  author: { id: string; nickname: string };
+  author: { id: string; nickname: string; handle?: string | null; location?: string | null };
   content: string;
   created_at: string;
   replies?: Comment[];
