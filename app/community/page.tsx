@@ -1,4 +1,5 @@
 import { Suspense } from "react";
+import type { Metadata } from "next";
 import { HotTopics }        from "@/components/community/HotTopics";
 import { CommunityClient }  from "./CommunityClient";
 
@@ -6,6 +7,17 @@ import { CommunityClient }  from "./CommunityClient";
 // CommunityClient is a client component — it runs in the browser and uses
 // its own feedCache, so this revalidate doesn't affect data freshness.
 export const revalidate = 300;
+
+export const metadata: Metadata = {
+  title: "커뮤니티",
+  description:
+    "뉴욕·뉴저지 한인들의 이야기. 병원 추천, 부동산, 육아, 비자·이민, 취업 정보를 함께 나눠요.",
+  openGraph: {
+    url: "/community",
+    title: "소리 커뮤니티 — 뉴욕·뉴저지 한인 생활 정보",
+    description: "포트리·팰팍·플러싱 한인들의 실시간 커뮤니티 피드",
+  },
+};
 
 function FeedSkeleton() {
   return (

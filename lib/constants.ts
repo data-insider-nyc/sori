@@ -47,12 +47,18 @@ export function getCategoryEmoji(value: string): string {
 // ─── Hyperlocal target cities (business directory only) ──────────────────────
 
 export const TARGET_CITIES = [
-  { value: "",              label: "All Cities" },
-  { value: "Fort Lee",      label: "Fort Lee, NJ" },
-  { value: "Palisades Park",label: "Palisades Park, NJ" },
-  { value: "Flushing",      label: "Flushing, NY" },
-  { value: "Manhattan",     label: "Manhattan, NY" },
-  { value: "Dallas",        label: "Dallas, TX" },
+  { value: "",               label: "All Cities" },
+  // ── 뉴저지 ─────────────────────────────────────
+  { value: "Fort Lee",       label: "Fort Lee, NJ" },
+  { value: "Palisades Park", label: "Palisades Park, NJ" },
+  { value: "Leonia",         label: "Leonia, NJ" },
+  { value: "Englewood",      label: "Englewood, NJ" },
+  // ── 뉴욕 퀸즈 ──────────────────────────────────
+  { value: "Flushing",       label: "Flushing, NY" },
+  { value: "Bayside",        label: "Bayside, NY" },
+  { value: "Fresh Meadows",  label: "Fresh Meadows, NY" },
+  // ── 뉴욕 맨해튼 ────────────────────────────────
+  { value: "Manhattan",      label: "Manhattan, NY" },
 ] as const;
 
 // ─── Community metro regions ──────────────────────────────────────────────────

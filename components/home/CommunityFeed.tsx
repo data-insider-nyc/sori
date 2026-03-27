@@ -17,7 +17,7 @@ export function CommunityFeed() {
         .from("posts")
         .select("*")
         .order("created_at", { ascending: false })
-        .limit(5);
+        .limit(8);
 
       const rawPosts = raw ?? [];
       const seen = new Set<string>();

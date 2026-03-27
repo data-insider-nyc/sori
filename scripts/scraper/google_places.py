@@ -27,12 +27,17 @@ supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
 # 타겟 지역
 # ─────────────────────────────────────────────
 CENTERS = [
-    # {"name": "Fort Lee",        "state": "NJ", "lat": 40.8504, "lng": -73.9710},
-    # {"name": "Palisades Park",  "state": "NJ", "lat": 40.8468, "lng": -73.9932},
-    # {"name": "Flushing",        "state": "NY", "lat": 40.7675, "lng": -73.8330},
-    # {"name": "Manhattan",       "state": "NY", "lat": 40.7580, "lng": -73.9855},
-    # {"name": "Carrollton", "state": "TX", "lat": 32.9756, "lng": -96.8899},
-    {"name": "Dallas", "state": "TX", "lat": 32.7767, "lng": -96.7970},
+    # ── 뉴저지 ──────────────────────────────────
+    {"name": "Fort Lee",       "state": "NJ", "lat": 40.8504, "lng": -73.9710},
+    {"name": "Palisades Park", "state": "NJ", "lat": 40.8468, "lng": -73.9932},
+    {"name": "Leonia",         "state": "NJ", "lat": 40.8618, "lng": -73.9849},
+    {"name": "Englewood",      "state": "NJ", "lat": 40.8934, "lng": -73.9726},
+    # ── 뉴욕 퀸즈 ────────────────────────────────
+    {"name": "Flushing",       "state": "NY", "lat": 40.7675, "lng": -73.8330},
+    {"name": "Bayside",        "state": "NY", "lat": 40.7632, "lng": -73.7710},
+    {"name": "Fresh Meadows",  "state": "NY", "lat": 40.7302, "lng": -73.7880},
+    # ── 뉴욕 맨해튼 ──────────────────────────────
+    # {"name": "Manhattan",    "state": "NY", "lat": 40.7580, "lng": -73.9855},
 ]
 
 # ─────────────────────────────────────────────
@@ -103,17 +108,91 @@ def text_search(query, lat, lng):
 
 # ─────────────────────────────────────────────
 # 주소 컴포넌트에서 도시/주 추출
+# Flushing 같은 sublocality_level_2 네이버후드 우선 사용
 # ─────────────────────────────────────────────
+
+# Queens borough 내 한인 밀집 네이버후드 → 표시 도시명 매핑
+NEIGHBORHOOD_CITY_MAP = {
+    "flushing": "Flushing",
+    "bayside": "Bayside",
+    "jackson heights": "Jackson Heights",
+    "elmhurst": "Elmhurst",
+    "corona": "Corona",
+    "forest hills": "Forest Hills",
+    "fresh meadows": "Fresh Meadows",
+    "kew gardens": "Kew Gardens",
+    "woodside": "Woodside",
+    "sunnyside": "Sunnyside",
+    "astoria": "Astoria",
+    "long island city": "Long Island City",
+}
+
+
 def extract_city_state(address_components):
     city = ""
+    neighborhood = ""
     state = ""
+
     for comp in address_components or []:
         types = comp.get("types", [])
-        if "locality" in types or "sublocality_level_1" in types:
-            city = comp.get("longText", "")
-        elif "administrative_area_level_1" in types:
+        long_text = comp.get("longText", "")
+
+        if "administrative_area_level_1" in types:
             state = comp.get("shortText", "")
+        elif "locality" in types:
+            city = long_text
+        elif "sublocality_level_1" in types and not city:
+            city = long_text
+        elif "sublocality_level_2" in types or "neighborhood" in types:
+            neighborhood = long_text
+
+    # 네이버후드가 알려진 한인 밀집지역이면 city로 승격
+    if neighborhood and neighborhood.lower() in NEIGHBORHOOD_CITY_MAP:
+        city = NEIGHBORHOOD_CITY_MAP[neighborhood.lower()]
+
     return city, state
+
+
+def refine_city_from_address(city: str, address: str) -> str:
+    """주소 문자열에서 네이버후드 키워드로 도시명 보정 (fallback)."""
+    addr_lower = address.lower()
+    for key, display in NEIGHBORHOOD_CITY_MAP.items():
+        if key in addr_lower:
+            return display
+    return city
+
+
+# ─────────────────────────────────────────────
+# 한국 비즈니스 필터 — 중국/일본계 업소 제외
+# ─────────────────────────────────────────────
+
+
+def _has_korean(text: str) -> bool:
+    return any("\uac00" <= c <= "\ud7a3" or "\u1100" <= c <= "\u11ff" for c in text)
+
+
+def _has_chinese_only(text: str) -> bool:
+    """한글 없이 한자(CJK)만 있으면 중국/일본계로 판단."""
+    has_cjk = any("\u4e00" <= c <= "\u9fff" for c in text)
+    has_hiragana = any("\u3040" <= c <= "\u309f" for c in text)
+    has_katakana = any("\u30a0" <= c <= "\u30ff" for c in text)
+    return (has_cjk or has_hiragana or has_katakana) and not _has_korean(text)
+
+
+def is_korean_business(place) -> bool:
+    """
+    한국 비즈니스 여부 판별:
+    - 이름에 한글이 있으면 → 통과
+    - 이름에 일본어(히라가나/카타카나) 또는 한자만 있으면 → 제외
+    - 영문 이름은 키워드에 'Korean'이 있으면 → 통과 (Google이 Korean으로 태깅)
+    """
+    name = place.get("displayName", {}).get("text", "") or ""
+    if _has_korean(name):
+        return True
+    if _has_chinese_only(name):
+        return False
+    # 영문 이름: Google이 Korean 키워드로 매칭했으므로 기본 통과
+    return True
 
 
 # ─────────────────────────────────────────────
@@ -124,6 +203,9 @@ def to_business(place, sori_category, center):
     if not name:
         return None
 
+    if not is_korean_business(place):
+        return None
+
     address = place.get("formattedAddress", "")
     lat = place.get("location", {}).get("latitude")
     lng = place.get("location", {}).get("longitude")
@@ -132,6 +214,9 @@ def to_business(place, sori_category, center):
     if not city:
         city = center["name"]
         state = center["state"]
+
+    # 주소 문자열로 도시명 보정 (Queens → Flushing 등)
+    city = refine_city_from_address(city, address)
 
     # 전화번호 정리
     phone_raw = place.get("internationalPhoneNumber", "") or ""
@@ -229,6 +314,9 @@ def main():
 
                 biz = to_business(place, cat["sori_category"], center)
                 if not biz:
+                    name = place.get("displayName", {}).get("text", "")
+                    if name:
+                        print(f"    ⏭️  제외 (비한국계): {name}")
                     continue
 
                 saved = upsert_business(biz)

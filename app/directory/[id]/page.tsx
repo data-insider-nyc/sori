@@ -118,13 +118,24 @@ export async function generateMetadata({
   const { id } = await params;
   const { data } = await supabase
     .from("businesses")
-    .select("name, city, state, subcategory")
+    .select("name, city, state, subcategory, category")
     .eq("id", id)
     .single();
   if (!data) return { title: "비즈니스 | 소리" };
+
+  const title = `${data.name} — ${data.city}, ${data.state}`;
+  const description = `${data.name}. ${data.subcategory ?? ""} · ${data.city}, ${data.state}. 소리에서 한인 비즈니스를 찾아보세요.`;
+
   return {
-    title: `${data.name} | 소리 Sori`,
-    description: `${data.name} — ${data.subcategory ?? ""} · ${data.city}, ${data.state}`,
+    title,
+    description,
+    openGraph: {
+      title: `${data.name} | 소리 Sori`,
+      description,
+      url: `/directory/${id}`,
+      type: "website",
+    },
+    twitter: { card: "summary", title, description },
   };
 }
 

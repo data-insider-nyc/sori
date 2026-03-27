@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
+import type { Metadata } from "next";
 import { createClient } from "@/lib/supabase-server";
 import { getCachedPost } from "@/lib/queries";
 import { getCategoryLabel, getCategoryEmoji } from "@/lib/constants";
@@ -7,6 +8,32 @@ import { getInitials, avatarTextColor, timeAgo } from "@/lib/utils";
 import { PostInteractions } from "./PostInteractions";
 import { CommentSection }   from "./CommentSection";
 import { UserPopover } from "@/components/community/UserPopover";
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}): Promise<Metadata> {
+  const { id } = await params;
+  const post = await getCachedPost(id);
+  if (!post) return { title: "게시글 | 소리" };
+
+  const description = post.content
+    ? post.content.slice(0, 120).replace(/\n/g, " ")
+    : `${getCategoryLabel(post.category)} — 소리 커뮤니티`;
+
+  return {
+    title: post.title,
+    description,
+    openGraph: {
+      title: `${post.title} | 소리 커뮤니티`,
+      description,
+      url: `/community/${id}`,
+      type: "article",
+    },
+    twitter: { card: "summary", title: post.title, description },
+  };
+}
 
 export default async function PostDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
