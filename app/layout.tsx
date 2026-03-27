@@ -88,6 +88,14 @@ export default function RootLayout({
         <main className="min-h-screen pb-20 lg:pb-0 lg:pt-16 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {children}
         </main>
+        <footer className="hidden lg:block border-t border-gray-100 bg-white mt-12">
+          <div className="max-w-7xl mx-auto px-6 py-6 flex items-center justify-between text-sm text-gray-400">
+            <span>© 2026 소리 Sori. All rights reserved.</span>
+            <a href="mailto:hello@oursori.com" className="hover:text-[#FF5C5C] transition-colors">
+              hello@oursori.com
+            </a>
+          </div>
+        </footer>
         <MobileNav />
       </body>
     </html>
