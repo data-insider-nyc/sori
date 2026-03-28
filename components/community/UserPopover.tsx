@@ -3,15 +3,21 @@
 import { useState, useEffect, useRef } from "react";
 import { Calendar } from "lucide-react";
 import { createClient } from "@/lib/supabase-browser";
+import { getRegionLabel, getRegionEmoji } from "@/lib/regions";
 import { ProfileCard } from "@/components/ui/ProfileCard";
 
 interface PopoverProfile {
   nickname: string;
   handle: string | null;
-  location: string | null;
+  location_id: number | null;
   bio: string | null;
   joined_at: string;
   post_count: number;
+}
+
+interface PopoverState extends PopoverProfile {
+  locationLabel?: string;
+  locationEmoji?: string;
 }
 
 interface Props {
@@ -22,7 +28,7 @@ interface Props {
 
 export function UserPopover({ userId, nickname, children }: Props) {
   const [open, setOpen] = useState(false);
-  const [profile, setProfile] = useState<PopoverProfile | null>(null);
+  const [profile, setProfile] = useState<PopoverState | null>(null);
   const [loading, setLoading] = useState(false);
   const [pos, setPos] = useState({ top: 0, left: 0 });
 
@@ -32,8 +38,12 @@ export function UserPopover({ userId, nickname, children }: Props) {
   const closeTimerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
   const fetchedRef = useRef(false);
 
-  function cancelOpen() { clearTimeout(openTimerRef.current); }
-  function cancelClose() { clearTimeout(closeTimerRef.current); }
+  function cancelOpen() {
+    clearTimeout(openTimerRef.current);
+  }
+  function cancelClose() {
+    clearTimeout(closeTimerRef.current);
+  }
 
   function scheduleOpen() {
     cancelClose();
@@ -41,7 +51,10 @@ export function UserPopover({ userId, nickname, children }: Props) {
       if (!triggerRef.current) return;
       const rect = triggerRef.current.getBoundingClientRect();
       const popoverWidth = 260;
-      const left = Math.max(8, Math.min(rect.left, window.innerWidth - popoverWidth - 8));
+      const left = Math.max(
+        8,
+        Math.min(rect.left, window.innerWidth - popoverWidth - 8),
+      );
       setPos({ top: rect.bottom + 6, left });
       setOpen(true);
       if (!fetchedRef.current) {
@@ -62,7 +75,7 @@ export function UserPopover({ userId, nickname, children }: Props) {
     const [{ data: prof }, { count }] = await Promise.all([
       supabase
         .from("profiles")
-        .select("nickname, handle, location, bio, joined_at")
+        .select("nickname, handle, location_id, bio, joined_at")
         .eq("id", userId)
         .single(),
       supabase
@@ -70,7 +83,20 @@ export function UserPopover({ userId, nickname, children }: Props) {
         .select("id", { count: "exact", head: true })
         .eq("user_id", userId),
     ]);
-    if (prof) setProfile({ ...prof, post_count: count ?? 0 });
+    if (prof) {
+      const locationLabel = prof.location_id
+        ? await getRegionLabel(prof.location_id)
+        : undefined;
+      const locationEmoji = prof.location_id
+        ? await getRegionEmoji(prof.location_id)
+        : undefined;
+      setProfile({
+        ...prof,
+        post_count: count ?? 0,
+        locationLabel,
+        locationEmoji,
+      });
+    }
     setLoading(false);
   }
 
@@ -82,7 +108,10 @@ export function UserPopover({ userId, nickname, children }: Props) {
     if (!open) {
       const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
       const popoverWidth = 260;
-      const left = Math.max(8, Math.min(rect.left, window.innerWidth - popoverWidth - 8));
+      const left = Math.max(
+        8,
+        Math.min(rect.left, window.innerWidth - popoverWidth - 8),
+      );
       setPos({ top: rect.bottom + 6, left });
       setOpen(true);
       if (!fetchedRef.current) {
@@ -96,12 +125,20 @@ export function UserPopover({ userId, nickname, children }: Props) {
 
   useEffect(() => {
     if (!open) return;
-    function onKey(e: KeyboardEvent) { if (e.key === "Escape") setOpen(false); }
+    function onKey(e: KeyboardEvent) {
+      if (e.key === "Escape") setOpen(false);
+    }
     document.addEventListener("keydown", onKey);
     return () => document.removeEventListener("keydown", onKey);
   }, [open]);
 
-  useEffect(() => () => { cancelOpen(); cancelClose(); }, []);
+  useEffect(
+    () => () => {
+      cancelOpen();
+      cancelClose();
+    },
+    [],
+  );
 
   return (
     <>
@@ -140,10 +177,17 @@ export function UserPopover({ userId, nickname, children }: Props) {
               <ProfileCard
                 nickname={profile.nickname}
                 handle={profile.handle}
-                location={profile.location}
+                location={profile.location_id}
                 size="md"
                 className="mb-3"
               />
+
+              {profile.location_id && profile.locationLabel && (
+                <p className="text-xs text-gray-600 border-t border-gray-50 pt-3 mb-3">
+                  <span className="text-gray-400">활동지역:</span>{" "}
+                  {profile.locationEmoji} {profile.locationLabel}
+                </p>
+              )}
 
               {profile.bio && (
                 <p className="text-xs text-gray-600 leading-relaxed border-t border-gray-50 pt-3 mb-3">

@@ -37,7 +37,7 @@ export default async function ProfilePage() {
   const { data: profile } = await supabase
     .from("profiles")
     .select(
-      "nickname, display_name, handle, bio, location, joined_at, nickname_changed_at, handle_changed_at",
+      "nickname, display_name, handle, bio, location_id, joined_at, nickname_changed_at, handle_changed_at",
     )
     .eq("id", user.id)
     .single();
@@ -76,8 +76,8 @@ export default async function ProfilePage() {
         <ProfileCard
           nickname={profile.nickname}
           handle={profile.handle}
-          location={profile.location}
           size="lg"
+          showLocation={true}
         />
         <p className="text-xs text-gray-400 mt-3 ml-[70px]">
           가입일 {formatDate(profile.joined_at)}
@@ -100,7 +100,7 @@ export default async function ProfilePage() {
       <div className="bg-white border border-gray-100 rounded-2xl shadow-sm p-6">
         <LocationEditor
           userId={user.id}
-          currentLocation={profile.location ?? null}
+          currentLocationId={profile.location_id ?? 12}
         />
       </div>
 

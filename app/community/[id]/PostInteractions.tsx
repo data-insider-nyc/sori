@@ -6,29 +6,43 @@ import { cn } from "@/lib/utils";
 import { createClient } from "@/lib/supabase-browser";
 
 interface Props {
-  postId:       string;
-  likeCount:    number;
+  postId: string;
+  likeCount: number;
   commentCount: number;
-  isLiked:      boolean;
-  userId:       string | null;
+  isLiked: boolean;
+  userId: string | null;
 }
 
-export function PostInteractions({ postId, likeCount, commentCount, isLiked: initialLiked, userId }: Props) {
+export function PostInteractions({
+  postId,
+  likeCount,
+  commentCount,
+  isLiked: initialLiked,
+  userId,
+}: Props) {
   const [liked, setLiked] = useState(initialLiked);
   const [count, setCount] = useState(likeCount);
 
   async function handleLike() {
-    if (!userId) { window.location.href = "/auth/login"; return; }
+    if (!userId) {
+      window.location.href = "/auth/login";
+      return;
+    }
 
     const supabase = createClient();
     const prev = liked;
     setLiked(!prev);
-    setCount((c) => prev ? c - 1 : c + 1);
+    setCount((c) => (prev ? c - 1 : c + 1));
 
     if (prev) {
-      await supabase.from("post_likes").delete().match({ post_id: postId, user_id: userId });
+      await supabase
+        .from("post_likes")
+        .delete()
+        .match({ post_id: postId, user_id: userId });
     } else {
-      await supabase.from("post_likes").insert({ post_id: postId, user_id: userId });
+      await supabase
+        .from("post_likes")
+        .insert({ post_id: postId, user_id: userId });
     }
   }
 
@@ -38,7 +52,9 @@ export function PostInteractions({ postId, likeCount, commentCount, isLiked: ini
         onClick={handleLike}
         className={cn(
           "flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-medium transition-all",
-          liked ? "text-[#FF5C5C] bg-[#FFF0F0]" : "text-gray-400 hover:text-[#FF5C5C] hover:bg-[#FFF0F0]",
+          liked
+            ? "text-[#FF5C5C] bg-[#FFF0F0]"
+            : "text-gray-400 hover:text-[#FF5C5C] hover:bg-[#FFF0F0]",
         )}
       >
         <Heart className={cn("w-4 h-4", liked && "fill-current")} />

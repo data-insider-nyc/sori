@@ -1,31 +1,35 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { MapPin } from "lucide-react";
 import { createClient } from "@/lib/supabase-browser";
-import { TARGET_CITIES } from "@/lib/constants";
-
-const LOCATION_OPTIONS = TARGET_CITIES.filter((c) => c.value !== "");
+import { getRegions } from "@/lib/regions";
+import type { Region } from "@/lib/regions";
 
 interface Props {
   userId: string;
-  currentLocation: string | null;
+  currentLocationId: number;
 }
 
-export function LocationEditor({ userId, currentLocation }: Props) {
-  const [location, setLocation] = useState(currentLocation ?? "");
-  const [loading, setLoading]   = useState(false);
-  const [success, setSuccess]   = useState("");
+export function LocationEditor({ userId, currentLocationId }: Props) {
+  const [locationId, setLocationId] = useState(currentLocationId);
+  const [regions, setRegions] = useState<Region[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState("");
   const router = useRouter();
   const supabase = createClient();
+
+  useEffect(() => {
+    getRegions().then(setRegions);
+  }, []);
 
   async function save() {
     setLoading(true);
     setSuccess("");
     const { error } = await supabase
       .from("profiles")
-      .update({ location: location || null })
+      .update({ location_id: locationId })
       .eq("id", userId);
 
     if (!error) {
@@ -39,9 +43,11 @@ export function LocationEditor({ userId, currentLocation }: Props) {
     <div>
       <div className="flex items-center gap-1.5 mb-1">
         <MapPin className="w-3.5 h-3.5 text-blue-400" />
-        <p className="text-sm font-semibold text-gray-700">내 지역</p>
+        <p className="text-sm font-semibold text-gray-700">내 활동 지역</p>
       </div>
-      <p className="text-xs text-gray-400 mb-4">닉네임 옆 지역 배지에 표시돼요</p>
+      <p className="text-xs text-gray-400 mb-4">
+        프로필 팝오버에 표시돼요
+      </p>
 
       {success && (
         <div className="bg-[#FFF0F0] rounded-xl px-4 py-2.5 text-sm text-[#FF5C5C] font-semibold text-center mb-3">
@@ -50,20 +56,24 @@ export function LocationEditor({ userId, currentLocation }: Props) {
       )}
 
       <select
-        value={location}
-        onChange={(e) => { setLocation(e.target.value); setSuccess(""); }}
+        value={locationId}
+        onChange={(e) => {
+          setLocationId(parseInt(e.target.value));
+          setSuccess("");
+        }}
         className="input-field appearance-none mb-3"
         disabled={loading}
       >
-        <option value="">선택 안 함</option>
-        {LOCATION_OPTIONS.map((c) => (
-          <option key={c.value} value={c.value}>{c.label}</option>
+        {regions.map((r) => (
+          <option key={r.id} value={r.id}>
+            {r.emoji} {r.label}
+          </option>
         ))}
       </select>
 
       <button
         onClick={save}
-        disabled={loading || location === (currentLocation ?? "")}
+        disabled={loading || locationId === currentLocationId}
         className="btn-coral w-full text-sm disabled:opacity-40"
       >
         지역 저장

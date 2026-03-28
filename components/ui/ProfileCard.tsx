@@ -1,33 +1,63 @@
+"use client";
+
+import { useState, useEffect } from "react";
 import { cn, avatarPalette } from "@/lib/utils";
+import { getRegionEmoji, getRegionLabel } from "@/lib/regions";
 
 interface Props {
   nickname: string;
   handle?: string | null;
-  location?: string | null;
+  location?: string | number | null;
   /** sm = 32px (comments), md = 40px (feed/popover), lg = 56px (profile page) */
   size?: "sm" | "md" | "lg";
   className?: string;
+  /** Whether to show location badge (default: false) */
+  showLocation?: boolean;
 }
 
 const SIZE = {
-  sm: { avatar: "w-8 h-8 text-sm",    text: "text-[13px]", handle: "text-[11px]" },
-  md: { avatar: "w-10 h-10 text-base", text: "text-sm",    handle: "text-xs"     },
-  lg: { avatar: "w-14 h-14 text-xl",   text: "text-base",  handle: "text-xs"     },
+  sm: { avatar: "w-8 h-8 text-sm", text: "text-[13px]", handle: "text-[11px]" },
+  md: { avatar: "w-10 h-10 text-base", text: "text-sm", handle: "text-xs" },
+  lg: { avatar: "w-14 h-14 text-xl", text: "text-base", handle: "text-xs" },
 } as const;
 
-export function ProfileCard({ nickname, handle, location, size = "md", className }: Props) {
+export function ProfileCard({
+  nickname,
+  handle,
+  location,
+  size = "md",
+  className,
+  showLocation = false,
+}: Props) {
   const s = SIZE[size];
+  const [displayLocation, setDisplayLocation] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!location) {
+      setDisplayLocation(null);
+      return;
+    }
+
+    (async () => {
+      const emoji = await getRegionEmoji(location);
+      const label = await getRegionLabel(location);
+      // Show emoji + first word of label (e.g., "🗽 NY")
+      const firstWord = label.split(" ")[0];
+      setDisplayLocation(`${emoji} ${firstWord}`);
+    })();
+  }, [location]);
+
   return (
     <div className={cn("profile-card", className)}>
       <ProfileAvatar nickname={nickname} size={size} />
       <div className="profile-info">
         <div className={cn("display-name", s.text)}>
           <span className="truncate">{nickname}</span>
-          {location && <span className="badge badge-loc">{location}</span>}
+          {displayLocation && showLocation && (
+            <span className="badge badge-loc">{displayLocation}</span>
+          )}
         </div>
-        {handle && (
-          <div className={cn("handle", s.handle)}>@{handle}</div>
-        )}
+        {handle && <div className={cn("handle", s.handle)}>@{handle}</div>}
       </div>
     </div>
   );

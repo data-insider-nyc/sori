@@ -82,7 +82,7 @@ export default async function PostDetailPage({ params }: { params: Promise<{ id:
               <ProfileCard
                 nickname={author.nickname}
                 handle={(author as any).handle}
-                location={(author as any).location}
+                location={(author as any).location_id}
                 size="md"
               />
               <p className="text-xs text-gray-400 mt-1 ml-[52px]">{timeAgo(post.created_at)}</p>

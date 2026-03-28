@@ -23,12 +23,12 @@ export function HeroCard() {
             뉴욕 · 뉴저지 한인 커뮤니티
           </div>
           <h1 className="text-2xl lg:text-3xl font-bold text-gray-900 leading-tight tracking-tight">
-            우리 동네 이야기,
+            우리의 이야기,
             <br />
-            함께 나눠요 <span className="text-[#FF5C5C]">소리</span>
+            우리의 <span className="text-[#FF5C5C]">소리</span>
           </h1>
           <p className="text-gray-500 text-sm mt-2.5 leading-relaxed">
-            뉴욕, 뉴저지 한인들이 모이는 공간
+            미국 한인들이 만들어가는 커뮤니티 — 어디서든, 누구든
           </p>
           <div className="flex flex-wrap gap-2.5 mt-5">
             <Link

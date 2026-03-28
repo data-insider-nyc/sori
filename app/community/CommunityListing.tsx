@@ -3,7 +3,9 @@
 import { useState, useEffect, useRef } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase-browser";
-import { COMMUNITY_CATEGORIES, REGIONS } from "@/lib/constants";
+import { LOCAL_CATEGORIES } from "@/lib/constants";
+import { getRegions } from "@/lib/regions";
+import { getPostCategories } from "@/lib/post-categories";
 import { PostCard } from "@/components/community/PostCard";
 import { cn } from "@/lib/utils";
 import type { Post } from "@/types";
@@ -14,7 +16,12 @@ const CACHE_TTL = 10 * 60 * 1000; // 10 minutes
 // ─── Module-level cache ────────────────────────────────────────────────────────
 // Survives component unmount/remount (same browser tab session).
 // Like Python's @cache(ttl=120) — "back and forth" navigation is instant.
-type CacheEntry = { posts: Post[]; cursor: string | null; hasMore: boolean; ts: number };
+type CacheEntry = {
+  posts: Post[];
+  cursor: string | null;
+  hasMore: boolean;
+  ts: number;
+};
 const feedCache = new Map<string, CacheEntry>();
 
 function makeCacheKey(region: string, category: string, q: string) {
@@ -27,32 +34,42 @@ export function clearFeedCache() {
 }
 // ──────────────────────────────────────────────────────────────────────────────
 
-export function CommunityClient() {
+export function CommunityListing() {
   const searchParams = useSearchParams();
-  const router       = useRouter();
+  const router = useRouter();
 
   const category = searchParams.get("category") ?? "all";
-  const region   = searchParams.get("region")   ?? "all";
-  const q        = searchParams.get("q")        ?? "";
+  const region = searchParams.get("region") ?? "all";
+  const q = searchParams.get("q") ?? "";
 
-  const key    = makeCacheKey(region, category, q);
+  const key = makeCacheKey(region, category, q);
   const cached = feedCache.get(key);
-  const fresh  = cached && Date.now() - cached.ts < CACHE_TTL;
+  const fresh = cached && Date.now() - cached.ts < CACHE_TTL;
 
   // Initialise from cache so returning users see posts immediately (no skeleton)
-  const [posts,       setPosts]       = useState<Post[]>(fresh ? cached.posts : []);
-  const [loading,     setLoading]     = useState(!fresh);
+  const [posts, setPosts] = useState<Post[]>(fresh ? cached.posts : []);
+  const [loading, setLoading] = useState(!fresh);
   const [loadingMore, setLoadingMore] = useState(false);
-  const [hasMore,     setHasMore]     = useState(fresh ? cached.hasMore : false);
-  const [cursor,      setCursor]      = useState<string | null>(fresh ? cached.cursor : null);
-  const [userId,      setUserId]      = useState<string | null>(null);
+  const [hasMore, setHasMore] = useState(fresh ? cached.hasMore : false);
+  const [cursor, setCursor] = useState<string | null>(
+    fresh ? cached.cursor : null,
+  );
+  const [userId, setUserId] = useState<string | null>(null);
   const [searchInput, setSearchInput] = useState(q);
+  const [regions, setRegions] = useState<any[]>([]);
+  const [categories, setCategories] = useState<any[]>([]);
   const debounceRef = useRef<ReturnType<typeof setTimeout>>(undefined);
+
+  // Load regions + categories from DB
+  useEffect(() => {
+    getRegions().then(setRegions);
+    getPostCategories().then(setCategories);
+  }, []);
 
   // Resolve auth (non-blocking — posts load in parallel)
   useEffect(() => {
-    createClient().auth
-      .getUser()
+    createClient()
+      .auth.getUser()
       .then(({ data: { user } }) => setUserId(user?.id ?? null));
   }, []);
 
@@ -71,7 +88,7 @@ export function CommunityClient() {
     setCursor(null);
     setHasMore(false);
     load({ afterCursor: null, append: false });
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [category, region, q]);
 
   // Overlay like status once userId is known (non-blocking)
@@ -82,22 +99,33 @@ export function CommunityClient() {
       const entry = feedCache.get(key);
       if (entry) feedCache.set(key, { ...entry, posts: updated });
     });
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [userId]);
 
-  useEffect(() => { setSearchInput(q); }, [q]);
+  useEffect(() => {
+    setSearchInput(q);
+  }, [q]);
 
   async function overlayLikes(list: Post[], uid: string): Promise<Post[]> {
     const { data: likes } = await createClient()
       .from("post_likes")
       .select("post_id")
       .eq("user_id", uid)
-      .in("post_id", list.map((p) => p.id));
+      .in(
+        "post_id",
+        list.map((p) => p.id),
+      );
     const liked = new Set((likes ?? []).map((l: any) => l.post_id));
     return list.map((p) => ({ ...p, is_liked: liked.has(p.id) }));
   }
 
-  async function load({ afterCursor, append }: { afterCursor: string | null; append: boolean }) {
+  async function load({
+    afterCursor,
+    append,
+  }: {
+    afterCursor: string | null;
+    append: boolean;
+  }) {
     if (append) setLoadingMore(true);
     else setLoading(true);
 
@@ -106,14 +134,18 @@ export function CommunityClient() {
     // Single query: posts + author profile via FK join (no separate profiles round-trip)
     let query = supabase
       .from("posts")
-      .select("*, author:profiles!user_id(id, nickname, handle, location)")
+      .select("*, author:profiles!user_id(id, nickname, handle, location_id)")
       .order("created_at", { ascending: false })
       .limit(PAGE_SIZE);
 
     if (category !== "all") query = query.eq("category", category);
-    if (region   !== "all") query = query.or(`region.is.null,region.eq.${region}`);
-    if (q.trim())           query = query.ilike("title", `%${q.trim()}%`);
-    if (afterCursor)        query = query.lt("created_at", afterCursor);
+    if (region !== "all") {
+      // Get region ID from region value
+      const regionId = regions.find((r) => r.value === region)?.id;
+      if (regionId) query = query.eq("region_id", regionId);
+    }
+    if (q.trim()) query = query.ilike("title", `%${q.trim()}%`);
+    if (afterCursor) query = query.lt("created_at", afterCursor);
 
     const { data: raw } = await query;
     const rows = (raw ?? []) as any[];
@@ -128,15 +160,19 @@ export function CommunityClient() {
 
     // Dedupe by id
     const seen = new Set<string>();
-    const deduped = rows.filter((p) => { if (seen.has(p.id)) return false; seen.add(p.id); return true; });
+    const deduped = rows.filter((p) => {
+      if (seen.has(p.id)) return false;
+      seen.add(p.id);
+      return true;
+    });
 
     const list: Post[] = deduped.map((p) => ({
       ...p,
-      author:   p.author ?? { id: p.user_id, nickname: "알 수 없음" },
+      author: p.author ?? { id: p.user_id, nickname: "알 수 없음" },
       is_liked: false, // overlaid asynchronously after userId resolves
     }));
 
-    const newPosts  = append ? [...posts, ...list] : list;
+    const newPosts = append ? [...posts, ...list] : list;
     const newCursor = deduped[deduped.length - 1].created_at;
     const newHasMore = deduped.length === PAGE_SIZE;
 
@@ -149,7 +185,10 @@ export function CommunityClient() {
     // Cache first page only
     if (!append) {
       feedCache.set(makeCacheKey(region, category, q), {
-        posts: list, cursor: newCursor, hasMore: newHasMore, ts: Date.now(),
+        posts: list,
+        cursor: newCursor,
+        hasMore: newHasMore,
+        ts: Date.now(),
       });
     }
 
@@ -159,7 +198,10 @@ export function CommunityClient() {
         setPosts(updated);
         if (!append) {
           feedCache.set(makeCacheKey(region, category, q), {
-            posts: updated, cursor: newCursor, hasMore: newHasMore, ts: Date.now(),
+            posts: updated,
+            cursor: newCursor,
+            hasMore: newHasMore,
+            ts: Date.now(),
           });
         }
       });
@@ -181,7 +223,6 @@ export function CommunityClient() {
 
   return (
     <div className="lg:col-span-2">
-
       {/* Search */}
       <div className="relative mb-5">
         <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 text-base pointer-events-none">
@@ -209,33 +250,20 @@ export function CommunityClient() {
         >
           🌐 전체
         </button>
-        {REGIONS.map((r) =>
-          r.status === "open" ? (
-            <button
-              key={r.value}
-              onClick={() => setParam("region", r.value)}
-              className={cn(
-                "flex-shrink-0 px-4 py-1.5 rounded-full text-sm font-bold border transition-all",
-                region === r.value
-                  ? "bg-[#FF5C5C] text-white border-[#FF5C5C]"
-                  : "bg-white text-gray-500 border-gray-200 hover:border-[#FF5C5C] hover:text-[#FF5C5C]",
-              )}
-            >
-              {r.emoji} {r.label}
-            </button>
-          ) : (
-            <div
-              key={r.value}
-              className="flex-shrink-0 flex items-center gap-1.5 px-4 py-1.5 rounded-full text-sm font-bold border border-gray-100 bg-gray-50 text-gray-300 cursor-not-allowed select-none"
-              title="준비 중인 지역이에요"
-            >
-              {r.emoji} {r.label}
-              <span className="text-[10px] font-semibold bg-gray-200 text-gray-400 rounded-full px-1.5 py-0.5 leading-none">
-                준비중
-              </span>
-            </div>
-          ),
-        )}
+        {regions.map((r) => (
+          <button
+            key={r.value}
+            onClick={() => setParam("region", r.value)}
+            className={cn(
+              "flex-shrink-0 px-4 py-1.5 rounded-full text-sm font-bold border transition-all",
+              region === r.value
+                ? "bg-[#FF5C5C] text-white border-[#FF5C5C]"
+                : "bg-white text-gray-500 border-gray-200 hover:border-[#FF5C5C] hover:text-[#FF5C5C]",
+            )}
+          >
+            {r.emoji} {r.label}
+          </button>
+        ))}
       </div>
 
       {/* Category tabs */}
@@ -251,7 +279,7 @@ export function CommunityClient() {
         >
           전체
         </button>
-        {COMMUNITY_CATEGORIES.map((cat) => (
+        {categories.map((cat) => (
           <button
             key={cat.value}
             onClick={() => setParam("category", cat.value)}
@@ -271,7 +299,10 @@ export function CommunityClient() {
       {loading ? (
         <div className="space-y-4">
           {[1, 2, 3].map((i) => (
-            <div key={i} className="h-36 bg-gray-100 rounded-2xl animate-pulse" />
+            <div
+              key={i}
+              className="h-36 bg-gray-100 rounded-2xl animate-pulse"
+            />
           ))}
         </div>
       ) : posts.length === 0 ? (

@@ -198,12 +198,12 @@ export function generateHandle(seed?: string): string {
     HANDLE_ADJECTIVES[Math.floor(Math.random() * HANDLE_ADJECTIVES.length)];
   const noun = HANDLE_NOUNS[Math.floor(Math.random() * HANDLE_NOUNS.length)];
   const num = Math.floor(Math.random() * 99) + 1;
-  return `${adj}${noun}${num}`;
+  return `${adj} ${noun} ${num}`;
 }
 
 export function generateNickname(): string {
   const go = ADJECTIVES_GO[Math.floor(Math.random() * ADJECTIVES_GO.length)];
   const han = ADJECTIVES_HAN[Math.floor(Math.random() * ADJECTIVES_HAN.length)];
   const ent = ENTITIES[Math.floor(Math.random() * ENTITIES.length)];
-  return `${go}${han}${ent}`;
+  return `${go} ${han} ${ent}`;
 }
