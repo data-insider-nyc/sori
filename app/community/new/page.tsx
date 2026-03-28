@@ -78,6 +78,19 @@ export default function NewPostPage() {
       return;
     }
 
+    // Auto-like post with author's own like (Reddit style)
+    const { error: likeError } = await supabase
+      .from("post_likes")
+      .insert({
+        post_id: post.id,
+        user_id: user.id,
+      });
+
+    if (likeError) {
+      console.error("Failed to add author like:", likeError);
+      // Don't block post creation if auto-like fails
+    }
+
     clearFeedCache();
     router.replace(`/community/${post.id}`);
   }

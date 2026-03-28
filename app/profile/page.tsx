@@ -23,7 +23,7 @@ function daysUntilChange(changedAt: string | null): number | null {
   const elapsed = Math.floor(
     (Date.now() - new Date(changedAt).getTime()) / (1000 * 60 * 60 * 24),
   );
-  const remaining = 14 - elapsed;
+  const remaining = 1 - elapsed;
   return remaining > 0 ? remaining : null;
 }
 
@@ -98,7 +98,10 @@ export default async function ProfilePage() {
 
       {/* ── Location card ─────────────────────────────────────────── */}
       <div className="bg-white border border-gray-100 rounded-2xl shadow-sm p-6">
-        <LocationEditor userId={user.id} currentLocation={profile.location ?? null} />
+        <LocationEditor
+          userId={user.id}
+          currentLocation={profile.location ?? null}
+        />
       </div>
 
       {/* ── Nickname change card ───────────────────────────────────── */}
@@ -112,7 +115,7 @@ export default async function ProfilePage() {
           )}
         </div>
         <p className="text-xs text-gray-400 mb-4">
-          14일에 한 번 변경할 수 있어요.
+          7일에 한 번 변경할 수 있어요.
         </p>
         <NicknameEditor
           userId={user.id}
