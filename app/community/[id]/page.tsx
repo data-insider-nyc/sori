@@ -7,8 +7,9 @@ import { getCategoryLabel, getCategoryEmoji } from "@/lib/constants";
 import { timeAgo } from "@/lib/utils";
 import { ProfileCard } from "@/components/ui/ProfileCard";
 import { PostInteractions } from "./PostInteractions";
-import { CommentSection }   from "./CommentSection";
+import { CommentSection } from "./CommentSection";
 import { UserPopover } from "@/components/community/UserPopover";
+import { PostBadge } from "@/components/ui/PostBadge";
 
 export async function generateMetadata({
   params,
@@ -36,7 +37,11 @@ export async function generateMetadata({
   };
 }
 
-export default async function PostDetailPage({ params }: { params: Promise<{ id: string }> }) {
+export default async function PostDetailPage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
   const { id } = await params;
 
   // post + author from cache (10 min TTL) — eliminates 2 separate DB round-trips
@@ -47,7 +52,9 @@ export default async function PostDetailPage({ params }: { params: Promise<{ id:
 
   // Auth + isLiked are user-specific — always fresh
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
   let isLiked = false;
   if (user) {
@@ -61,19 +68,23 @@ export default async function PostDetailPage({ params }: { params: Promise<{ id:
 
   return (
     <div className="py-6 max-w-2xl mx-auto">
-      <Link href="/community" className="text-sm text-gray-400 hover:text-gray-700 transition-colors mb-6 inline-block">
+      <Link
+        href="/community"
+        className="text-sm text-gray-400 hover:text-gray-700 transition-colors mb-6 inline-block"
+      >
         ← 커뮤니티
       </Link>
 
       {/* Post card */}
       <div className="bg-white border border-gray-100 rounded-2xl shadow-sm p-6 mb-6">
-        {/* Category badge */}
-        <span className="inline-flex items-center gap-1 text-xs bg-[#FFF0F0] text-[#FF5C5C] font-semibold px-2.5 py-1 rounded-full mb-4">
-          {getCategoryEmoji(post.category)} {getCategoryLabel(post.category)}
-        </span>
+        <div className="flex items-center justify-between mb-3">
+          <PostBadge post={post} />
+        </div>
 
         {/* Title */}
-        <h1 className="text-xl font-black text-gray-900 mb-3 leading-snug">{post.title}</h1>
+        <h1 className="text-xl font-black text-gray-900 mb-3 leading-snug">
+          {post.title}
+        </h1>
 
         {/* Author */}
         {author && (
@@ -85,7 +96,9 @@ export default async function PostDetailPage({ params }: { params: Promise<{ id:
                 location={(author as any).location_id}
                 size="md"
               />
-              <p className="text-xs text-gray-400 mt-1 ml-[52px]">{timeAgo(post.created_at)}</p>
+              <p className="text-xs text-gray-400 mt-1 ml-[52px]">
+                {timeAgo(post.created_at)}
+              </p>
             </div>
           </UserPopover>
         )}
@@ -95,14 +108,18 @@ export default async function PostDetailPage({ params }: { params: Promise<{ id:
               <div className="avatar av1 w-8 h-8 text-sm opacity-30">?</div>
               <div className="profile-info">
                 <div className="display-name">알 수 없음</div>
-                <div className="text-xs text-gray-400">{timeAgo(post.created_at)}</div>
+                <div className="text-xs text-gray-400">
+                  {timeAgo(post.created_at)}
+                </div>
               </div>
             </div>
           </div>
         )}
 
         {/* Content */}
-        <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap">{post.content}</p>
+        <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap">
+          {post.content}
+        </p>
 
         {/* Like / comment counts */}
         <PostInteractions
