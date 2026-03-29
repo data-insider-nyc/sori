@@ -6,7 +6,7 @@ import { createClient } from "@/lib/supabase-browser";
 import { LOCAL_CATEGORIES } from "@/lib/constants";
 import { getRegions } from "@/lib/regions";
 import { getPostCategories } from "@/lib/post-categories";
-import { PostCard } from "@/components/community/PostCard";
+import { PostCard } from "@/components/ui/PostCard";
 import { cn } from "@/lib/utils";
 import type { Post } from "@/types";
 

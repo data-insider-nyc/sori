@@ -29,12 +29,6 @@ export function ComingSoon({ title, description, emoji, launchDate }: ComingSoon
       )}
       {!launchDate && <div className="mb-8" />}
 
-      {/* 배지 */}
-      <div className="flex items-center gap-2 bg-amber-50 border border-amber-200
-                      text-amber-700 text-sm font-bold px-5 py-2.5 rounded-full mb-8">
-        <span>⚒️</span> 현재 개발 중입니다
-      </div>
-
       {/* 홈으로 */}
       <Link
         href="/"
