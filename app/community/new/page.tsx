@@ -22,7 +22,7 @@ export default function NewPostPage() {
   const supabase = createClient();
 
   const [category, setCategory] = useState<PostCategory>(DEFAULT_CATEGORY);
-  const [region, setRegion] = useState<string | null>(null);
+  const [region, setRegion] = useState<number | null>(null);
   const [profileRegion, setProfileRegion] = useState<string>("other");
   const [regions, setRegions] = useState<Region[]>([]);
   const [title, setTitle] = useState("");
@@ -54,7 +54,7 @@ export default function NewPostPage() {
 
   // When category changes, auto-set region based on whether it's a local category
   useEffect(() => {
-    setRegion(LOCAL_CATEGORIES.has(category) ? profileRegion : null);
+    setRegion(LOCAL_CATEGORIES.has(category) ? Number(profileRegion) : null);
   }, [category, profileRegion]);
 
   const isLocal = LOCAL_CATEGORIES.has(category);
