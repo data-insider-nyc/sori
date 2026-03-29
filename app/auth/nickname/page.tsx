@@ -94,8 +94,10 @@ export default function NicknamePage() {
       return;
     }
 
-    router.refresh();
-    router.replace("/");
+    // Explicitly refresh session to ensure user is fully logged in
+    await supabase.auth.getSession();
+    // Force a full reload to guarantee SSR/client session sync
+    window.location.replace("/");
   }
 
   return (
@@ -206,7 +208,7 @@ export default function NicknamePage() {
               <span className="text-gray-400 font-normal">(선택)</span>
             </span>
           </label>
-          <select
+          {/* <select
             value={location}
             onChange={(e) => setLocation(e.target.value)}
             className="input-field appearance-none"
@@ -218,7 +220,7 @@ export default function NicknamePage() {
                 {c.label}
               </option>
             ))}
-          </select>
+          </select> */}
           <p className="text-[11px] text-gray-400 mt-1">
             닉네임 옆에 지역 배지로 표시돼요
           </p>

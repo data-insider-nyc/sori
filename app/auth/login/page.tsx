@@ -23,7 +23,9 @@ export default function LoginPage() {
         {/* Logo */}
         <div className="mb-6">
           <span className="text-4xl font-black text-[#FF5C5C]">소리</span>
-          <p className="text-xs text-gray-400 font-medium tracking-widest mt-1">SORI</p>
+          <p className="text-xs text-gray-400 font-medium tracking-widest mt-1">
+            SORI
+          </p>
         </div>
 
         <h1 className="text-xl font-bold text-gray-900 mb-1">로그인</h1>
@@ -64,8 +66,14 @@ export default function LoginPage() {
 
         <p className="mt-6 text-xs text-gray-400 leading-relaxed">
           로그인 시 소리의{" "}
-          <span className="text-gray-600 underline cursor-pointer">이용약관</span>과{" "}
-          <span className="text-gray-600 underline cursor-pointer">개인정보처리방침</span>에 동의하게 됩니다.
+          <span className="text-gray-600 underline cursor-pointer">
+            이용약관
+          </span>
+          과{" "}
+          <span className="text-gray-600 underline cursor-pointer">
+            개인정보처리방침
+          </span>
+          에 동의하게 됩니다.
         </p>
       </div>
     </div>
