@@ -94,12 +94,16 @@ export default function RootLayout({
         <footer className="hidden lg:block border-t border-gray-100 bg-white mt-12">
           <div className="max-w-7xl mx-auto px-6 py-6 flex items-center justify-between text-sm text-gray-400">
             <span>© 2026 소리 Sori. All rights reserved.</span>
-            <a
-              href="mailto:hello@oursori.com"
-              className="hover:text-[#FF5C5C] transition-colors"
-            >
-              hello@oursori.com
-            </a>
+            <div className="flex items-center gap-6">
+              <a href="/terms" className="hover:text-[#FF5C5C] transition-colors">Terms</a>
+              <a href="/privacy" className="hover:text-[#FF5C5C] transition-colors">Privacy</a>
+              <a
+                href="mailto:hello@oursori.com"
+                className="hover:text-[#FF5C5C] transition-colors"
+              >
+                hello@oursori.com
+              </a>
+            </div>
           </div>
         </footer>
         {/* <MobileNav /> */}
