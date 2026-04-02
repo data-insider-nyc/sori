@@ -65,6 +65,21 @@ export default function LoginPage() {
               <span className="font-medium text-gray-600">{email}</span>로<br />
               로그인 링크를 보냈어요
             </p>
+
+            {process.env.NEXT_PUBLIC_APP_ENV === "development" && (
+              <p className="text-[11px] text-gray-400 mt-2">
+                로컬 개발 환경에서는{" "}
+                <a
+                  href="http://127.0.0.1:54324"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-[#FF5C5C] underline"
+                >
+                  Inbucket
+                </a>
+                에서 확인하세요
+              </p>
+            )}
             <button
               onClick={() => {
                 setEmailSent(false);
