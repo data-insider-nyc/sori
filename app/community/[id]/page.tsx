@@ -10,6 +10,7 @@ import { PostInteractions } from "./PostInteractions";
 import { CommentSection } from "./CommentSection";
 import { UserPopover } from "@/components/community/UserPopover";
 import { PostBadge } from "@/components/ui/PostBadge";
+import { PostDetailActions } from "./PostDetailActions";
 
 export async function generateMetadata({
   params,
@@ -79,6 +80,17 @@ export default async function PostDetailPage({
       <div className="bg-white border border-gray-100 rounded-2xl shadow-sm p-6 mb-6">
         <div className="flex items-center justify-between mb-3">
           <PostBadge post={post} />
+          <PostDetailActions
+            post={{
+              id: post.id,
+              title: post.title,
+              content: post.content,
+              category: post.category,
+              region_id: post.region_id,
+              authorId: author?.id ?? null,
+            }}
+            userId={user?.id ?? null}
+          />
         </div>
 
         {/* Title */}

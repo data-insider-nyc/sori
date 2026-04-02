@@ -165,36 +165,38 @@ export function ProfileActivity({
           ) : posts.length === 0 ? (
             <EmptyState text="아직 작성한 글이 없어요." />
           ) : (
-            <ul className="divide-y divide-gray-50">
-              {posts.map((post) => (
-                <li key={post.id}>
-                  <Link
-                    href={`/community/${post.id}`}
-                    className="flex items-start gap-3 px-5 py-4 hover:bg-gray-50 transition-colors"
-                  >
-                    <span className="text-base flex-shrink-0 mt-0.5">
-                      {getCategoryEmoji(post.category)}
-                    </span>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-semibold text-gray-900 line-clamp-1 mb-0.5">
-                        {post.title}
-                      </p>
-                      <div className="flex items-center gap-3 text-xs text-gray-400">
-                        <span>{getCategoryLabel(post.category)}</span>
-                        <span>{timeAgo(post.created_at)}</span>
-                        <span className="flex items-center gap-1">
-                          <Heart className="w-3 h-3" /> {post.like_count}
-                        </span>
-                        <span className="flex items-center gap-1">
-                          <MessageCircle className="w-3 h-3" />{" "}
-                          {post.comment_count}
-                        </span>
+            <div className="max-h-[420px] overflow-y-auto">
+              <ul className="divide-y divide-gray-50">
+                {posts.map((post) => (
+                  <li key={post.id}>
+                    <Link
+                      href={`/community/${post.id}`}
+                      className="flex items-start gap-3 px-5 py-4 hover:bg-gray-50 transition-colors"
+                    >
+                      <span className="text-base flex-shrink-0 mt-0.5">
+                        {getCategoryEmoji(post.category)}
+                      </span>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-semibold text-gray-900 line-clamp-1 mb-0.5">
+                          {post.title}
+                        </p>
+                        <div className="flex items-center gap-3 text-xs text-gray-400">
+                          <span>{getCategoryLabel(post.category)}</span>
+                          <span>{timeAgo(post.created_at)}</span>
+                          <span className="flex items-center gap-1">
+                            <Heart className="w-3 h-3" /> {post.like_count}
+                          </span>
+                          <span className="flex items-center gap-1">
+                            <MessageCircle className="w-3 h-3" />{" "}
+                            {post.comment_count}
+                          </span>
+                        </div>
                       </div>
-                    </div>
-                  </Link>
-                </li>
-              ))}
-            </ul>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
           )}
         </div>
       )}
@@ -207,34 +209,36 @@ export function ProfileActivity({
           ) : comments.length === 0 ? (
             <EmptyState text="아직 작성한 댓글이 없어요." />
           ) : (
-            <ul className="divide-y divide-gray-50">
-              {comments.map((comment) => (
-                <li key={comment.id}>
-                  <Link
-                    href={`/community/${comment.post_id}`}
-                    className="block px-5 py-4 hover:bg-gray-50 transition-colors"
-                  >
-                    {/* Which post */}
-                    <div className="flex items-center gap-1.5 mb-2">
-                      <CornerDownRight className="w-3 h-3 text-gray-300 flex-shrink-0" />
-                      <span className="text-xs text-gray-400 line-clamp-1">
-                        {getCategoryEmoji(comment.postCategory)}{" "}
-                        <span className="font-medium text-gray-500">
-                          {comment.postTitle}
+            <div className="max-h-[420px] overflow-y-auto">
+              <ul className="divide-y divide-gray-50">
+                {comments.map((comment) => (
+                  <li key={comment.id}>
+                    <Link
+                      href={`/community/${comment.post_id}`}
+                      className="block px-5 py-4 hover:bg-gray-50 transition-colors"
+                    >
+                      {/* Which post */}
+                      <div className="flex items-center gap-1.5 mb-2">
+                        <CornerDownRight className="w-3 h-3 text-gray-300 flex-shrink-0" />
+                        <span className="text-xs text-gray-400 line-clamp-1">
+                          {getCategoryEmoji(comment.postCategory)}{" "}
+                          <span className="font-medium text-gray-500">
+                            {comment.postTitle}
+                          </span>
                         </span>
-                      </span>
-                    </div>
-                    {/* Comment content */}
-                    <p className="text-sm text-gray-700 line-clamp-2 mb-1">
-                      {comment.content}
-                    </p>
-                    <p className="text-xs text-gray-400">
-                      {timeAgo(comment.created_at)}
-                    </p>
-                  </Link>
-                </li>
-              ))}
-            </ul>
+                      </div>
+                      {/* Comment content */}
+                      <p className="text-sm text-gray-700 line-clamp-2 mb-1">
+                        {comment.content}
+                      </p>
+                      <p className="text-xs text-gray-400">
+                        {timeAgo(comment.created_at)}
+                      </p>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
           )}
         </div>
       )}
