@@ -186,13 +186,9 @@ export default function LoginPage() {
 
         <p className="mt-6 text-xs text-gray-400 leading-relaxed">
           로그인 시 소리의{" "}
-          <span className="text-gray-600 underline cursor-pointer">
-            이용약관
-          </span>
+          <a href="/terms" className="text-gray-600 underline">이용약관</a>
           과{" "}
-          <span className="text-gray-600 underline cursor-pointer">
-            개인정보처리방침
-          </span>
+          <a href="/privacy" className="text-gray-600 underline">개인정보처리방침</a>
           에 동의하게 됩니다.
         </p>
       </div>
