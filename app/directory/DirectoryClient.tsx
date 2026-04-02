@@ -5,6 +5,7 @@ import { BusinessSearch } from "@/components/directory/BusinessSearch";
 import { BusinessList } from "@/components/directory/BusinessList";
 import { CategoryFilterBar } from "@/components/directory/CategoryFilterBar";
 import { TARGET_CITIES } from "@/lib/constants";
+import { TAGLINE } from "@/lib/copy";
 
 export function DirectoryClient() {
   const searchParams = useSearchParams();
@@ -29,7 +30,7 @@ export function DirectoryClient() {
           비즈니스 찾기
         </h1>
         <p className="text-gray-400 mt-1 text-sm font-medium">
-          뉴욕 · 뉴저지 한인 비즈니스 디렉토리
+          {TAGLINE.directory}
         </p>
       </div>
 

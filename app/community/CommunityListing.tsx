@@ -248,7 +248,7 @@ export function CommunityListing() {
               : "bg-white text-gray-500 border-gray-200 hover:border-[#FF5C5C] hover:text-[#FF5C5C]",
           )}
         >
-          🌐 전체
+          전체 지역
         </button>
         {regions.map((r) => (
           <button
@@ -277,7 +277,7 @@ export function CommunityListing() {
               : "bg-white text-gray-500 border-gray-200 hover:border-gray-400",
           )}
         >
-          전체
+          전체 토픽
         </button>
         {categories.map((cat) => (
           <button

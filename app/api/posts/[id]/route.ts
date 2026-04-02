@@ -1,14 +1,12 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase-server";
 
-export async function PATCH(req: Request, { params }: { params: { id: string } }) {
-  const id = params.id;
+export async function PATCH(req: Request, { params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
   const json = await req.json();
   const supabase = await createClient();
 
-  // Only allow updating title/content/images
   const { title, content, images } = json;
-
   const updates: any = {};
   if (typeof title !== "undefined") updates.title = title;
   if (typeof content !== "undefined") updates.content = content;
@@ -21,16 +19,21 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
     .select()
     .maybeSingle();
 
-  if (error) return NextResponse.json({ error: error.message }, { status });
+  if (error) {
+    console.error("[PATCH /api/posts]", error);
+    return NextResponse.json({ error: error.message }, { status });
+  }
+  if (!data) return NextResponse.json({ error: "Not found or not authorized" }, { status: 403 });
   return NextResponse.json(data);
 }
 
-export async function DELETE(req: Request, { params }: { params: { id: string } }) {
-  const id = params.id;
+export async function DELETE(req: Request, { params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
   const supabase = await createClient();
 
-  // Soft-delete post (only succeeds if auth.uid() === user_id due to RLS)
   const nowIso = new Date().toISOString();
+
+  // Try soft-delete first; falls back to hard-delete if deleted_at column doesn't exist
   const { data: postData, error: postError } = await supabase
     .from("posts")
     .update({ deleted_at: nowIso })
@@ -39,33 +42,36 @@ export async function DELETE(req: Request, { params }: { params: { id: string } 
     .maybeSingle();
 
   if (postError) {
+    console.error("[DELETE /api/posts] soft-delete error:", postError.message, postError.code);
+
+    // Column doesn't exist yet → fall back to hard delete
+    if (postError.code === "42703") {
+      const { error: hardErr } = await supabase.from("posts").delete().eq("id", id);
+      if (hardErr) {
+        console.error("[DELETE /api/posts] hard-delete fallback error:", hardErr.message);
+        return NextResponse.json({ error: hardErr.message }, { status: 500 });
+      }
+      return NextResponse.json({ ok: true, mode: "hard" });
+    }
+
     return NextResponse.json({ error: postError.message }, { status: 500 });
   }
 
   if (!postData) {
-    // No rows updated — either not found or not permitted by RLS
     return NextResponse.json({ error: "Not found or not authorized" }, { status: 403 });
   }
 
-  // Soft-delete comments linked to this post
+  // Soft-delete associated comments (ignore error if column missing — non-fatal)
   const { error: commentsError } = await supabase
     .from("comments")
     .update({ deleted_at: nowIso })
     .eq("post_id", id);
 
-  if (commentsError) {
-    return NextResponse.json({ error: commentsError.message }, { status: 500 });
+  if (commentsError && commentsError.code !== "42703") {
+    console.error("[DELETE /api/posts] comments soft-delete error:", commentsError.message);
   }
 
-  // Set post's comment_count to 0 to reflect deletions
-  const { error: updateCountError } = await supabase
-    .from("posts")
-    .update({ comment_count: 0 })
-    .eq("id", id);
+  await supabase.from("posts").update({ comment_count: 0 }).eq("id", id);
 
-  if (updateCountError) {
-    return NextResponse.json({ error: updateCountError.message }, { status: 500 });
-  }
-
-  return NextResponse.json({ ok: true });
+  return NextResponse.json({ ok: true, mode: "soft" });
 }

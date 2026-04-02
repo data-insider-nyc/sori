@@ -5,17 +5,17 @@ import { CategoryGrid }       from "@/components/home/CategoryGrid";
 import { FeaturedBusinesses } from "@/components/home/FeaturedBusinesses";
 import { CommunityFeed }      from "@/components/home/CommunityFeed";
 import { JobsBanner }         from "@/components/home/JobsBanner";
+import { PAGE_META, JSON_LD as LD } from "@/lib/copy";
 
 export const revalidate = 30;
 
 export const metadata: Metadata = {
-  title: "소리 — 뉴욕·뉴저지 한인 커뮤니티 & 비즈니스 디렉토리",
-  description:
-    "포트리·팰팍·플러싱·맨해튼 한인들의 커뮤니티. 한인 병원·변호사·회계사·식당·부동산·학원 찾기, 이민 생활 정보 공유.",
+  title: PAGE_META.home.title,
+  description: PAGE_META.home.description,
   openGraph: {
     url: "/",
-    title: "소리 — 뉴욕·뉴저지 한인 커뮤니티 & 비즈니스",
-    description: "포트리·팰팍·플러싱 한인들의 커뮤니티 & 비즈니스 디렉토리",
+    title: PAGE_META.home.ogTitle,
+    description: PAGE_META.home.ogDescription,
   },
 };
 
@@ -26,8 +26,8 @@ const jsonLd = {
       "@type": "WebSite",
       "@id": "https://oursori.com/#website",
       url: "https://oursori.com",
-      name: "소리 Sori",
-      description: "뉴욕·뉴저지 한인 커뮤니티 & 비즈니스 디렉토리",
+      name: LD.websiteName,
+      description: LD.websiteDescription,
       inLanguage: "ko",
       potentialAction: {
         "@type": "SearchAction",
@@ -38,10 +38,10 @@ const jsonLd = {
     {
       "@type": "Organization",
       "@id": "https://oursori.com/#organization",
-      name: "소리 Sori",
+      name: LD.orgName,
       url: "https://oursori.com",
-      description: "뉴욕·뉴저지 한인 커뮤니티 & 비즈니스 플랫폼",
-      areaServed: ["Fort Lee, NJ", "Palisades Park, NJ", "Flushing, NY", "Manhattan, NY"],
+      description: LD.orgDescription,
+      areaServed: LD.areaServed,
     },
   ],
 };

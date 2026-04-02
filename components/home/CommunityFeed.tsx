@@ -8,6 +8,7 @@ import type { Post } from "@/types";
 export function CommunityFeed() {
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
+  const [userId, setUserId] = useState<string | null>(null);
 
   useEffect(() => {
     async function load() {
@@ -57,6 +58,14 @@ export function CommunityFeed() {
     load();
   }, []);
 
+  // Resolve auth (non-blocking) so PostCard can show edit/delete menu when appropriate
+  useEffect(() => {
+    createClient()
+      .auth.getUser()
+      .then(({ data: { user } }) => setUserId(user?.id ?? null))
+      .catch(() => setUserId(null));
+  }, []);
+
   if (loading)
     return (
       <div className="space-y-4">
@@ -77,7 +86,7 @@ export function CommunityFeed() {
   return (
     <div className="space-y-4">
       {posts.map((post) => (
-        <PostCard key={post.id} post={post} />
+        <PostCard key={post.id} post={post} userId={userId} />
       ))}
     </div>
   );
