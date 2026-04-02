@@ -103,7 +103,10 @@ export function PostCard({ post, userId = null }: Props) {
   }
 
   async function handleEditSave(values: PostFormValues) {
-    if (!userId) { window.location.href = "/auth/login"; return; }
+    if (!userId) {
+      window.location.href = "/auth/login";
+      return;
+    }
     const supabase = createClient();
     const { error } = await supabase
       .from("posts")
@@ -161,64 +164,64 @@ export function PostCard({ post, userId = null }: Props) {
     <>
       <div className="bg-white border border-gray-100 rounded-2xl p-5 shadow-sm hover:border-[#FF5C5C]/30 transition-colors">
         {/* Author row */}
-        <UserPopover userId={post.author.id} nickname={post.author.nickname}>
-          <div className="flex items-center justify-between mb-3">
+        <div className="flex items-center justify-between mb-3">
+          <UserPopover userId={post.author.id} nickname={post.author.nickname}>
             <ProfileCard
               nickname={post.author.nickname}
               handle={post.author.handle}
               size="sm"
             />
-            <div className="flex items-center gap-2">
-              <PostBadge post={post} />
-              {isAuthor && (
-                <div className="relative" ref={menuRef}>
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setMenuOpen((v) => !v);
-                    }}
-                    className={cn(
-                      "p-1.5 rounded-lg transition-colors",
-                      menuOpen
-                        ? "bg-gray-100 text-gray-700"
-                        : "text-gray-400 hover:bg-gray-100 hover:text-gray-700",
-                    )}
-                    aria-label="게시글 메뉴"
-                  >
-                    <MoreHorizontal className="w-4 h-4" />
-                  </button>
-
-                  {menuOpen && (
-                    <div className="absolute right-0 top-full mt-1.5 w-36 bg-white border border-gray-100 rounded-xl shadow-lg z-50 overflow-hidden py-1">
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          openEdit(e);
-                        }}
-                        className="flex items-center gap-2.5 w-full px-3.5 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
-                      >
-                        <Edit2 className="w-3.5 h-3.5 text-gray-400" />
-                        수정하기
-                      </button>
-                      <div className="h-px bg-gray-50 mx-2" />
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setMenuOpen(false);
-                          setShowDeleteConfirm(true);
-                        }}
-                        className="flex items-center gap-2.5 w-full px-3.5 py-2.5 text-sm text-red-500 hover:bg-red-50 transition-colors"
-                      >
-                        <Trash2 className="w-3.5 h-3.5" />
-                        삭제하기
-                      </button>
-                    </div>
+          </UserPopover>
+          <div className="flex items-center gap-2">
+            <PostBadge post={post} />
+            {isAuthor && (
+              <div className="relative" ref={menuRef}>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setMenuOpen((v) => !v);
+                  }}
+                  className={cn(
+                    "p-1.5 rounded-lg transition-colors",
+                    menuOpen
+                      ? "bg-gray-100 text-gray-700"
+                      : "text-gray-400 hover:bg-gray-100 hover:text-gray-700",
                   )}
-                </div>
-              )}
-            </div>
+                  aria-label="게시글 메뉴"
+                >
+                  <MoreHorizontal className="w-4 h-4" />
+                </button>
+
+                {menuOpen && (
+                  <div className="absolute right-0 top-full mt-1.5 w-36 bg-white border border-gray-100 rounded-xl shadow-lg z-50 overflow-hidden py-1">
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        openEdit(e);
+                      }}
+                      className="flex items-center gap-2.5 w-full px-3.5 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                    >
+                      <Edit2 className="w-3.5 h-3.5 text-gray-400" />
+                      수정하기
+                    </button>
+                    <div className="h-px bg-gray-50 mx-2" />
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setMenuOpen(false);
+                        setShowDeleteConfirm(true);
+                      }}
+                      className="flex items-center gap-2.5 w-full px-3.5 py-2.5 text-sm text-red-500 hover:bg-red-50 transition-colors"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                      삭제하기
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
-        </UserPopover>
+        </div>
 
         {/* Title + content */}
         <Link href={`/community/${post.id}`} className="block group">
