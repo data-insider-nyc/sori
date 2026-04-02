@@ -1,7 +1,7 @@
 {
   "name": "소리 Sori",
   "short_name": "소리",
-  "description": "뉴욕·뉴저지 한인 커뮤니티 & 비즈니스 플랫폼",
+  "description": "한인 커뮤니티 & 비즈니스 플랫폼",
   "start_url": "/",
   "display": "standalone",
   "orientation": "portrait",
