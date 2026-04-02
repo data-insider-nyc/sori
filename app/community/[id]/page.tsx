@@ -106,6 +106,7 @@ export default async function PostDetailPage({
                 nickname={author.nickname}
                 handle={(author as any).handle}
                 location={(author as any).location_id}
+                avatarUrl={(author as any).avatar_url}
                 size="md"
               />
               <p className="text-xs text-gray-400 mt-1 ml-[52px]">

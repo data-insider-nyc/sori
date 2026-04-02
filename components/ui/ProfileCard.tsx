@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useState, useEffect } from "react";
 import { cn, avatarPalette } from "@/lib/utils";
 import { getRegionEmoji, getRegionLabel } from "@/lib/regions";
@@ -8,6 +9,7 @@ interface Props {
   nickname: string;
   handle?: string | null;
   location?: string | number | null;
+  avatarUrl?: string | null;
   /** sm = 32px (comments), md = 40px (feed/popover), lg = 56px (profile page) */
   size?: "sm" | "md" | "lg";
   className?: string;
@@ -25,6 +27,7 @@ export function ProfileCard({
   nickname,
   handle,
   location,
+  avatarUrl,
   size = "md",
   className,
   showLocation = false,
@@ -49,7 +52,7 @@ export function ProfileCard({
 
   return (
     <div className={cn("profile-card", className)}>
-      <ProfileAvatar nickname={nickname} size={size} />
+      <ProfileAvatar nickname={nickname} avatarUrl={avatarUrl} size={size} />
       <div className="profile-info">
         <div className={cn("display-name", s.text)}>
           <span className="truncate">{nickname}</span>
@@ -66,15 +69,33 @@ export function ProfileCard({
 /** Stand-alone avatar only — for tight spaces */
 export function ProfileAvatar({
   nickname,
+  avatarUrl,
   size = "sm",
   className,
 }: {
   nickname: string;
+  avatarUrl?: string | null;
   size?: "sm" | "md" | "lg";
   className?: string;
 }) {
   const s = SIZE[size];
   const palette = avatarPalette(nickname);
+
+  if (avatarUrl) {
+    return (
+      <div className={cn("rounded-full flex-shrink-0 overflow-hidden", s.avatar, className)}>
+        <Image
+          src={avatarUrl}
+          alt={nickname}
+          width={56}
+          height={56}
+          className="w-full h-full object-cover"
+          unoptimized
+        />
+      </div>
+    );
+  }
+
   return (
     <div
       className={cn(

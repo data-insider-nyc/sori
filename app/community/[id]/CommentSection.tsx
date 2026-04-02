@@ -52,7 +52,7 @@ export function CommentSection({ postId, userId }: Props) {
       // Single query: comments + author via FK join (no separate profiles round-trip)
       const { data: raw } = await supabase
         .from("comments")
-        .select("*, author:profiles!user_id(id, nickname, handle)")
+        .select("*, author:profiles!user_id(id, nickname, handle, avatar_url)")
         .eq("post_id", postId)
         .order("created_at", { ascending: true });
 
@@ -318,6 +318,7 @@ function CommentItem({
       >
         <ProfileAvatar
           nickname={comment.author.nickname}
+          avatarUrl={comment.author.avatar_url}
           size="sm"
           className="w-7 h-7 text-xs"
         />

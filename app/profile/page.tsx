@@ -7,6 +7,7 @@ import { DeleteAccountButton } from "./DeleteAccountButton";
 import { ProfileActivity } from "./ProfileActivity";
 import { BioEditor } from "./BioEditor";
 import { LocationEditor } from "./LocationEditor";
+import { AvatarEditor } from "./AvatarEditor";
 
 export const metadata: Metadata = { title: "내 프로필" };
 
@@ -37,7 +38,7 @@ export default async function ProfilePage() {
   const { data: profile } = await supabase
     .from("profiles")
     .select(
-      "nickname, display_name, handle, bio, location_id, joined_at, nickname_changed_at, handle_changed_at",
+      "nickname, display_name, handle, bio, location_id, joined_at, nickname_changed_at, handle_changed_at, avatar_url",
     )
     .eq("id", user.id)
     .single();
@@ -78,6 +79,7 @@ export default async function ProfilePage() {
             <ProfileCard
               nickname={profile.nickname}
               handle={profile.handle}
+              avatarUrl={profile.avatar_url}
               size="lg"
               showLocation={true}
             />
@@ -95,6 +97,15 @@ export default async function ProfilePage() {
         </div>
 
         <div className="space-y-4 lg:sticky lg:top-24">
+          {/* ── Avatar card ───────────────────────────────────────────── */}
+          <div className="bg-white border border-gray-100 rounded-2xl shadow-sm p-6">
+            <AvatarEditor
+              userId={user.id}
+              nickname={profile.nickname}
+              currentAvatarUrl={profile.avatar_url ?? null}
+            />
+          </div>
+
           {/* ── Bio card ──────────────────────────────────────────────── */}
           <div className="bg-white border border-gray-100 rounded-2xl shadow-sm p-6">
             <BioEditor userId={user.id} currentBio={profile.bio} />

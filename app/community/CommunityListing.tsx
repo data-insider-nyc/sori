@@ -134,7 +134,7 @@ export function CommunityListing() {
     // Single query: posts + author profile via FK join (no separate profiles round-trip)
     let query = supabase
       .from("posts")
-      .select("*, author:profiles!user_id(id, nickname, handle, location_id)")
+      .select("*, author:profiles!user_id(id, nickname, handle, location_id, avatar_url)")
       .order("created_at", { ascending: false })
       .limit(PAGE_SIZE);
 

@@ -173,6 +173,7 @@ export function PostCard({ post, userId = null }: Props) {
             <ProfileCard
               nickname={post.author.nickname}
               handle={post.author.handle}
+              avatarUrl={post.author.avatar_url}
               size="sm"
             />
           </UserPopover>

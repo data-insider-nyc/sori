@@ -36,7 +36,7 @@ export const getCachedPost = unstable_cache(
   async (id: string) => {
     const { data: post } = await supabase
       .from("posts")
-      .select("*, author:profiles!user_id(id, nickname, handle, location_id)")
+      .select("*, author:profiles!user_id(id, nickname, handle, location_id, avatar_url)")
       .eq("id", id)
       .single();
     return post as (typeof post & { author: { id: string; nickname: string; handle: string | null; location_id: number | null } | null }) | null;

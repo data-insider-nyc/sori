@@ -9,9 +9,10 @@ import { ProfileAvatar } from "@/components/ui/ProfileCard";
 
 interface Props {
   nickname: string;
+  avatarUrl?: string | null;
 }
 
-export function UserMenu({ nickname }: Props) {
+export function UserMenu({ nickname, avatarUrl }: Props) {
   const [open, setOpen] = useState(false);
   const router = useRouter();
   const supabase = createClient();
@@ -29,7 +30,7 @@ export function UserMenu({ nickname }: Props) {
         className="flex items-center gap-2 text-sm font-medium text-gray-700
                    hover:text-[#FF5C5C] transition-colors"
       >
-        <ProfileAvatar nickname={nickname} size="sm" className="w-7 h-7 text-xs" />
+        <ProfileAvatar nickname={nickname} avatarUrl={avatarUrl} size="sm" className="w-7 h-7 text-xs" />
         <span className="font-semibold text-gray-900">{nickname}</span>
         <ChevronDown className={`w-3.5 h-3.5 text-gray-400 transition-transform ${open ? "rotate-180" : ""}`} />
       </button>
