@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { revalidateTag } from "next/cache";
 import { createClient } from "@/lib/supabase-server";
 import { createAdminClient } from "@/lib/supabase-admin";
 
@@ -23,6 +24,12 @@ export async function DELETE(req: Request, { params }: { params: Promise<{ id: s
   if (error) {
     console.error("[DELETE /api/comments] error:", error.message);
     return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+
+  try {
+    revalidateTag("posts");
+  } catch (e) {
+    console.warn("[DELETE /api/comments] revalidateTag failed", e);
   }
 
   return NextResponse.json({ ok: true });

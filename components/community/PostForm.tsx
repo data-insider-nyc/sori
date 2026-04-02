@@ -125,7 +125,12 @@ export function PostForm({
       <div>
         <div className="flex items-center justify-between mb-1.5">
           <label className="text-sm font-semibold text-gray-700">제목</label>
-          <span className={cn("text-xs", titleLeft < 10 ? "text-red-400" : "text-gray-400")}>
+          <span
+            className={cn(
+              "text-xs",
+              titleLeft < 10 ? "text-red-400" : "text-gray-400",
+            )}
+          >
             {titleLeft}자 남음
           </span>
         </div>
@@ -142,7 +147,12 @@ export function PostForm({
       <div>
         <div className="flex items-center justify-between mb-1.5">
           <label className="text-sm font-semibold text-gray-700">내용</label>
-          <span className={cn("text-xs", contentLeft < 100 ? "text-red-400" : "text-gray-400")}>
+          <span
+            className={cn(
+              "text-xs",
+              contentLeft < 100 ? "text-red-400" : "text-gray-400",
+            )}
+          >
             {contentLeft}자 남음
           </span>
         </div>
@@ -150,7 +160,7 @@ export function PostForm({
           value={content}
           onChange={(e) => setContent(e.target.value.slice(0, CONTENT_MAX))}
           placeholder="내용을 입력해주세요"
-          rows={compact ? 6 : 8}
+          rows={compact ? 8 : 12}
           className="input-field resize-none"
           required
         />
@@ -160,7 +170,11 @@ export function PostForm({
 
       <div className={cn("flex gap-2", onCancel ? "justify-end" : "")}>
         {onCancel && (
-          <button type="button" onClick={onCancel} className="btn-outline text-sm">
+          <button
+            type="button"
+            onClick={onCancel}
+            className="btn-outline text-sm"
+          >
             취소
           </button>
         )}

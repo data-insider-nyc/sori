@@ -109,19 +109,28 @@ export function PostCard({ post, userId = null }: Props) {
       window.location.href = "/auth/login";
       return;
     }
-    const supabase = createClient();
-    const { error } = await supabase
-      .from("posts")
-      .update({
-        title: values.title || null,
-        content: values.content,
-        category: values.category,
-        region_id: values.region_id,
-      })
-      .eq("id", post.id);
-    if (error) throw new Error(error.message);
-    setShowEdit(false);
-    window.location.reload();
+    try {
+      const res = await fetch(`/api/posts/${post.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({
+          title: values.title || null,
+          content: values.content,
+          category: values.category,
+          region_id: values.region_id,
+        }),
+      });
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        throw new Error(body.error || "수정에 실패했습니다.");
+      }
+      setShowEdit(false);
+      window.location.reload();
+    } catch (err: any) {
+      console.error("[PostCard] edit failed", err);
+      throw err;
+    }
   }
 
   const [deleteError, setDeleteError] = useState("");

@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { revalidateTag } from "next/cache";
 import { createClient } from "@/lib/supabase-server";
 import { createAdminClient } from "@/lib/supabase-admin";
 
@@ -25,6 +26,14 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
     return NextResponse.json({ error: error.message }, { status });
   }
   if (!data) return NextResponse.json({ error: "Not found or not authorized" }, { status: 403 });
+
+  // Invalidate cached posts so the post detail page reflects the change immediately
+  try {
+    revalidateTag("posts");
+  } catch (e) {
+    console.warn("[PATCH /api/posts] revalidateTag failed", e);
+  }
+
   return NextResponse.json(data);
 }
 
@@ -53,6 +62,12 @@ export async function DELETE(req: Request, { params }: { params: Promise<{ id: s
   if (error) {
     console.error("[DELETE /api/posts] error:", error.message);
     return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+
+  try {
+    revalidateTag("posts");
+  } catch (e) {
+    console.warn("[DELETE /api/posts] revalidateTag failed", e);
   }
 
   return NextResponse.json({ ok: true });
