@@ -146,7 +146,7 @@ export default function NicknamePage() {
             type="text"
             value={displayName}
             onChange={(e) => setDisplayName(e.target.value)}
-            placeholder="예: 포트리 칼, 플러싱 언니"
+            placeholder="예: 뉴욕 멋쟁이 슈퍼맨, 달라스 귀여운 언니"
             maxLength={20}
             className="input-field"
             disabled={loading}

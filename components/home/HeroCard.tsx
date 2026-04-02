@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { PenLine, Search } from "lucide-react";
+import { HERO_COPY, TAGLINE } from "@/lib/copy";
 
 export function HeroCard() {
   return (
@@ -20,15 +21,15 @@ export function HeroCard() {
                           text-xs font-semibold px-3 py-1.5 rounded-full mb-4"
           >
             <span className="w-1.5 h-1.5 rounded-full bg-[#FF5C5C] animate-pulse" />
-            뉴욕 · 뉴저지 한인 커뮤니티
+            {HERO_COPY.badge}
           </div>
           <h1 className="text-2xl lg:text-3xl font-bold text-gray-900 leading-tight tracking-tight">
-            우리의 이야기,
+            {HERO_COPY.headline[0]}
             <br />
-            우리의 <span className="text-[#FF5C5C]">소리</span>
+            {HERO_COPY.headline[1]} <span className="text-[#FF5C5C]">{HERO_COPY.headlineBrand}</span>
           </h1>
           <p className="text-gray-500 text-sm mt-2.5 leading-relaxed">
-            미국 한인들이 만들어가는 커뮤니티 — 어디서든, 누구든
+            {HERO_COPY.sub}
           </p>
           <div className="flex flex-wrap gap-2.5 mt-5">
             <Link

@@ -5,6 +5,7 @@ import "./globals.css";
 import { Header } from "@/components/layout/Header";
 import { MobileNav } from "@/components/layout/MobileNav";
 import { AuthRefresh } from "@/components/layout/AuthRefresh";
+import { LAYOUT_META, SITE } from "@/lib/copy";
 
 const notoSansKR = Noto_Sans_KR({
   subsets: ["latin"],
@@ -18,43 +19,23 @@ export const metadata: Metadata = {
     process.env.NEXT_PUBLIC_APP_URL ?? "https://oursori.com",
   ),
   title: {
-    default: "소리 Sori — 뉴욕·뉴저지 한인 커뮤니티 & 비즈니스",
-    template: "%s | 소리 Sori",
+    default: LAYOUT_META.defaultTitle,
+    template: LAYOUT_META.titleTemplate,
   },
-  description:
-    "뉴욕·뉴저지 한인 커뮤니티. 포트리·팰팍·플러싱 한인 병원·변호사·회계사·식당·부동산 찾기 & 생활 정보 공유.",
-  keywords: [
-    "한인 커뮤니티",
-    "뉴저지 한인",
-    "뉴욕 한인",
-    "한인 병원",
-    "한인 변호사",
-    "한인 회계사",
-    "포트리 한인",
-    "팰리세이즈파크 한인",
-    "플러싱 한인",
-    "뉴저지 한인 커뮤니티",
-    "뉴욕 한인 커뮤니티",
-    "한인 비즈니스",
-    "Korean American",
-    "Fort Lee Korean",
-    "Palisades Park Korean",
-    "Flushing Korean",
-    "Korean community New York New Jersey",
-  ],
+  description: LAYOUT_META.description,
+  keywords: [...LAYOUT_META.keywords],
   openGraph: {
     type: "website",
     locale: "ko_KR",
     alternateLocale: "en_US",
-    siteName: "소리 Sori",
-    title: "소리 Sori — 뉴욕·뉴저지 한인 커뮤니티 & 비즈니스",
-    description:
-      "포트리·팰팍·플러싱 한인들의 커뮤니티. 한인 병원·변호사·회계사·식당 찾기 & 생활 정보.",
+    siteName: SITE.name,
+    title: LAYOUT_META.ogTitle,
+    description: LAYOUT_META.ogDescription,
   },
   twitter: {
     card: "summary_large_image",
-    title: "소리 Sori — 뉴욕·뉴저지 한인 커뮤니티",
-    description: "포트리·팰팍·플러싱 한인들의 커뮤니티 & 비즈니스 디렉토리",
+    title: LAYOUT_META.twitterTitle,
+    description: LAYOUT_META.twitterDescription,
   },
   robots: {
     index: true,
@@ -68,7 +49,7 @@ export const metadata: Metadata = {
     canonical: "https://oursori.com",
   },
   manifest: "/manifest.json",
-  appleWebApp: { capable: true, statusBarStyle: "default", title: "소리 Sori" },
+  appleWebApp: { capable: true, statusBarStyle: "default", title: SITE.shortName },
 };
 
 export const viewport: Viewport = {
@@ -93,10 +74,20 @@ export default function RootLayout({
         </main>
         <footer className="hidden lg:block border-t border-gray-100 bg-white mt-12">
           <div className="max-w-7xl mx-auto px-6 py-6 flex items-center justify-between text-sm text-gray-400">
-            <span>© 2026 소리 Sori. All rights reserved.</span>
+            <span>{SITE.copyright}</span>
             <div className="flex items-center gap-6">
-              <a href="/terms" className="hover:text-[#FF5C5C] transition-colors">Terms</a>
-              <a href="/privacy" className="hover:text-[#FF5C5C] transition-colors">Privacy</a>
+              <a
+                href="/terms"
+                className="hover:text-[#FF5C5C] transition-colors"
+              >
+                Terms
+              </a>
+              <a
+                href="/privacy"
+                className="hover:text-[#FF5C5C] transition-colors"
+              >
+                Privacy
+              </a>
               <a
                 href="mailto:hello@oursori.com"
                 className="hover:text-[#FF5C5C] transition-colors"
