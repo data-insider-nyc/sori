@@ -5,10 +5,10 @@ import { DirectoryClient } from "./DirectoryClient";
 export const metadata: Metadata = {
   title: "한인 비즈니스 디렉토리",
   description:
-    "뉴욕·뉴저지 한인 병원·치과·변호사·회계사·식당·뷰티·부동산·학원 찾기. 포트리·팰팍·플러싱·맨해튼 지역 한인 비즈니스 디렉토리.",
+    "미국 한인 병원·치과·변호사·회계사·식당·뷰티·부동산·학원 찾기. 포트리·팰팍·플러싱·맨해튼 지역 한인 비즈니스 디렉토리.",
   openGraph: {
     url: "/directory",
-    title: "소리 — 뉴욕·뉴저지 한인 비즈니스 디렉토리",
+    title: "소리 — 미국 한인 비즈니스 디렉토리",
     description: "포트리·팰팍·플러싱 한인 비즈니스 검색 & 리뷰",
   },
 };
