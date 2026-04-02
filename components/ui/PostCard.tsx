@@ -18,6 +18,7 @@ import { ProfileCard } from "@/components/ui/ProfileCard";
 import type { Post } from "@/types";
 import { PostBadge } from "./PostBadge";
 import { PostForm } from "@/components/community/PostForm";
+import { useIsAdmin } from "@/hooks/useIsAdmin";
 import type { PostFormValues } from "@/components/community/PostForm";
 
 interface Props {
@@ -26,6 +27,7 @@ interface Props {
 }
 
 export function PostCard({ post, userId = null }: Props) {
+  const { isAdmin } = useIsAdmin();
   const [liked, setLiked] = useState(post.is_liked ?? false);
   const [count, setCount] = useState(post.like_count);
   const [regionValue, setRegionValue] = useState("");
@@ -132,18 +134,11 @@ export function PostCard({ post, userId = null }: Props) {
     setDeleting(true);
     setDeleteError("");
     try {
-      const supabase = createClient();
-
-      // Hard delete — RLS own_post (FOR ALL) permits this for the post owner
-      const { error } = await supabase
-        .from("posts")
-        .delete()
-        .eq("id", post.id)
-        .eq("user_id", userId); // belt-and-suspenders: double-check ownership client-side
-
-      console.log("[delete] error:", error);
-
-      if (error) throw new Error(error.message);
+      const res = await fetch(`/api/posts/${post.id}`, { method: "DELETE" });
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        throw new Error(body.error || "삭제에 실패했습니다.");
+      }
 
       setShowDeleteConfirm(false);
       if (window.location.pathname.startsWith(`/community/${post.id}`)) {
@@ -174,7 +169,7 @@ export function PostCard({ post, userId = null }: Props) {
           </UserPopover>
           <div className="flex items-center gap-2">
             <PostBadge post={post} />
-            {isAuthor && (
+            {(isAuthor || isAdmin) && (
               <div className="relative" ref={menuRef}>
                 <button
                   onClick={(e) => {
@@ -194,17 +189,21 @@ export function PostCard({ post, userId = null }: Props) {
 
                 {menuOpen && (
                   <div className="absolute right-0 top-full mt-1.5 w-36 bg-white border border-gray-100 rounded-xl shadow-lg z-50 overflow-hidden py-1">
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        openEdit(e);
-                      }}
-                      className="flex items-center gap-2.5 w-full px-3.5 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
-                    >
-                      <Edit2 className="w-3.5 h-3.5 text-gray-400" />
-                      수정하기
-                    </button>
-                    <div className="h-px bg-gray-50 mx-2" />
+                    {isAuthor && (
+                      <>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            openEdit(e);
+                          }}
+                          className="flex items-center gap-2.5 w-full px-3.5 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                        >
+                          <Edit2 className="w-3.5 h-3.5 text-gray-400" />
+                          수정하기
+                        </button>
+                        <div className="h-px bg-gray-50 mx-2" />
+                      </>
+                    )}
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
