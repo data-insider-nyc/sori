@@ -324,6 +324,11 @@ secret = "env(SUPABASE_AUTH_EXTERNAL_GOOGLE_SECRET)"
 # Required for local dev — Google's nonce check doesn't work with Supabase local
 skip_nonce_check = true
 
+[auth.external.kakao]
+enabled = true
+client_id = "env(SUPABASE_AUTH_EXTERNAL_KAKAO_CLIENT_ID)"
+secret = "env(SUPABASE_AUTH_EXTERNAL_KAKAO_SECRET)"
+
 # Allow Solana wallet holders to sign in to your project via the Sign in with Solana (SIWS, EIP-4361) standard.
 # You can configure "web3" rate limit in the [auth.rate_limit] section and set up [auth.captcha] if self-hosting.
 [auth.web3.solana]
