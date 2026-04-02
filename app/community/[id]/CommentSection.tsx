@@ -6,6 +6,7 @@ import { cn, timeAgo } from "@/lib/utils";
 import { createClient } from "@/lib/supabase-browser";
 import { UserPopover } from "@/components/community/UserPopover";
 import { ProfileAvatar } from "@/components/ui/ProfileCard";
+import { useIsAdmin } from "@/hooks/useIsAdmin";
 import type { Comment } from "@/types";
 
 interface Props {
@@ -22,6 +23,7 @@ type CommentCacheEntry = { comments: Comment[]; ts: number };
 const commentCache = new Map<string, CommentCacheEntry>();
 
 export function CommentSection({ postId, userId }: Props) {
+  const { isAdmin } = useIsAdmin();
   const cached = commentCache.get(postId);
   const fresh  = cached && Date.now() - cached.ts < CACHE_TTL;
 
@@ -122,7 +124,11 @@ export function CommentSection({ postId, userId }: Props) {
   }
 
   async function deleteComment(commentId: string) {
-    await supabase.from("comments").delete().eq("id", commentId);
+    if (isAdmin) {
+      await fetch(`/api/comments/${commentId}`, { method: "DELETE" });
+    } else {
+      await supabase.from("comments").delete().eq("id", commentId);
+    }
     await fetchComments({ bust: true });
   }
 
@@ -173,6 +179,7 @@ export function CommentSection({ postId, userId }: Props) {
               <CommentItem
                 comment={comment}
                 userId={userId}
+                isAdmin={isAdmin}
                 onDelete={deleteComment}
                 onReply={() => setReplyingTo(replyingTo === comment.id ? null : comment.id)}
               />
@@ -185,6 +192,7 @@ export function CommentSection({ postId, userId }: Props) {
                       key={reply.id}
                       comment={reply}
                       userId={userId}
+                      isAdmin={isAdmin}
                       onDelete={deleteComment}
                       isReply
                     />
@@ -236,12 +244,14 @@ export function CommentSection({ postId, userId }: Props) {
 function CommentItem({
   comment,
   userId,
+  isAdmin = false,
   onDelete,
   onReply,
   isReply = false,
 }: {
   comment:  Comment;
   userId:   string | null;
+  isAdmin?: boolean;
   onDelete: (id: string) => void;
   onReply?: () => void;
   isReply?: boolean;
@@ -274,7 +284,7 @@ function CommentItem({
               답글
             </button>
           )}
-          {userId === comment.author.id && (
+          {(userId === comment.author.id || isAdmin) && (
             <button
               onClick={() => onDelete(comment.id)}
               className="text-[11px] text-gray-300 hover:text-red-400 transition-colors flex items-center gap-0.5"
