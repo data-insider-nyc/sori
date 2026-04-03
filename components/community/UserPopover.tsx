@@ -13,6 +13,7 @@ interface PopoverProfile {
   bio: string | null;
   joined_at: string;
   post_count: number;
+  avatar_url: string | null;
 }
 
 interface PopoverState extends PopoverProfile {
@@ -75,7 +76,7 @@ export function UserPopover({ userId, nickname, children }: Props) {
     const [{ data: prof }, { count }] = await Promise.all([
       supabase
         .from("profiles")
-        .select("nickname, handle, location_id, bio, joined_at")
+        .select("nickname, handle, location_id, bio, joined_at, avatar_url")
         .eq("id", userId)
         .single(),
       supabase
@@ -178,6 +179,7 @@ export function UserPopover({ userId, nickname, children }: Props) {
                 nickname={profile.nickname}
                 handle={profile.handle}
                 location={profile.location_id}
+                avatarUrl={profile.avatar_url}
                 size="md"
                 className="mb-3"
               />

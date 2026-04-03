@@ -3,7 +3,6 @@
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import {
-  Heart,
   MessageCircle,
   MoreHorizontal,
   Trash2,
@@ -12,7 +11,6 @@ import {
 import { cn, timeAgo } from "@/lib/utils";
 import { getRegions } from "@/lib/regions";
 import { getPostCategories } from "@/lib/post-categories";
-import { createClient } from "@/lib/supabase-browser";
 import { UserPopover } from "../community/UserPopover";
 import { ProfileCard } from "@/components/ui/ProfileCard";
 import type { Post } from "@/types";
@@ -20,6 +18,7 @@ import { PostBadge } from "./PostBadge";
 import { PostForm } from "@/components/community/PostForm";
 import { useIsAdmin } from "@/hooks/useIsAdmin";
 import type { PostFormValues } from "@/components/community/PostForm";
+import { LikeButton } from "@/components/ui/LikeButton";
 
 interface Props {
   post: Post;
@@ -28,8 +27,6 @@ interface Props {
 
 export function PostCard({ post, userId = null }: Props) {
   const { isAdmin } = useIsAdmin();
-  const [liked, setLiked] = useState(post.is_liked ?? false);
-  const [count, setCount] = useState(post.like_count);
   const [regionValue, setRegionValue] = useState("");
   const [regionLabel, setRegionLabel] = useState("");
   const [regionEmoji, setRegionEmoji] = useState("");
@@ -65,6 +62,7 @@ export function PostCard({ post, userId = null }: Props) {
     })();
   }, [post.region_id, post.category]);
 
+
   // Close menu when clicking outside
   useEffect(() => {
     if (!menuOpen) return;
@@ -77,27 +75,6 @@ export function PostCard({ post, userId = null }: Props) {
     return () => document.removeEventListener("mousedown", onClickOutside);
   }, [menuOpen]);
 
-  async function handleLike() {
-    if (!userId) {
-      window.location.href = "/auth/login";
-      return;
-    }
-    const supabase = createClient();
-    const prev = liked;
-    setLiked(!prev);
-    setCount((c) => (prev ? c - 1 : c + 1));
-    if (prev) {
-      await supabase
-        .from("post_likes")
-        .delete()
-        .match({ post_id: post.id, user_id: userId });
-    } else {
-      await supabase
-        .from("post_likes")
-        .insert({ post_id: post.id, user_id: userId });
-    }
-  }
-
   function openEdit(e?: React.MouseEvent) {
     e?.stopPropagation();
     setMenuOpen(false);
@@ -109,19 +86,28 @@ export function PostCard({ post, userId = null }: Props) {
       window.location.href = "/auth/login";
       return;
     }
-    const supabase = createClient();
-    const { error } = await supabase
-      .from("posts")
-      .update({
-        title: values.title || null,
-        content: values.content,
-        category: values.category,
-        region_id: values.region_id,
-      })
-      .eq("id", post.id);
-    if (error) throw new Error(error.message);
-    setShowEdit(false);
-    window.location.reload();
+    try {
+      const res = await fetch(`/api/posts/${post.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({
+          title: values.title || null,
+          content: values.content,
+          category: values.category,
+          region_id: values.region_id,
+        }),
+      });
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        throw new Error(body.error || "수정에 실패했습니다.");
+      }
+      setShowEdit(false);
+      window.location.reload();
+    } catch (err: any) {
+      console.error("[PostCard] edit failed", err);
+      throw err;
+    }
   }
 
   const [deleteError, setDeleteError] = useState("");
@@ -164,6 +150,7 @@ export function PostCard({ post, userId = null }: Props) {
             <ProfileCard
               nickname={post.author.nickname}
               handle={post.author.handle}
+              avatarUrl={post.author.avatar_url}
               size="sm"
             />
           </UserPopover>
@@ -204,6 +191,42 @@ export function PostCard({ post, userId = null }: Props) {
                         <div className="h-px bg-gray-50 mx-2" />
                       </>
                     )}
+
+                    {/* Admin pin/unpin */}
+                    {isAdmin && (
+                      <>
+                        <button
+                          onClick={async (e) => {
+                            e.stopPropagation();
+                            setMenuOpen(false);
+                            try {
+                              const res = await fetch(`/api/posts/${post.id}`, {
+                                method: "PATCH",
+                                headers: { "Content-Type": "application/json" },
+                                body: JSON.stringify({ pinned: !post.pinned }),
+                              });
+                              if (!res.ok) {
+                                const body = await res.json().catch(() => ({}));
+                                throw new Error(body.error || "핀 변경에 실패했습니다.");
+                              }
+                              // refresh to reflect pinned state in sidebar
+                              window.location.reload();
+                            } catch (err) {
+                              console.error("Pin toggle failed", err);
+                              alert("핀 변경에 실패했습니다.");
+                            }
+                          }}
+                          className="flex items-center gap-2.5 w-full px-3.5 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                        >
+                          <svg className="w-3.5 h-3.5 text-gray-400" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M12 2l2 6h6l-4.5 3.5L18 20l-6-3.5L6 20l1.5-8.5L3 8h6l2-6z" stroke="currentColor" strokeWidth="0" fill="currentColor" />
+                          </svg>
+                          {post.pinned ? "추천 해제" : "운영진 추천"}
+                        </button>
+                        <div className="h-px bg-gray-50 mx-2" />
+                      </>
+                    )}
+
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
@@ -236,18 +259,12 @@ export function PostCard({ post, userId = null }: Props) {
 
         {/* Actions */}
         <div className="flex items-center gap-1 mt-4 pt-3 border-t border-gray-50">
-          <button
-            onClick={handleLike}
-            className={cn(
-              "flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm transition-all",
-              liked
-                ? "text-[#FF5C5C] bg-[#FFF0F0]"
-                : "text-gray-400 hover:text-[#FF5C5C] hover:bg-[#FFF0F0]",
-            )}
-          >
-            <Heart className={cn("w-4 h-4", liked && "fill-current")} />
-            <span className="font-medium">{count}</span>
-          </button>
+          <LikeButton
+            postId={post.id}
+            initialCount={post.like_count}
+            initialLiked={post.is_liked ?? false}
+            userId={userId}
+          />
           <Link
             href={`/community/${post.id}`}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm text-gray-400 hover:text-blue-500 hover:bg-blue-50 transition-all"

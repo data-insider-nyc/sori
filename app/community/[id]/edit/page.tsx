@@ -35,14 +35,26 @@ export default function EditPostPage() {
     e.preventDefault();
     setSaving(true);
     setError("");
-    const { error } = await supabase.from("posts").update({ title: title || null, content }).eq("id", id);
-    setSaving(false);
-    if (error) {
-      console.error(error);
+    try {
+      const res = await fetch(`/api/posts/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ title: title || null, content }),
+      });
+      setSaving(false);
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        console.error(body);
+        setError(body.error || "Failed to save");
+        return;
+      }
+      router.push(`/community/${id}`);
+    } catch (err) {
+      console.error(err);
+      setSaving(false);
       setError("Failed to save");
-      return;
     }
-    router.push(`/community/${id}`);
   }
 
   if (loading) return <div className="p-8">Loading…</div>;

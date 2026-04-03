@@ -52,6 +52,7 @@ export interface Post {
   like_count: number;
   comment_count: number;
   is_liked?: boolean;
+  pinned?: boolean;
   created_at: string;
 }
 
@@ -59,7 +60,7 @@ export interface Comment {
   id: string;
   post_id: string;
   parent_id: string | null;
-  author: { id: string; nickname: string; handle?: string | null; location?: string | null };
+  author: { id: string; nickname: string; handle?: string | null; location?: string | null; avatar_url?: string | null };
   content: string;
   created_at: string;
   replies?: Comment[];
