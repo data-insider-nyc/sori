@@ -9,6 +9,7 @@ import { getPostCategories } from "@/lib/post-categories";
 import { PostCard } from "@/components/ui/PostCard";
 import { cn } from "@/lib/utils";
 import type { Post } from "@/types";
+import { applyLikeOverrides } from "@/lib/post-like-store";
 
 const PAGE_SIZE = 20;
 const CACHE_TTL = 10 * 60 * 1000; // 10 minutes
@@ -47,7 +48,8 @@ export function CommunityListing() {
   const fresh = cached && Date.now() - cached.ts < CACHE_TTL;
 
   // Initialise from cache so returning users see posts immediately (no skeleton)
-  const [posts, setPosts] = useState<Post[]>(fresh ? cached.posts : []);
+  // applyLikeOverrides ensures any likes done on the detail page are reflected instantly
+  const [posts, setPosts] = useState<Post[]>(fresh ? applyLikeOverrides(cached.posts) : []);
   const [loading, setLoading] = useState(!fresh);
   const [loadingMore, setLoadingMore] = useState(false);
   const [hasMore, setHasMore] = useState(fresh ? cached.hasMore : false);
@@ -73,12 +75,56 @@ export function CommunityListing() {
       .then(({ data: { user } }) => setUserId(user?.id ?? null));
   }, []);
 
+  // Realtime: sync like_count & comment_count for all visible posts
+  useEffect(() => {
+    const supabase = createClient();
+    const channel = supabase
+      .channel("community-feed-realtime")
+      .on(
+        "postgres_changes",
+        { event: "UPDATE", schema: "public", table: "posts" },
+        (payload) => {
+          const updated = payload.new as any;
+          setPosts((prev) =>
+            prev.map((p) =>
+              p.id === updated.id
+                ? {
+                    ...p,
+                    like_count: updated.like_count ?? p.like_count,
+                    comment_count: updated.comment_count ?? p.comment_count,
+                  }
+                : p,
+            ),
+          );
+          // Keep cache in sync too
+          for (const [k, entry] of feedCache.entries()) {
+            const idx = entry.posts.findIndex((p) => p.id === updated.id);
+            if (idx !== -1) {
+              const next = [...entry.posts];
+              next[idx] = {
+                ...next[idx],
+                like_count: updated.like_count ?? next[idx].like_count,
+                comment_count: updated.comment_count ?? next[idx].comment_count,
+              };
+              feedCache.set(k, { ...entry, posts: next });
+            }
+          }
+        },
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, []);
+
   // Load when filters change — use cache if fresh, otherwise fetch
   useEffect(() => {
     const entry = feedCache.get(makeCacheKey(region, category, q));
     const isFresh = entry && Date.now() - entry.ts < CACHE_TTL;
     if (isFresh) {
-      setPosts(entry.posts);
+      // Apply any recent like toggles the user made (e.g., liked on detail page, back to list)
+      setPosts(applyLikeOverrides(entry.posts));
       setHasMore(entry.hasMore);
       setCursor(entry.cursor);
       setLoading(false);
@@ -100,23 +146,33 @@ export function CommunityListing() {
       if (entry) feedCache.set(key, { ...entry, posts: updated });
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [userId]);
+  }, [userId, posts.length]); // re-run when posts load after userId resolves
 
   useEffect(() => {
     setSearchInput(q);
   }, [q]);
 
   async function overlayLikes(list: Post[], uid: string): Promise<Post[]> {
-    const { data: likes } = await createClient()
-      .from("post_likes")
-      .select("post_id")
-      .eq("user_id", uid)
-      .in(
-        "post_id",
-        list.map((p) => p.id),
-      );
-    const liked = new Set((likes ?? []).map((l: any) => l.post_id));
-    return list.map((p) => ({ ...p, is_liked: liked.has(p.id) }));
+    try {
+      const res = await fetch("/api/posts/likes", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ post_ids: list.map((p) => p.id) }),
+      });
+      if (!res.ok) {
+        console.error("[CommunityListing] overlayLikes failed to fetch likes", res.status);
+        return applyLikeOverrides(list.map((p) => ({ ...p, is_liked: false })));
+      }
+      const body = await res.json().catch(() => ({}));
+      const likedSet = new Set<string>(body.liked ?? []);
+      const withLikes = list.map((p) => ({ ...p, is_liked: likedSet.has(p.id) }));
+      // Apply any recent like toggles the user made (survives page navigation)
+      return applyLikeOverrides(withLikes);
+    } catch (err) {
+      console.error("[CommunityListing] overlayLikes err", err);
+      return applyLikeOverrides(list.map((p) => ({ ...p, is_liked: false })));
+    }
   }
 
   async function load({

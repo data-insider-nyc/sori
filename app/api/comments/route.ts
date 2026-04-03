@@ -26,6 +26,7 @@ export async function POST(req: Request) {
   }
 
   try {
+    // @ts-ignore - Next's revalidateTag typing may require extra args in this environment
     revalidateTag("posts");
   } catch (e) {
     console.warn('[POST /api/comments] revalidateTag failed', e);

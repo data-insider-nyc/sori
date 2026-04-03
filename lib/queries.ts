@@ -59,3 +59,19 @@ export const getHotTopics = unstable_cache(
   ["hot-topics"],
   { revalidate: 120, tags: ["posts"] },
 );
+
+/** Admin pinned posts (simple, no order) — refreshed every 2 minutes. */
+export const getPinnedPosts = unstable_cache(
+  async (): Promise<{ id: string; title: string; comment_count: number }[]> => {
+    const { data } = await supabase
+      .from("posts")
+      .select("id, title, comment_count")
+      .eq("pinned", true)
+      .order("pinned_at", { ascending: false })
+      .limit(5);
+    return data ?? [];
+  },
+  ["pinned-posts"],
+  { revalidate: 120, tags: ["posts"] },
+);
+
