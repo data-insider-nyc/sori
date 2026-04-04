@@ -8,6 +8,7 @@ import { ProfileActivity } from "./ProfileActivity";
 import { BioEditor } from "./BioEditor";
 import { LocationEditor } from "./LocationEditor";
 import { AvatarEditor } from "./AvatarEditor";
+import { LogoutButton } from "./LogoutButton";
 
 export const metadata: Metadata = { title: "내 프로필" };
 
@@ -139,6 +140,13 @@ export default async function ProfilePage() {
               cooldownDays={cooldownDays}
               handleCooldown={handleCooldownDays}
             />
+          </div>
+
+          {/* ── Logout ────────────────────────────────────────────── */}
+          <div className="bg-white border border-gray-100 rounded-2xl shadow-sm p-6">
+            <p className="text-sm font-semibold text-gray-700 mb-1">로그아웃</p>
+            <p className="text-xs text-gray-400 mb-4">이 기기에서 로그아웃해요.</p>
+            <LogoutButton />
           </div>
 
           {/* ── Account deletion card (danger zone) ───────────────────── */}

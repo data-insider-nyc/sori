@@ -8,7 +8,7 @@ import { createClient } from "@/lib/supabase-browser";
 export function DeleteAccountButton() {
   const [confirm, setConfirm] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [error, setError]     = useState("");
+  const [error, setError] = useState("");
   const router = useRouter();
   const supabase = createClient();
 
@@ -16,8 +16,13 @@ export function DeleteAccountButton() {
     setLoading(true);
     setError("");
 
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) { router.replace("/auth/login"); return; }
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) {
+      router.replace("/auth/login");
+      return;
+    }
 
     // Delete profile row (RLS: own_profile FOR ALL allows this)
     const { error: deleteError } = await supabase
@@ -39,7 +44,9 @@ export function DeleteAccountButton() {
   if (confirm) {
     return (
       <div className="bg-red-50 border border-red-100 rounded-xl p-4 space-y-3">
-        <p className="text-sm font-semibold text-red-700">정말 삭제하시겠어요?</p>
+        <p className="text-sm font-semibold text-red-700">
+          정말 삭제하시겠어요?
+        </p>
         <p className="text-xs text-red-500">이 작업은 되돌릴 수 없어요.</p>
         {error && <p className="text-xs text-red-600">{error}</p>}
         <div className="flex gap-2">
@@ -70,9 +77,9 @@ export function DeleteAccountButton() {
   return (
     <button
       onClick={() => setConfirm(true)}
-      className="flex items-center gap-2 text-sm text-red-500 hover:text-red-600
-                 border border-red-200 hover:border-red-300 rounded-xl px-4 py-2.5
-                 transition-colors"
+      className="flex items-center gap-2 text-sm text-gray-400 hover:text-red-500
+                 border border-gray-200 hover:border-red-200 rounded-xl px-4 py-2.5
+                 transition-all opacity-60 hover:opacity-100"
     >
       <Trash2 className="w-4 h-4" />
       계정 삭제

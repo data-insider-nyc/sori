@@ -2,15 +2,21 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, Search, MessageSquare, Briefcase, MoreHorizontal } from "lucide-react";
+import {
+  Home,
+  Plus,
+  MessageSquare,
+  Briefcase,
+  MoreHorizontal,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const TABS = [
-  { href: "/",          icon: Home,            label: "홈" },
-  { href: "/directory", icon: Search,          label: "비즈니스" },
-  { href: "/community", icon: MessageSquare,   label: "커뮤니티" },
-  { href: "/jobs",      icon: Briefcase,       label: "채용" },
-  { href: "/more",      icon: MoreHorizontal,  label: "더보기" },
+  { href: "/", icon: Home, label: "홈" },
+  { href: "/community", icon: MessageSquare, label: "커뮤니티" },
+  { href: "/community/new", icon: Plus, label: "글쓰기" },
+  { href: "/jobs", icon: Briefcase, label: "채용" },
+  { href: "/profile", icon: MoreHorizontal, label: "프로필" },
 ];
 
 export function MobileNav() {
@@ -26,11 +32,16 @@ export function MobileNav() {
               href={href}
               className={cn(
                 "flex-1 flex flex-col items-center justify-center gap-1 py-3 transition-colors",
-                active ? "text-[#FF5C5C]" : "text-gray-400 hover:text-gray-600"
+                active ? "text-[#FF5C5C]" : "text-gray-400 hover:text-gray-600",
               )}
             >
               <Icon className="w-5 h-5" strokeWidth={active ? 2.5 : 1.8} />
-              <span className={cn("text-[10px]", active ? "font-semibold" : "font-medium")}>
+              <span
+                className={cn(
+                  "text-[10px]",
+                  active ? "font-semibold" : "font-medium",
+                )}
+              >
                 {label}
               </span>
             </Link>

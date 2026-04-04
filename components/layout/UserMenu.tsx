@@ -3,9 +3,10 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { LogOut, UserCircle, User, ChevronDown } from "lucide-react";
+import { UserCircle, User, ChevronDown } from "lucide-react";
 import { createClient } from "@/lib/supabase-browser";
 import { ProfileAvatar } from "@/components/ui/ProfileCard";
+import { LogoutButton } from "@/app/profile/LogoutButton";
 
 interface Props {
   nickname: string;
@@ -30,16 +31,25 @@ export function UserMenu({ nickname, avatarUrl }: Props) {
         className="flex items-center gap-2 text-sm font-medium text-gray-700
                    hover:text-[#FF5C5C] transition-colors"
       >
-        <ProfileAvatar nickname={nickname} avatarUrl={avatarUrl} size="sm" className="w-7 h-7 text-xs" />
+        <ProfileAvatar
+          nickname={nickname}
+          avatarUrl={avatarUrl}
+          size="sm"
+          className="w-7 h-7 text-xs"
+        />
         <span className="font-semibold text-gray-900">{nickname}</span>
-        <ChevronDown className={`w-3.5 h-3.5 text-gray-400 transition-transform ${open ? "rotate-180" : ""}`} />
+        <ChevronDown
+          className={`w-3.5 h-3.5 text-gray-400 transition-transform ${open ? "rotate-180" : ""}`}
+        />
       </button>
 
       {open && (
         <>
           <div className="fixed inset-0 z-10" onClick={() => setOpen(false)} />
-          <div className="absolute right-0 top-9 z-20 bg-white border border-gray-100
-                          rounded-2xl shadow-lg py-2 w-44">
+          <div
+            className="absolute right-0 top-9 z-20 bg-white border border-gray-100
+                          rounded-2xl shadow-lg py-2 w-44"
+          >
             <div className="py-1">
               <Link
                 href="/profile"
@@ -49,14 +59,7 @@ export function UserMenu({ nickname, avatarUrl }: Props) {
               >
                 <UserCircle className="w-4 h-4" />내 프로필
               </Link>
-              <button
-                onClick={handleLogout}
-                className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-gray-600
-                           hover:bg-gray-50 hover:text-gray-900 transition-colors"
-              >
-                <LogOut className="w-4 h-4" />
-                로그아웃
-              </button>
+              <LogoutButton />
             </div>
           </div>
         </>
