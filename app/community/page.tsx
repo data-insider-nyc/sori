@@ -1,6 +1,7 @@
 import { Suspense } from "react";
 import type { Metadata } from "next";
 import { HotTopics } from "@/components/community/HotTopics";
+// import { AdvertisePage } from "@/app/advertise/AdvertisePage";
 import { CommunityListing } from "./CommunityListing";
 import { PAGE_META } from "@/lib/copy";
 
@@ -46,7 +47,7 @@ export default function CommunityPage() {
           className="btn-coral flex items-center gap-2 text-sm"
         >
           <span>✏️</span>
-          <span className="hidden sm:inline">글쓰기</span>
+          <span>글쓰기</span>
         </a>
       </div>
 
@@ -63,22 +64,7 @@ export default function CommunityPage() {
           >
             <HotTopics />
           </Suspense>
-          <div className="bg-white border border-gray-100 rounded-2xl p-5 text-center">
-            <div className="text-3xl mb-3">📢</div>
-            <div className="font-bold text-sm text-gray-900 mb-1">
-              비즈니스 광고 문의
-            </div>
-            <div className="text-xs text-gray-400 mb-4">
-              한인 고객에게 직접 도달하세요
-            </div>
-            <a
-              href="/advertise"
-              className="inline-block bg-[#E8321C] text-white text-sm font-bold
-                          px-5 py-2.5 rounded-xl hover:bg-[#C82818] transition-colors"
-            >
-              광고 시작하기
-            </a>
-          </div>
+          {/* <AdvertisePage /> */}
         </aside>
       </div>
     </div>

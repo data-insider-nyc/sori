@@ -97,7 +97,7 @@ export default function RootLayout({
             </div>
           </div>
         </footer>
-        {/* <MobileNav /> */}
+        <MobileNav />
         <Analytics />
       </body>
     </html>
