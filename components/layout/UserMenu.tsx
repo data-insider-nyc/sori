@@ -3,9 +3,10 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { LogOut, UserCircle, User, ChevronDown } from "lucide-react";
+import { UserCircle, User, ChevronDown } from "lucide-react";
 import { createClient } from "@/lib/supabase-browser";
 import { ProfileAvatar } from "@/components/ui/ProfileCard";
+import { LogoutButton } from "@/app/profile/LogoutButton";
 
 interface Props {
   nickname: string;
@@ -58,14 +59,7 @@ export function UserMenu({ nickname, avatarUrl }: Props) {
               >
                 <UserCircle className="w-4 h-4" />내 프로필
               </Link>
-              <button
-                onClick={handleLogout}
-                className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-gray-600
-                           hover:bg-gray-50 hover:text-gray-900 transition-colors"
-              >
-                <LogOut className="w-4 h-4" />
-                로그아웃
-              </button>
+              <LogoutButton />
             </div>
           </div>
         </>

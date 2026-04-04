@@ -142,10 +142,10 @@ export default async function ProfilePage() {
             />
           </div>
 
-          {/* Logout */}
-          <div className="bg-white border border-red-100 rounded-2xl shadow-sm p-6">
-            <p className="text-sm font-semibold text-red-500 mb-1">로그아웃</p>
-            <p className="text-xs text-gray-400 mb-4"></p>
+          {/* ── Logout ────────────────────────────────────────────── */}
+          <div className="bg-white border border-gray-100 rounded-2xl shadow-sm p-6">
+            <p className="text-sm font-semibold text-gray-700 mb-1">로그아웃</p>
+            <p className="text-xs text-gray-400 mb-4">이 기기에서 로그아웃해요.</p>
             <LogoutButton />
           </div>
 
@@ -159,8 +159,6 @@ export default async function ProfilePage() {
           </div>
         </div>
       </div>
-
-      <div className="mt-6 flex justify-center"></div>
     </div>
   );
 }
