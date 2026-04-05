@@ -1,49 +1,26 @@
-"use client";
-
-import { useState, useEffect } from "react";
-import Link from "next/link";
-import { Heart, MessageCircle } from "lucide-react";
 import { cn, timeAgo } from "@/lib/utils";
-import { getRegions } from "@/lib/regions";
-import { getPostCategories } from "@/lib/post-categories";
 import { getRegionColor, getCategoryColor } from "@/lib/colors";
 import type { Post } from "@/types";
+import type { Region } from "@/lib/regions";
+import type { PostCategory } from "@/lib/post-categories";
 
 interface Props {
   post: Post;
   userId?: string | null;
+  /** Pre-fetched lookup data from the parent feed — avoids per-card async effect */
+  regions?: Region[];
+  categories?: PostCategory[];
 }
 
-export function PostBadge({ post }: Props) {
-  const [regionValue, setRegionValue] = useState("");
-  const [regionLabel, setRegionLabel] = useState("");
-  const [regionEmoji, setRegionEmoji] = useState("");
-  const [catLabel, setCatLabel] = useState<string>(post.category);
-  const [catEmoji, setCatEmoji] = useState<string>("💬");
+export function PostBadge({ post, regions = [], categories = [] }: Props) {
+  const region = post.region_id ? regions.find((r) => r.id === post.region_id) : undefined;
+  const cat = categories.find((c) => c.value === post.category);
 
-  useEffect(() => {
-    (async () => {
-      const [regions, cats] = await Promise.all([
-        getRegions(),
-        getPostCategories(),
-      ]);
-
-      if (post.region_id) {
-        const region = regions.find((r) => r.id === post.region_id);
-        if (region) {
-          setRegionValue(region.value);
-          setRegionLabel(region.label);
-          setRegionEmoji(region.emoji);
-        }
-      }
-
-      const cat = cats.find((c) => c.value === post.category);
-      if (cat) {
-        setCatLabel(cat.label);
-        setCatEmoji(cat.emoji);
-      }
-    })();
-  }, [post.region_id, post.category]);
+  const regionValue = region?.value ?? "";
+  const regionLabel = region?.label ?? "";
+  const regionEmoji = region?.emoji ?? "";
+  const catLabel = cat?.label ?? post.category;
+  const catEmoji = cat?.emoji ?? "💬";
 
   return (
     <div className="flex items-center gap-1.5 ml-auto">

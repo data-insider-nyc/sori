@@ -1,14 +1,14 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { MessageCircle, MoreHorizontal, Trash2, Edit2 } from "lucide-react";
-import { cn, timeAgo } from "@/lib/utils";
-import { getRegions } from "@/lib/regions";
-import { getPostCategories } from "@/lib/post-categories";
+import { cn } from "@/lib/utils";
 import { UserPopover } from "../community/UserPopover";
 import { ProfileCard } from "@/components/ui/ProfileCard";
 import type { Post } from "@/types";
+import type { Region } from "@/lib/regions";
+import type { PostCategory } from "@/lib/post-categories";
 import { PostBadge } from "./PostBadge";
 import { PostForm } from "@/components/community/PostForm";
 import { useIsAdmin } from "@/hooks/useIsAdmin";
@@ -18,44 +18,19 @@ import { LikeButton } from "@/components/ui/LikeButton";
 interface Props {
   post: Post;
   userId?: string | null;
+  /** Pre-fetched lookup data from the parent feed — passed through to PostBadge */
+  regions?: Region[];
+  categories?: PostCategory[];
 }
 
-export function PostCard({ post, userId = null }: Props) {
+export const PostCard = React.memo(function PostCard({ post, userId = null, regions = [], categories = [] }: Props) {
   const { isAdmin } = useIsAdmin();
-  const [regionValue, setRegionValue] = useState("");
-  const [regionLabel, setRegionLabel] = useState("");
-  const [regionEmoji, setRegionEmoji] = useState("");
-  const [catLabel, setCatLabel] = useState<string>(post.category);
-  const [catEmoji, setCatEmoji] = useState<string>("💬");
 
-  // Menu / modal state
   const [menuOpen, setMenuOpen] = useState(false);
   const [showEdit, setShowEdit] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    (async () => {
-      const [regions, cats] = await Promise.all([
-        getRegions(),
-        getPostCategories(),
-      ]);
-      if (post.region_id) {
-        const region = regions.find((r) => r.id === post.region_id);
-        if (region) {
-          setRegionValue(region.value);
-          setRegionLabel(region.label);
-          setRegionEmoji(region.emoji);
-        }
-      }
-      const cat = cats.find((c) => c.value === post.category);
-      if (cat) {
-        setCatLabel(cat.label);
-        setCatEmoji(cat.emoji);
-      }
-    })();
-  }, [post.region_id, post.category]);
 
   // Close menu when clicking outside
   useEffect(() => {
@@ -230,7 +205,7 @@ export function PostCard({ post, userId = null }: Props) {
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <PostBadge post={post} />
+          <PostBadge post={post} regions={regions} categories={categories} />
           {(isAuthor || isAdmin) && (
             <div className="relative" ref={menuRef}>
               <button
@@ -362,4 +337,4 @@ export function PostCard({ post, userId = null }: Props) {
       )}
     </>
   );
-}
+});
