@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import Link from "next/link";
 import { Calendar } from "lucide-react";
 import { createClient } from "@/lib/supabase-browser";
 import { getRegionLabel, getRegionEmoji } from "@/lib/regions";
@@ -207,6 +208,16 @@ export function UserPopover({ userId, nickname, children }: Props) {
                 </span>
                 <span>게시글 {profile.post_count}개</span>
               </div>
+
+              {profile.handle && (
+                <Link
+                  href={`/u/${profile.handle}`}
+                  onClick={() => setOpen(false)}
+                  className="mt-3 block w-full text-center text-xs font-semibold text-[#FF5C5C] bg-[#FFF0F0] hover:bg-[#FFE0E0] rounded-xl py-2 transition-colors"
+                >
+                  프로필 보기
+                </Link>
+              )}
             </>
           )}
         </div>
