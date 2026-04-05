@@ -42,9 +42,9 @@ export function AvatarEditor({ userId, nickname, currentAvatarUrl }: Props) {
         return;
       }
 
-      const { data: { publicUrl } } = supabase.storage
-        .from("avatars")
-        .getPublicUrl(path);
+      const {
+        data: { publicUrl },
+      } = supabase.storage.from("avatars").getPublicUrl(path);
 
       // cache-buster so browser fetches fresh image
       const url = `${publicUrl}?t=${Date.now()}`;
@@ -71,7 +71,10 @@ export function AvatarEditor({ userId, nickname, currentAvatarUrl }: Props) {
         .from("profiles")
         .update({ avatar_url: null })
         .eq("id", userId);
-      if (error) { setError("삭제 실패: " + error.message); return; }
+      if (error) {
+        setError("삭제 실패: " + error.message);
+        return;
+      }
       setAvatarUrl(null);
     });
   }
@@ -90,11 +93,15 @@ export function AvatarEditor({ userId, nickname, currentAvatarUrl }: Props) {
           aria-label="프로필 사진 변경"
         >
           <ProfileAvatar nickname={nickname} avatarUrl={avatarUrl} size="lg" />
-          <span className="absolute inset-0 rounded-full bg-black/40 flex items-center justify-center
-                           opacity-0 group-hover:opacity-100 transition-opacity">
-            {isPending
-              ? <Loader2 className="w-5 h-5 text-white animate-spin" />
-              : <Camera className="w-5 h-5 text-white" />}
+          <span
+            className="absolute inset-0 rounded-full bg-black/40 flex items-center justify-center
+                           opacity-0 group-hover:opacity-100 transition-opacity"
+          >
+            {isPending ? (
+              <Loader2 className="w-5 h-5 text-white animate-spin" />
+            ) : (
+              <Camera className="w-5 h-5 text-white" />
+            )}
           </span>
         </button>
 
@@ -114,7 +121,8 @@ export function AvatarEditor({ userId, nickname, currentAvatarUrl }: Props) {
               disabled={isPending}
               className="flex items-center gap-1 text-xs text-gray-400 hover:text-red-500 transition-colors"
             >
-              <X className="w-3 h-3" />사진 삭제
+              <X className="w-3 h-3" />
+              사진 삭제
             </button>
           )}
           <p className="text-xs text-gray-400">JPG · PNG · GIF · 최대 2MB</p>
