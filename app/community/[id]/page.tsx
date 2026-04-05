@@ -88,6 +88,7 @@ export default async function PostDetailPage({
               category: post.category,
               region_id: post.region_id,
               authorId: author?.id ?? null,
+              pinned: (post as any).pinned,
             }}
             userId={user?.id ?? null}
           />
