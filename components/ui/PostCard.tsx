@@ -114,7 +114,7 @@ export const PostCard = React.memo(function PostCard({ post, userId = null, regi
     <>
       <div className="bg-white border border-gray-100 rounded-2xl p-5 shadow-sm hover:border-[#FF5C5C]/30 transition-colors">
         {/* Author row */}
-        <div className="flex items-center justify-between mb-3">
+        <div className="flex items-center mb-3">
           <UserPopover userId={post.author.id} nickname={post.author.nickname}>
             <ProfileCard
               nickname={post.author.nickname}
@@ -123,86 +123,6 @@ export const PostCard = React.memo(function PostCard({ post, userId = null, regi
               size="sm"
             />
           </UserPopover>
-          <div className="flex items-center gap-2">
-            {menuOpen && (
-              <div className="absolute right-0 top-full mt-1.5 w-36 bg-white border border-gray-100 rounded-xl shadow-lg z-50 overflow-hidden py-1">
-                {isAuthor && (
-                  <>
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        openEdit(e);
-                      }}
-                      className="flex items-center gap-2.5 w-full px-3.5 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
-                    >
-                      <Edit2 className="w-3.5 h-3.5 text-gray-400" />
-                      수정하기
-                    </button>
-                    <div className="h-px bg-gray-50 mx-2" />
-                  </>
-                )}
-
-                {/* Admin pin/unpin */}
-                {isAdmin && (
-                  <>
-                    <button
-                      onClick={async (e) => {
-                        e.stopPropagation();
-                        setMenuOpen(false);
-                        try {
-                          const res = await fetch(`/api/posts/${post.id}`, {
-                            method: "PATCH",
-                            headers: { "Content-Type": "application/json" },
-                            body: JSON.stringify({ pinned: !post.pinned }),
-                          });
-                          if (!res.ok) {
-                            const body = await res.json().catch(() => ({}));
-                            throw new Error(
-                              body.error || "핀 변경에 실패했습니다.",
-                            );
-                          }
-                          // refresh to reflect pinned state in sidebar
-                          window.location.reload();
-                        } catch (err) {
-                          console.error("Pin toggle failed", err);
-                          alert("핀 변경에 실패했습니다.");
-                        }
-                      }}
-                      className="flex items-center gap-2.5 w-full px-3.5 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
-                    >
-                      <svg
-                        className="w-3.5 h-3.5 text-gray-400"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
-                        <path
-                          d="M12 2l2 6h6l-4.5 3.5L18 20l-6-3.5L6 20l1.5-8.5L3 8h6l2-6z"
-                          stroke="currentColor"
-                          strokeWidth="0"
-                          fill="currentColor"
-                        />
-                      </svg>
-                      {post.pinned ? "추천 해제" : "운영진 추천"}
-                    </button>
-                    <div className="h-px bg-gray-50 mx-2" />
-                  </>
-                )}
-
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setMenuOpen(false);
-                    setShowDeleteConfirm(true);
-                  }}
-                  className="flex items-center gap-2.5 w-full px-3.5 py-2.5 text-sm text-red-500 hover:bg-red-50 transition-colors"
-                >
-                  <Trash2 className="w-3.5 h-3.5" />
-                  삭제하기
-                </button>
-              </div>
-            )}
-          </div>
         </div>
         <div className="flex items-center gap-2">
           <PostBadge post={post} regions={regions} categories={categories} />
@@ -223,6 +143,86 @@ export const PostCard = React.memo(function PostCard({ post, userId = null, regi
               >
                 <MoreHorizontal className="w-4 h-4" />
               </button>
+
+              {/* Dropdown — inside the relative container so absolute positioning and
+                  click-outside detection both work correctly */}
+              {menuOpen && (
+                <div className="absolute right-0 top-full mt-1.5 w-36 bg-white border border-gray-100 rounded-xl shadow-lg z-50 overflow-hidden py-1">
+                  {isAuthor && (
+                    <>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          openEdit(e);
+                        }}
+                        className="flex items-center gap-2.5 w-full px-3.5 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                      >
+                        <Edit2 className="w-3.5 h-3.5 text-gray-400" />
+                        수정하기
+                      </button>
+                      <div className="h-px bg-gray-50 mx-2" />
+                    </>
+                  )}
+
+                  {/* Admin pin/unpin */}
+                  {isAdmin && (
+                    <>
+                      <button
+                        onClick={async (e) => {
+                          e.stopPropagation();
+                          setMenuOpen(false);
+                          try {
+                            const res = await fetch(`/api/posts/${post.id}`, {
+                              method: "PATCH",
+                              headers: { "Content-Type": "application/json" },
+                              body: JSON.stringify({ pinned: !post.pinned }),
+                            });
+                            if (!res.ok) {
+                              const body = await res.json().catch(() => ({}));
+                              throw new Error(
+                                body.error || "핀 변경에 실패했습니다.",
+                              );
+                            }
+                            window.location.reload();
+                          } catch (err) {
+                            console.error("Pin toggle failed", err);
+                            alert("핀 변경에 실패했습니다.");
+                          }
+                        }}
+                        className="flex items-center gap-2.5 w-full px-3.5 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                      >
+                        <svg
+                          className="w-3.5 h-3.5 text-gray-400"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
+                          <path
+                            d="M12 2l2 6h6l-4.5 3.5L18 20l-6-3.5L6 20l1.5-8.5L3 8h6l2-6z"
+                            stroke="currentColor"
+                            strokeWidth="0"
+                            fill="currentColor"
+                          />
+                        </svg>
+                        {post.pinned ? "추천 해제" : "운영진 추천"}
+                      </button>
+                      <div className="h-px bg-gray-50 mx-2" />
+                    </>
+                  )}
+
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setMenuOpen(false);
+                      setShowDeleteConfirm(true);
+                    }}
+                    className="flex items-center gap-2.5 w-full px-3.5 py-2.5 text-sm text-red-500 hover:bg-red-50 transition-colors"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                    삭제하기
+                  </button>
+                </div>
+              )}
             </div>
           )}
         </div>
