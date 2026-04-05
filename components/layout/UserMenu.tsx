@@ -1,12 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { UserCircle, User, ChevronDown } from "lucide-react";
-import { createClient } from "@/lib/supabase-browser";
 import { ProfileAvatar } from "@/components/ui/ProfileCard";
-import { LogoutButton } from "@/app/profile/LogoutButton";
+import { LogoutButton } from "@/components/ui/LogoutButton";
 
 interface Props {
   nickname: string;
@@ -15,14 +13,6 @@ interface Props {
 
 export function UserMenu({ nickname, avatarUrl }: Props) {
   const [open, setOpen] = useState(false);
-  const router = useRouter();
-  const supabase = createClient();
-
-  async function handleLogout() {
-    await supabase.auth.signOut();
-    router.refresh();
-    router.push("/");
-  }
 
   return (
     <div className="relative">
@@ -59,7 +49,7 @@ export function UserMenu({ nickname, avatarUrl }: Props) {
               >
                 <UserCircle className="w-4 h-4" />내 프로필
               </Link>
-              <LogoutButton />
+              <LogoutButton variant="menu-item" onClose={() => setOpen(false)} />
             </div>
           </div>
         </>
