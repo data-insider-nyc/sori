@@ -68,56 +68,17 @@ export function CommunityListing() {
     getPostCategories().then(setCategories);
   }, []);
 
-  // Resolve auth (non-blocking — posts load in parallel)
+  // Resolve auth from local session cache (no network round-trip)
   useEffect(() => {
     createClient()
-      .auth.getUser()
-      .then(({ data: { user } }) => setUserId(user?.id ?? null));
+      .auth.getSession()
+      .then(({ data: { session } }) => setUserId(session?.user?.id ?? null));
   }, []);
 
-  // Realtime: sync like_count & comment_count for all visible posts
-  useEffect(() => {
-    const supabase = createClient();
-    const channel = supabase
-      .channel("community-feed-realtime")
-      .on(
-        "postgres_changes",
-        { event: "UPDATE", schema: "public", table: "posts" },
-        (payload) => {
-          const updated = payload.new as any;
-          setPosts((prev) =>
-            prev.map((p) =>
-              p.id === updated.id
-                ? {
-                    ...p,
-                    like_count: updated.like_count ?? p.like_count,
-                    comment_count: updated.comment_count ?? p.comment_count,
-                  }
-                : p,
-            ),
-          );
-          // Keep cache in sync too
-          for (const [k, entry] of feedCache.entries()) {
-            const idx = entry.posts.findIndex((p) => p.id === updated.id);
-            if (idx !== -1) {
-              const next = [...entry.posts];
-              next[idx] = {
-                ...next[idx],
-                like_count: updated.like_count ?? next[idx].like_count,
-                comment_count: updated.comment_count ?? next[idx].comment_count,
-              };
-              feedCache.set(k, { ...entry, posts: next });
-            }
-          }
-        },
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, []);
-
+  // Realtime subscription intentionally removed:
+  // - Free tier allows only 200 concurrent connections; 1000 users would exhaust it
+  // - like_count is handled optimistically by LikeButton + post-like-store
+  // - comment_count updates when the user navigates to the detail page
   // Load when filters change — use cache if fresh, otherwise fetch
   useEffect(() => {
     const entry = feedCache.get(makeCacheKey(region, category, q));
@@ -190,7 +151,9 @@ export function CommunityListing() {
     // Single query: posts + author profile via FK join (no separate profiles round-trip)
     let query = supabase
       .from("posts")
-      .select("*, author:profiles!user_id(id, nickname, handle, location_id, avatar_url)")
+      .select(
+        "id, title, content, category, region_id, user_id, like_count, comment_count, created_at, pinned, pinned_at, author:profiles!user_id(id, nickname, handle, location_id, avatar_url)",
+      )
       .order("created_at", { ascending: false })
       .limit(PAGE_SIZE);
 
@@ -373,7 +336,7 @@ export function CommunityListing() {
         <>
           <div className="space-y-4">
             {posts.map((post) => (
-              <PostCard key={post.id} post={post} userId={userId} />
+              <PostCard key={post.id} post={post} userId={userId} regions={regions} categories={categories} />
             ))}
           </div>
 

@@ -1,49 +1,58 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import Link from "next/link";
-import { Heart, MessageCircle } from "lucide-react";
 import { cn, timeAgo } from "@/lib/utils";
 import { getRegions } from "@/lib/regions";
-import { getPostCategories } from "@/lib/post-categories";
+import { getPostCategories, FALLBACK_CATEGORIES } from "@/lib/post-categories";
 import { getRegionColor, getCategoryColor } from "@/lib/colors";
 import type { Post } from "@/types";
+import type { Region } from "@/lib/regions";
+import type { PostCategory } from "@/lib/post-categories";
 
 interface Props {
   post: Post;
   userId?: string | null;
+  /** Pre-fetched lookup data from the parent feed — avoids per-card async effect.
+   *  When omitted (e.g. detail page), falls back to the module-level cached fetch. */
+  regions?: Region[];
+  categories?: PostCategory[];
 }
 
-export function PostBadge({ post }: Props) {
-  const [regionValue, setRegionValue] = useState("");
-  const [regionLabel, setRegionLabel] = useState("");
-  const [regionEmoji, setRegionEmoji] = useState("");
-  const [catLabel, setCatLabel] = useState<string>(post.category);
-  const [catEmoji, setCatEmoji] = useState<string>("💬");
+export function PostBadge({ post, regions: regionsProp, categories: categoriesProp }: Props) {
+  const propsProvided = regionsProp !== undefined && categoriesProp !== undefined;
+
+  // Synchronous derivation when parent passes data (feed list — zero flash).
+  // Falls back to local state + async fetch when used standalone (detail page).
+  const [regions, setRegions] = useState<Region[]>(regionsProp ?? []);
+  const [categories, setCategories] = useState<PostCategory[]>(
+    categoriesProp ?? FALLBACK_CATEGORIES,
+  );
 
   useEffect(() => {
-    (async () => {
-      const [regions, cats] = await Promise.all([
-        getRegions(),
-        getPostCategories(),
-      ]);
+    if (propsProvided) return; // props are being managed by parent — skip async fetch
+    Promise.all([getRegions(), getPostCategories()]).then(([r, c]) => {
+      setRegions(r);
+      setCategories(c);
+    });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
-      if (post.region_id) {
-        const region = regions.find((r) => r.id === post.region_id);
-        if (region) {
-          setRegionValue(region.value);
-          setRegionLabel(region.label);
-          setRegionEmoji(region.emoji);
-        }
-      }
+  // Keep in sync if parent updates props after mount
+  useEffect(() => {
+    if (regionsProp !== undefined) setRegions(regionsProp);
+  }, [regionsProp]);
+  useEffect(() => {
+    if (categoriesProp !== undefined) setCategories(categoriesProp);
+  }, [categoriesProp]);
 
-      const cat = cats.find((c) => c.value === post.category);
-      if (cat) {
-        setCatLabel(cat.label);
-        setCatEmoji(cat.emoji);
-      }
-    })();
-  }, [post.region_id, post.category]);
+  const region = post.region_id ? regions.find((r) => r.id === post.region_id) : undefined;
+  const cat = categories.find((c) => c.value === post.category);
+
+  const regionValue = region?.value ?? "";
+  const regionLabel = region?.label ?? "";
+  const regionEmoji = region?.emoji ?? "";
+  const catLabel = cat?.label ?? post.category;
+  const catEmoji = cat?.emoji ?? "💬";
 
   return (
     <div className="flex items-center gap-1.5 ml-auto">

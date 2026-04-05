@@ -39,15 +39,29 @@ function daysUntilChange90(changedAt: string | null): number | null {
   return remaining > 0 ? remaining : null;
 }
 
-function SectionLabel({ children, className }: { children: React.ReactNode; className?: string }) {
+function SectionLabel({
+  children,
+  className,
+}: {
+  children: React.ReactNode;
+  className?: string;
+}) {
   return (
-    <p className={`text-[10px] font-bold tracking-widest uppercase text-gray-400 px-1 mb-2 mt-1 ${className ?? ""}`}>
+    <p
+      className={`text-[10px] font-bold tracking-widest uppercase text-gray-400 px-1 mb-2 mt-1 ${className ?? ""}`}
+    >
       {children}
     </p>
   );
 }
 
-function SettingsCard({ children, danger }: { children: React.ReactNode; danger?: boolean }) {
+function SettingsCard({
+  children,
+  danger,
+}: {
+  children: React.ReactNode;
+  danger?: boolean;
+}) {
   return (
     <div
       className={`bg-white rounded-2xl shadow-sm p-5 ${
@@ -94,11 +108,8 @@ export default async function ProfilePage() {
 
   return (
     <div className="py-6 max-w-5xl mx-auto space-y-5">
-
       {/* ── Identity banner ───────────────────────────────────────────── */}
-      <div
-        className="relative rounded-3xl overflow-hidden hero-gradient px-6 py-8 lg:px-10 lg:py-10"
-      >
+      <div className="relative rounded-3xl overflow-hidden hero-gradient px-6 py-8 lg:px-10 lg:py-10">
         {/* Personalized color glow — unique to this user */}
         <div
           aria-hidden="true"
@@ -121,10 +132,12 @@ export default async function ProfilePage() {
           {/* Avatar with personalized color ring */}
           <div className="flex-shrink-0">
             <div
-              className="rounded-full p-0.5"
-              style={{ background: `linear-gradient(135deg, ${palette.color}80, ${palette.color}20)` }}
+              className="rounded-full"
+              style={{
+                background: `linear-gradient(135deg, ${palette.color}80, ${palette.color}20)`,
+              }}
             >
-              <div className="rounded-full p-0.5 bg-[#0F1B2D]">
+              <div className="rounded-full bg-[#0F1B2D]">
                 <ProfileAvatar
                   nickname={profile.nickname}
                   avatarUrl={profile.avatar_url}
@@ -152,7 +165,9 @@ export default async function ProfilePage() {
                 {profile.bio}
               </p>
             ) : (
-              <p className="text-sm text-white/25 mt-2 italic">한 줄 소개를 추가해보세요</p>
+              <p className="text-sm text-white/25 mt-2 italic">
+                한 줄 소개를 추가해보세요
+              </p>
             )}
 
             {/* Stats row */}
@@ -160,15 +175,17 @@ export default async function ProfilePage() {
               <div className="flex items-center gap-1.5 text-white/50 text-xs font-medium">
                 <FileText className="w-3.5 h-3.5" />
                 <span>
-                  <span className="text-white font-bold">{postCount ?? 0}</span>
-                  {" "}개의 글
+                  <span className="text-white font-bold">{postCount ?? 0}</span>{" "}
+                  개의 글
                 </span>
               </div>
               <div className="flex items-center gap-1.5 text-white/50 text-xs font-medium">
                 <MessageCircle className="w-3.5 h-3.5" />
                 <span>
-                  <span className="text-white font-bold">{commentCount ?? 0}</span>
-                  {" "}개의 댓글
+                  <span className="text-white font-bold">
+                    {commentCount ?? 0}
+                  </span>{" "}
+                  개의 댓글
                 </span>
               </div>
               <div className="flex items-center gap-1.5 text-white/50 text-xs font-medium">
@@ -182,7 +199,6 @@ export default async function ProfilePage() {
 
       {/* ── Main grid ──────────────────────────────────────────────────── */}
       <div className="flex flex-col lg:grid lg:grid-cols-[1fr_320px] gap-5 lg:items-start">
-
         {/* LEFT — Activity feed (order-2 on mobile so settings appear first) */}
         <div className="order-2 lg:order-1">
           <ProfileActivity
@@ -194,7 +210,6 @@ export default async function ProfilePage() {
 
         {/* RIGHT — Settings (order-1 on mobile = top, order-2 on desktop = right column) */}
         <div className="order-1 lg:order-2 space-y-2 lg:sticky lg:top-24">
-
           {/* Profile settings group */}
           <SectionLabel>프로필 설정</SectionLabel>
 
@@ -255,7 +270,6 @@ export default async function ProfilePage() {
             </p>
             <DeleteAccountButton />
           </SettingsCard>
-
         </div>
       </div>
     </div>

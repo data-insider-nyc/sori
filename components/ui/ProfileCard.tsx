@@ -83,7 +83,13 @@ export function ProfileAvatar({
 
   if (avatarUrl) {
     return (
-      <div className={cn("rounded-full flex-shrink-0 overflow-hidden", s.avatar, className)}>
+      <div
+        className={cn(
+          "rounded-full flex-shrink-0 overflow-hidden",
+          s.avatar,
+          className,
+        )}
+      >
         <Image
           src={avatarUrl}
           alt={nickname}
