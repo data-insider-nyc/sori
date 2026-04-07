@@ -7,7 +7,7 @@ import { getPostCategories, FALLBACK_CATEGORIES } from "@/lib/post-categories";
 import { getRegionColor, getCategoryColor } from "@/lib/colors";
 import type { Post } from "@/types";
 import type { Region } from "@/lib/regions";
-import type { PostCategory } from "@/lib/post-categories";
+import type { PostCategoryItem } from "@/lib/post-categories";
 
 interface Props {
   post: Post;
@@ -15,7 +15,7 @@ interface Props {
   /** Pre-fetched lookup data from the parent feed — avoids per-card async effect.
    *  When omitted (e.g. detail page), falls back to the module-level cached fetch. */
   regions?: Region[];
-  categories?: PostCategory[];
+  categories?: PostCategoryItem[];
 }
 
 export function PostBadge({ post, regions: regionsProp, categories: categoriesProp }: Props) {
@@ -24,7 +24,7 @@ export function PostBadge({ post, regions: regionsProp, categories: categoriesPr
   // Synchronous derivation when parent passes data (feed list — zero flash).
   // Falls back to local state + async fetch when used standalone (detail page).
   const [regions, setRegions] = useState<Region[]>(regionsProp ?? []);
-  const [categories, setCategories] = useState<PostCategory[]>(
+  const [categories, setCategories] = useState<PostCategoryItem[]>(
     categoriesProp ?? FALLBACK_CATEGORIES,
   );
 
