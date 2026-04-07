@@ -10,6 +10,7 @@ interface Props {
     content: string;
     category: string;
     region: string | null;
+    images?: string[] | null;
     authorId: string | null;
     pinned?: boolean;
   };
@@ -30,6 +31,7 @@ export function PostDetailActions({ post, userId }: Props) {
         content: post.content,
         category: post.category,
         region: post.region,
+        images: post.images ?? [],
       }}
       onAfterEdit={() => router.refresh()}
       onAfterDelete={() => { window.location.href = "/community"; }}

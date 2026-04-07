@@ -5,12 +5,14 @@ import { cn } from "@/lib/utils";
 import { Globe } from "lucide-react";
 import { REGIONS, getRegionIcon } from "@/lib/regions";
 import { CATEGORIES, DEFAULT_CATEGORY, getCategoryIcon } from "@/lib/post-categories";
+import { ImageUploader } from "@/components/community/ImageUploader";
 
 export interface PostFormValues {
   title: string;
   content: string;
   category: string;
   region: string | null;
+  images: string[];
 }
 
 interface Props {
@@ -22,6 +24,8 @@ interface Props {
   /** When true the textarea gets fewer rows (suited for a modal) */
   compact?: boolean;
   error?: string;
+  /** Required for image upload — current user's id */
+  userId?: string;
 }
 
 const TITLE_MAX = 50;
@@ -34,6 +38,7 @@ export function PostForm({
   submitLabel = "게시하기",
   compact = false,
   error: externalError,
+  userId,
 }: Props) {
   const [category, setCategory] = useState<string>(
     initialValues?.category ?? DEFAULT_CATEGORY,
@@ -45,6 +50,7 @@ export function PostForm({
   const categories = CATEGORIES;
   const [title, setTitle] = useState(initialValues?.title ?? "");
   const [content, setContent] = useState(initialValues?.content ?? "");
+  const [images, setImages] = useState<string[]>(initialValues?.images ?? []);
   const [saving, setSaving] = useState(false);
   const [internalError, setInternalError] = useState("");
 
@@ -63,6 +69,7 @@ export function PostForm({
         content: content.trim(),
         category,
         region,
+        images,
       });
     } catch (err: any) {
       setInternalError(err.message || "저장에 실패했습니다.");
@@ -170,6 +177,19 @@ export function PostForm({
           required
         />
       </div>
+
+      {/* Images */}
+      {userId && (
+        <div>
+          <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">사진</p>
+          <ImageUploader
+            userId={userId}
+            value={images}
+            onChange={setImages}
+            disabled={saving}
+          />
+        </div>
+      )}
 
       {error && <p className="text-sm text-red-500">{error}</p>}
 

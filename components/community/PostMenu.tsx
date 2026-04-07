@@ -21,6 +21,7 @@ interface Props {
     content: string;
     category: string;
     region?: string | null;
+    images?: string[];
   };
   /** Called after a successful edit. Use router.refresh() on detail page,
    *  window.location.reload() on listing. */
@@ -78,6 +79,7 @@ export function PostMenu({
         content: values.content,
         category: values.category,
         region: values.region,
+        images: values.images,
       }),
     });
     if (!res.ok) {
@@ -237,11 +239,13 @@ export function PostMenu({
                   content: initialValues.content,
                   category: initialValues.category as any,
                   region: initialValues.region ?? null,
+                  images: initialValues.images ?? [],
                 }}
                 onSubmit={handleEditSave}
                 onCancel={() => setShowEdit(false)}
                 submitLabel="저장하기"
                 compact
+                userId={userId ?? undefined}
               />
             </div>
           </div>

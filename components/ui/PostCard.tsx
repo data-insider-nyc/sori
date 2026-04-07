@@ -2,6 +2,7 @@
 
 import React from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { MessageCircle } from "lucide-react";
 import { UserPopover } from "../community/UserPopover";
 import { ProfileCard } from "@/components/ui/ProfileCard";
@@ -45,6 +46,7 @@ export const PostCard = React.memo(function PostCard({
               content: post.content ?? "",
               category: post.category,
               region: post.region,
+              images: post.images ?? [],
             }}
             onAfterEdit={() => window.location.reload()}
             onAfterDelete={() => {
@@ -70,6 +72,17 @@ export const PostCard = React.memo(function PostCard({
           <p className="text-sm text-gray-500 leading-relaxed line-clamp-2">
             {post.content}
           </p>
+
+          {/* Image thumbnail grid */}
+          {post.images && post.images.length > 0 && (
+            <div className={`mt-3 gap-1.5 grid ${post.images.length === 1 ? "grid-cols-1" : "grid-cols-2"}`}>
+              {post.images.slice(0, 4).map((url, i) => (
+                <div key={i} className="relative aspect-video rounded-lg overflow-hidden bg-gray-100">
+                  <Image src={url} alt="" fill className="object-cover" sizes="(max-width: 640px) 50vw, 300px" />
+                </div>
+              ))}
+            </div>
+          )}
         </Link>
 
         {/* Actions */}

@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import type { Metadata } from "next";
 import { createClient } from "@/lib/supabase-server";
 import { getCachedPost } from "@/lib/queries";
@@ -87,6 +88,7 @@ export default async function PostDetailPage({
               content: post.content,
               category: post.category,
               region: post.region,
+              images: (post as any).images ?? [],
               authorId: author?.id ?? null,
               pinned: (post as any).pinned,
             }}
@@ -134,6 +136,17 @@ export default async function PostDetailPage({
         <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap">
           {post.content}
         </p>
+
+        {/* Images */}
+        {(post as any).images?.length > 0 && (
+          <div className="mt-4 space-y-2">
+            {((post as any).images as string[]).map((url: string, i: number) => (
+              <div key={i} className="relative w-full rounded-xl overflow-hidden bg-gray-100">
+                <Image src={url} alt="" width={800} height={600} className="w-full h-auto object-contain" />
+              </div>
+            ))}
+          </div>
+        )}
 
         {/* Like / comment counts */}
         <PostInteractions

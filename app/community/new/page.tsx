@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase-browser";
 import { clearFeedCache } from "@/app/community/CommunityListing";
@@ -22,6 +23,7 @@ export default function NewPostPage() {
         content: values.content,
         region: values.region,
         category: values.category,
+        images: values.images,
         tags: [],
       })
       .select("id")
@@ -36,6 +38,11 @@ export default function NewPostPage() {
     router.replace(`/community/${post.id}`);
   }
 
+  const [userId, setUserId] = useState<string | null>(null);
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data: { user } }) => setUserId(user?.id ?? null));
+  }, []);
+
   return (
     <div className="py-4 sm:py-8 max-w-2xl mx-auto">
       <div className="mb-4 flex items-center gap-3">
@@ -49,7 +56,7 @@ export default function NewPostPage() {
       </div>
 
       <div className="bg-white border border-gray-100 rounded-2xl shadow-sm p-4 sm:p-6">
-        <PostForm onSubmit={handleSubmit} submitLabel="게시하기" />
+        <PostForm onSubmit={handleSubmit} submitLabel="게시하기" userId={userId ?? undefined} />
       </div>
     </div>
   );
