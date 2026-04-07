@@ -45,15 +45,15 @@ export const getCachedPost = unstable_cache(
   { revalidate: 600, tags: ["posts"] },
 );
 
-/** Hot topics sidebar (top 5 by comment count) — refreshed every 2 minutes. */
+/** Hot topics sidebar (top N by comment count) — refreshed every 2 minutes. */
 export const getHotTopics = unstable_cache(
-  async (): Promise<{ id: string; title: string; comment_count: number }[]> => {
+  async (limit = 5): Promise<{ id: string; title: string; comment_count: number }[]> => {
     const { data } = await supabase
       .from("posts")
       .select("id, title, comment_count")
       .order("comment_count", { ascending: false })
       .order("created_at", { ascending: false })
-      .limit(5);
+      .limit(limit);
     return data ?? [];
   },
   ["hot-topics"],
@@ -62,16 +62,48 @@ export const getHotTopics = unstable_cache(
 
 /** Admin pinned posts (simple, no order) — refreshed every 2 minutes. */
 export const getPinnedPosts = unstable_cache(
-  async (): Promise<{ id: string; title: string; comment_count: number }[]> => {
+  async (limit = 5): Promise<{ id: string; title: string; comment_count: number }[]> => {
     const { data } = await supabase
       .from("posts")
       .select("id, title, comment_count")
       .eq("pinned", true)
       .order("pinned_at", { ascending: false })
-      .limit(5);
+      .limit(limit);
     return data ?? [];
   },
   ["pinned-posts"],
+  { revalidate: 120, tags: ["posts"] },
+);
+
+/** Admin announcements (is_announcement = true) — refreshed every 2 minutes. */
+export const getAdminAnnouncements = unstable_cache(
+  async (limit = 5): Promise<{ id: string; title: string; comment_count: number }[]> => {
+    const { data } = await supabase
+      .from("posts")
+      .select("id, title, comment_count")
+      .eq("is_announcement", true)
+      .is("deleted_at", null)
+      .order("created_at", { ascending: false })
+      .limit(limit);
+    return data ?? [];
+  },
+  ["admin-announcements"],
+  { revalidate: 120, tags: ["posts"] },
+);
+
+/** Hot posts by like count — refreshed every 2 minutes. */
+export const getHotByLikes = unstable_cache(
+  async (limit = 5): Promise<{ id: string; title: string; comment_count: number }[]> => {
+    const { data } = await supabase
+      .from("posts")
+      .select("id, title, comment_count")
+      .is("deleted_at", null)
+      .order("like_count", { ascending: false })
+      .order("created_at", { ascending: false })
+      .limit(limit);
+    return data ?? [];
+  },
+  ["hot-by-likes"],
   { revalidate: 120, tags: ["posts"] },
 );
 

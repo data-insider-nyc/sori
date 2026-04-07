@@ -1,6 +1,6 @@
 import { Suspense } from "react";
 import type { Metadata } from "next";
-import { HotTopics } from "@/components/community/HotTopics";
+import { SidebarWidgets } from "@/components/community/SidebarWidgets";
 // import { AdvertisePage } from "@/app/advertise/AdvertisePage";
 import { CommunityListing } from "./CommunityListing";
 import { PAGE_META } from "@/lib/copy";
@@ -62,7 +62,7 @@ export default function CommunityPage() {
               <div className="h-48 bg-gray-50 rounded-2xl animate-pulse" />
             }
           >
-            <HotTopics />
+            <SidebarWidgets />
           </Suspense>
           {/* <AdvertisePage /> */}
         </aside>

@@ -13,6 +13,7 @@ interface Props {
     images?: string[] | null;
     authorId: string | null;
     pinned?: boolean;
+    isAnnouncement?: boolean;
   };
   userId: string | null;
 }
@@ -26,6 +27,7 @@ export function PostDetailActions({ post, userId }: Props) {
       authorId={post.authorId}
       userId={userId}
       pinned={post.pinned}
+      isAnnouncement={post.isAnnouncement}
       initialValues={{
         title: post.title,
         content: post.content,
@@ -36,6 +38,7 @@ export function PostDetailActions({ post, userId }: Props) {
       onAfterEdit={() => router.refresh()}
       onAfterDelete={() => { window.location.href = "/community"; }}
       onAfterPin={() => router.refresh()}
+      onAfterAnnouncement={() => router.refresh()}
     />
   );
 }

@@ -14,39 +14,28 @@ import {
 export interface PostCategoryItem {
   value: string;
   label: string;
-}
-
-export const CATEGORY_ICONS: Record<string, LucideIcon> = {
-  general:     MessageCircle,
-  food:        UtensilsCrossed,
-  local:       MapPin,
-  jobs:        Briefcase,
-  housing:     Building2,
-  family:      Baby,
-  market:      ShoppingBag,
-  immigration: Plane,
-  health:      Stethoscope,
-};
-
-export function getCategoryIcon(value: string): LucideIcon {
-  return CATEGORY_ICONS[value] ?? MessageCircle;
+  icon: LucideIcon;
+  color?: string;
 }
 
 export const DEFAULT_CATEGORY = "general";
 
 export const CATEGORIES: PostCategoryItem[] = [
-  { value: "general",     label: "자유"   },
-  { value: "food",        label: "맛집"   },
-  { value: "local",       label: "생활"   },
-  { value: "jobs",        label: "커리어" },
-  { value: "housing",     label: "부동산" },
-  { value: "family",      label: "육아"   },
-  { value: "market",      label: "중고"   },
-  { value: "immigration", label: "비자"   },
-  { value: "health",      label: "병원"   },
+  { value: "general", label: "자유", icon: MessageCircle },
+  { value: "food", label: "맛집", icon: UtensilsCrossed },
+  { value: "local", label: "생활", icon: MapPin },
+  { value: "jobs", label: "커리어", icon: Briefcase },
+  { value: "housing", label: "부동산", icon: Building2, color: "#7C3AED" },
+  { value: "family", label: "육아", icon: Baby },
+  { value: "market", label: "중고", icon: ShoppingBag },
+  { value: "immigration", label: "비자", icon: Plane },
+  { value: "health", label: "병원", icon: Stethoscope },
 ];
+
+export function getCategoryIcon(value: string): LucideIcon {
+  return CATEGORIES.find((c) => c.value === value)?.icon ?? MessageCircle;
+}
 
 export function getCategoryLabel(value: string): string {
   return CATEGORIES.find((c) => c.value === value)?.label ?? value;
 }
-

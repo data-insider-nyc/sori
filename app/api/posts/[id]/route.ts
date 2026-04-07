@@ -105,6 +105,41 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
     return NextResponse.json(data);
   }
 
+  // Handle is_announcement toggle — admin only
+  if (typeof json.is_announcement !== "undefined") {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("is_admin")
+      .eq("id", user.id)
+      .single();
+    if (!profile?.is_admin) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+
+    const admin = createAdminClient();
+    const { data, error } = await admin
+      .from("posts")
+      .update({ is_announcement: !!json.is_announcement })
+      .eq("id", id)
+      .select()
+      .maybeSingle();
+
+    if (error) {
+      console.error("[PATCH /api/posts is_announcement]", error);
+      return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+
+    try {
+      // @ts-ignore
+      revalidateTag("posts");
+    } catch (e) {
+      console.warn("[PATCH /api/posts] revalidateTag failed", e);
+    }
+
+    return NextResponse.json(data);
+  }
+
   // Fallback: regular post updates (title/content/category/region/images)
   const { title, content, category, region, images } = json;
   const updates: any = {};

@@ -91,6 +91,7 @@ export default async function PostDetailPage({
               images: post.images ?? [],
               authorId: author?.id ?? null,
               pinned: (post as any).pinned,
+              isAnnouncement: (post as any).is_announcement,
             }}
             userId={user?.id ?? null}
           />

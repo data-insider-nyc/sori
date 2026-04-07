@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Edit2, MoreHorizontal, Trash2 } from "lucide-react";
+import { Bookmark, Edit2, Megaphone, MoreHorizontal, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useIsAdmin } from "@/hooks/useIsAdmin";
 import { PostForm } from "@/components/community/PostForm";
@@ -15,6 +15,8 @@ interface Props {
   userId: string | null;
   /** Whether the post is currently pinned */
   pinned?: boolean;
+  /** Whether the post is currently an announcement */
+  isAnnouncement?: boolean;
   /** Prepopulate the edit form */
   initialValues: {
     title?: string | null;
@@ -30,6 +32,8 @@ interface Props {
   onAfterDelete?: () => void;
   /** Called after a successful pin toggle. */
   onAfterPin?: () => void;
+  /** Called after a successful announcement toggle. */
+  onAfterAnnouncement?: () => void;
 }
 
 export function PostMenu({
@@ -37,10 +41,12 @@ export function PostMenu({
   authorId,
   userId,
   pinned = false,
+  isAnnouncement = false,
   initialValues,
   onAfterEdit,
   onAfterDelete,
   onAfterPin,
+  onAfterAnnouncement,
 }: Props) {
   const { isAdmin } = useIsAdmin();
   const isAuthor = !!userId && userId === authorId;
@@ -105,6 +111,24 @@ export function PostMenu({
     } catch (err) {
       console.error("Pin toggle failed", err);
       alert("핀 변경에 실패했습니다.");
+    }
+  }
+
+  async function handleAnnouncementToggle() {
+    try {
+      const res = await fetch(`/api/posts/${postId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ is_announcement: !isAnnouncement }),
+      });
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        throw new Error(body.error || "공지 변경에 실패했습니다.");
+      }
+      onAfterAnnouncement?.();
+    } catch (err) {
+      console.error("Announcement toggle failed", err);
+      alert("공지 변경에 실패했습니다.");
     }
   }
 
@@ -176,22 +200,22 @@ export function PostMenu({
                   onClick={async (e) => {
                     e.stopPropagation();
                     setMenuOpen(false);
+                    await handleAnnouncementToggle();
+                  }}
+                  className="flex items-center gap-2.5 w-full px-3.5 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                >
+                  <Megaphone className="w-3.5 h-3.5 text-gray-400" />
+                  {isAnnouncement ? "공지 해제" : "공지로 등록"}
+                </button>
+                <button
+                  onClick={async (e) => {
+                    e.stopPropagation();
+                    setMenuOpen(false);
                     await handlePinToggle();
                   }}
                   className="flex items-center gap-2.5 w-full px-3.5 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
                 >
-                  <svg
-                    className="w-3.5 h-3.5 text-gray-400"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      d="M12 2l2 6h6l-4.5 3.5L18 20l-6-3.5L6 20l1.5-8.5L3 8h6l2-6z"
-                      strokeWidth="0"
-                      fill="currentColor"
-                    />
-                  </svg>
+                  <Bookmark className="w-3.5 h-3.5 text-gray-400" />
                   {pinned ? "추천 해제" : "운영진 추천"}
                 </button>
                 <div className="h-px bg-gray-100 mx-2" />
