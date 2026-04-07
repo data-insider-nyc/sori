@@ -1,17 +1,16 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { cn } from "@/lib/utils";
-import { getRegions } from "@/lib/regions";
-import { getPostCategories, DEFAULT_CATEGORY } from "@/lib/post-categories";
-import type { PostCategoryItem } from "@/lib/post-categories";
-import type { Region } from "@/lib/regions";
+import { Globe } from "lucide-react";
+import { REGIONS, getRegionIcon } from "@/lib/regions";
+import { CATEGORIES, DEFAULT_CATEGORY, getCategoryIcon } from "@/lib/post-categories";
 
 export interface PostFormValues {
   title: string;
   content: string;
   category: string;
-  region_id: number | null;
+  region: string | null;
 }
 
 interface Props {
@@ -39,22 +38,15 @@ export function PostForm({
   const [category, setCategory] = useState<string>(
     initialValues?.category ?? DEFAULT_CATEGORY,
   );
-  const [regionId, setRegionId] = useState<number | null>(
-    initialValues?.region_id ?? null,
+  const [region, setRegion] = useState<string | null>(
+    initialValues?.region ?? null,
   );
-  const [regions, setRegions] = useState<Region[]>([]);
-  const [categories, setCategories] = useState<PostCategoryItem[]>([]);
+  const regions = REGIONS;
+  const categories = CATEGORIES;
   const [title, setTitle] = useState(initialValues?.title ?? "");
   const [content, setContent] = useState(initialValues?.content ?? "");
   const [saving, setSaving] = useState(false);
   const [internalError, setInternalError] = useState("");
-
-  useEffect(() => {
-    Promise.all([getRegions(), getPostCategories()]).then(([r, c]) => {
-      setRegions(r);
-      setCategories(c);
-    });
-  }, []);
 
   const error = externalError || internalError;
   const titleLeft = TITLE_MAX - title.length;
@@ -70,7 +62,7 @@ export function PostForm({
         title: title.trim(),
         content: content.trim(),
         category,
-        region_id: regionId,
+        region,
       });
     } catch (err: any) {
       setInternalError(err.message || "저장에 실패했습니다.");
@@ -86,21 +78,26 @@ export function PostForm({
         <div className="flex flex-wrap gap-1.5">
           <button
             type="button"
-            onClick={() => setRegionId(null)}
-            className={cn("chip", regionId === null && "chip-active")}
+            onClick={() => setRegion(null)}
+            className={cn("chip inline-flex items-center gap-1", region === null && "chip-active")}
           >
-            🌐 전체 지역
+            <Globe className="w-3.5 h-3.5" strokeWidth={2} />
+            전체 지역
           </button>
-          {regions.map((r) => (
-            <button
-              key={r.id}
-              type="button"
-              onClick={() => setRegionId(r.id)}
-              className={cn("chip", regionId === r.id && "chip-active")}
-            >
-              {r.emoji} {r.label}
-            </button>
-          ))}
+          {regions.map((r) => {
+            const RIcon = getRegionIcon(r.value);
+            return (
+              <button
+                key={r.value}
+                type="button"
+                onClick={() => setRegion(r.value)}
+                className={cn("chip inline-flex items-center gap-1", region === r.value && "chip-active")}
+              >
+                <RIcon className="w-3.5 h-3.5" strokeWidth={2} />
+                {r.label}
+              </button>
+            );
+          })}
         </div>
       </div>
 
@@ -110,16 +107,20 @@ export function PostForm({
       <div>
         <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">카테고리</p>
         <div className="flex flex-wrap gap-1.5">
-          {categories.map((cat) => (
-            <button
-              key={cat.value}
-              type="button"
-              onClick={() => setCategory(cat.value)}
-              className={cn("chip", category === cat.value && "chip-active")}
-            >
-              {cat.emoji} {cat.label}
-            </button>
-          ))}
+          {categories.map((cat) => {
+              const CatIcon = getCategoryIcon(cat.value);
+              return (
+                <button
+                  key={cat.value}
+                  type="button"
+                  onClick={() => setCategory(cat.value)}
+                  className={cn("chip inline-flex items-center gap-1", category === cat.value && "chip-active")}
+                >
+                  <CatIcon className="w-3 h-3" strokeWidth={2} />
+                  {cat.label}
+                </button>
+              );
+            })}
         </div>
       </div>
 

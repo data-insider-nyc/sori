@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Heart, MessageCircle, CornerDownRight } from "lucide-react";
 import { createClient } from "@/lib/supabase-browser";
-import { getCategoryLabel, getCategoryEmoji } from "@/lib/post-categories";
+import { getCategoryLabel, getCategoryIcon } from "@/lib/post-categories";
 import { timeAgo } from "@/lib/utils";
 import { cn } from "@/lib/utils";
 
@@ -174,7 +174,7 @@ export function ProfileActivity({
                       className="flex items-start gap-3 px-5 py-4 hover:bg-gray-50 transition-colors"
                     >
                       <span className="text-base flex-shrink-0 mt-0.5">
-                        {getCategoryEmoji(post.category)}
+                        {(() => { const Icon = getCategoryIcon(post.category); return <Icon className="w-4 h-4 text-gray-400" strokeWidth={2} />; })()}
                       </span>
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-semibold text-gray-900 line-clamp-1 mb-0.5">
@@ -220,8 +220,8 @@ export function ProfileActivity({
                       {/* Which post */}
                       <div className="flex items-center gap-1.5 mb-2">
                         <CornerDownRight className="w-3 h-3 text-gray-300 flex-shrink-0" />
-                        <span className="text-xs text-gray-400 line-clamp-1">
-                          {getCategoryEmoji(comment.postCategory)}{" "}
+                        <span className="text-xs text-gray-400 line-clamp-1 flex items-center gap-1">
+                          {(() => { const Icon = getCategoryIcon(comment.postCategory); return <Icon className="w-3 h-3 flex-shrink-0" strokeWidth={2} />; })()}
                           <span className="font-medium text-gray-500">
                             {comment.postTitle}
                           </span>

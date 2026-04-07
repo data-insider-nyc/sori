@@ -1,35 +1,29 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { MapPin } from "lucide-react";
 import { createClient } from "@/lib/supabase-browser";
-import { getRegions } from "@/lib/regions";
-import type { Region } from "@/lib/regions";
+import { REGIONS } from "@/lib/regions";
 
 interface Props {
   userId: string;
-  currentLocationId: number;
+  currentLocation: string;
 }
 
-export function LocationEditor({ userId, currentLocationId }: Props) {
-  const [locationId, setLocationId] = useState(currentLocationId);
-  const [regions, setRegions] = useState<Region[]>([]);
+export function LocationEditor({ userId, currentLocation }: Props) {
+  const [location, setLocation] = useState(currentLocation);
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState("");
   const router = useRouter();
   const supabase = createClient();
-
-  useEffect(() => {
-    getRegions().then(setRegions);
-  }, []);
 
   async function save() {
     setLoading(true);
     setSuccess("");
     const { error } = await supabase
       .from("profiles")
-      .update({ location_id: locationId })
+      .update({ location })
       .eq("id", userId);
 
     if (!error) {
@@ -56,24 +50,24 @@ export function LocationEditor({ userId, currentLocationId }: Props) {
       )}
 
       <select
-        value={locationId}
+        value={location}
         onChange={(e) => {
-          setLocationId(parseInt(e.target.value));
+          setLocation(e.target.value);
           setSuccess("");
         }}
         className="input-field appearance-none mb-3"
         disabled={loading}
       >
-        {regions.map((r) => (
-          <option key={r.id} value={r.id}>
-            {r.emoji} {r.label}
+        {REGIONS.map((r) => (
+          <option key={r.value} value={r.value}>
+            {r.label}
           </option>
         ))}
       </select>
 
       <button
         onClick={save}
-        disabled={loading || locationId === currentLocationId}
+        disabled={loading || location === currentLocation}
         className="btn-coral w-full text-sm disabled:opacity-40"
       >
         지역 저장

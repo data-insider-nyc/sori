@@ -3,13 +3,13 @@
 import { useState, useEffect, useRef } from "react";
 import { Calendar } from "lucide-react";
 import { createClient } from "@/lib/supabase-browser";
-import { getRegionLabel, getRegionEmoji } from "@/lib/regions";
+import { getRegionLabel, getRegionIcon } from "@/lib/regions";
 import { ProfileCard } from "@/components/ui/ProfileCard";
 
 interface PopoverProfile {
   nickname: string;
   handle: string | null;
-  location_id: number | null;
+  location: string | null;
   bio: string | null;
   joined_at: string;
   post_count: number;
@@ -18,7 +18,6 @@ interface PopoverProfile {
 
 interface PopoverState extends PopoverProfile {
   locationLabel?: string;
-  locationEmoji?: string;
 }
 
 interface Props {
@@ -76,7 +75,7 @@ export function UserPopover({ userId, nickname, children }: Props) {
     const [{ data: prof }, { count }] = await Promise.all([
       supabase
         .from("profiles")
-        .select("nickname, handle, location_id, bio, joined_at, avatar_url")
+        .select("nickname, handle, location, bio, joined_at, avatar_url")
         .eq("id", userId)
         .single(),
       supabase
@@ -85,17 +84,13 @@ export function UserPopover({ userId, nickname, children }: Props) {
         .eq("user_id", userId),
     ]);
     if (prof) {
-      const locationLabel = prof.location_id
-        ? await getRegionLabel(prof.location_id)
-        : undefined;
-      const locationEmoji = prof.location_id
-        ? await getRegionEmoji(prof.location_id)
+      const locationLabel = prof.location
+        ? getRegionLabel(prof.location)
         : undefined;
       setProfile({
         ...prof,
         post_count: count ?? 0,
         locationLabel,
-        locationEmoji,
       });
     }
     setLoading(false);
@@ -178,18 +173,22 @@ export function UserPopover({ userId, nickname, children }: Props) {
               <ProfileCard
                 nickname={profile.nickname}
                 handle={profile.handle}
-                location={profile.location_id}
+                location={profile.location}
                 avatarUrl={profile.avatar_url}
                 size="md"
                 className="mb-3"
               />
 
-              {profile.location_id && profile.locationLabel && (
-                <p className="text-xs text-gray-600 border-t border-gray-50 pt-3 mb-3">
-                  <span className="text-gray-400">활동지역:</span>{" "}
-                  {profile.locationEmoji} {profile.locationLabel}
-                </p>
-              )}
+              {profile.location && profile.locationLabel && (() => {
+                const LocIcon = getRegionIcon(profile.location!);
+                return (
+                  <p className="text-xs text-gray-600 border-t border-gray-50 pt-3 mb-3 flex items-center gap-1">
+                    <span className="text-gray-400">활동지역:</span>
+                    <LocIcon className="w-3 h-3" strokeWidth={2} />
+                    {profile.locationLabel}
+                  </p>
+                );
+              })()}
 
               {profile.bio && (
                 <p className="text-xs text-gray-600 leading-relaxed border-t border-gray-50 pt-3 mb-3">

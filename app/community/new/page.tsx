@@ -20,7 +20,7 @@ export default function NewPostPage() {
         user_id: user.id,
         title: values.title || null,
         content: values.content,
-        region_id: values.region_id,
+        region: values.region,
         category: values.category,
         tags: [],
       })

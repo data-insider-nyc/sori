@@ -1,57 +1,54 @@
-import { createClient as createBrowserClient } from "@/lib/supabase-browser";
+import {
+  Building2,
+  Sun,
+  Waves,
+  Wind,
+  GraduationCap,
+  Leaf,
+  Star,
+  Landmark,
+  CloudRain,
+  Globe,
+  type LucideIcon,
+} from "lucide-react";
 
 export interface Region {
-  id: number;
   value: string;
   label: string;
-  emoji: string;
-  status: "open" | "soon" | "hidden";
-  sort_order: number;
-  created_at?: string;
-  updated_at?: string;
 }
 
-// In-memory cache for regions
-let regionsCache: Region[] | null = null;
-let cacheTime: number = 0;
-const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+export const REGION_ICONS: Record<string, LucideIcon> = {
+  nyc:     Building2,
+  la:      Sun,
+  sf:      Waves,
+  chicago: Wind,
+  boston:  GraduationCap,
+  atlanta: Leaf,
+  dallas:  Star,
+  dc:      Landmark,
+  seattle: CloudRain,
+  other:   Globe,
+};
 
-export async function getRegions(): Promise<Region[]> {
-  // Check cache freshness
-  if (regionsCache && Date.now() - cacheTime < CACHE_TTL) {
-    return regionsCache;
-  }
-
-  const supabase = createBrowserClient();
-  const { data, error } = await supabase
-    .from("regions")
-    .select("*")
-    .order("sort_order", { ascending: true });
-
-  if (error || !data) {
-    console.error("Failed to fetch regions:", error);
-    return [];
-  }
-
-  regionsCache = data as Region[];
-  cacheTime = Date.now();
-  return data as Region[];
+export function getRegionIcon(value: string): LucideIcon {
+  return REGION_ICONS[value] ?? Globe;
 }
 
-export async function getRegionLabel(idOrValue: number | string): Promise<string> {
-  const regions = await getRegions();
-  if (typeof idOrValue === "number") {
-    return regions.find((r) => r.id === idOrValue)?.label ?? "";
-  }
-  return regions.find((r) => r.value === idOrValue)?.label ?? idOrValue;
-}
+export const REGIONS: Region[] = [
+  { value: "nyc",     label: "NYC Metro"    },
+  { value: "la",      label: "Los Angeles"  },
+  { value: "sf",      label: "Bay Area"     },
+  { value: "chicago", label: "Chicago"      },
+  { value: "dc",      label: "Washington DC"},
+  { value: "seattle", label: "Seattle"      },
+  { value: "boston",  label: "Boston"       },
+  { value: "atlanta", label: "Atlanta"      },
+  { value: "dallas",  label: "DFW"          },
+  { value: "other",   label: "Others"       },
+];
 
-export async function getRegionEmoji(idOrValue: number | string): Promise<string> {
-  const regions = await getRegions();
-  if (typeof idOrValue === "number") {
-    return regions.find((r) => r.id === idOrValue)?.emoji ?? "🌍";
-  }
-  return regions.find((r) => r.value === idOrValue)?.emoji ?? "🌍";
+export function getRegionLabel(value: string): string {
+  return REGIONS.find((r) => r.value === value)?.label ?? value;
 }
 
 export type MetroArea = Region["value"];

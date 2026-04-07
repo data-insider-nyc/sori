@@ -10,8 +10,7 @@ export type Category =
   | "jobs"
   | "other";
 
-// PostCategory is managed in the DB (lib/post-categories.ts) — value is a string.
-// Region is now from lib/regions.ts (DB-backed)
+// PostCategory and Region are managed in code — lib/post-categories.ts, lib/regions.ts
 import type { Region } from "@/lib/regions";
 export type { Region };
 
@@ -41,9 +40,9 @@ export interface Business {
 
 export interface Post {
   id: string;
-  author: { id: string; nickname: string; handle?: string | null; location_id?: number | null; avatar_url?: string };
+  author: { id: string; nickname: string; handle?: string | null; location?: string | null; avatar_url?: string };
   category: string;
-  region_id: number | null;  // Region ID (INTEGER FK)
+  region: string | null;
   title: string;
   content: string;
   tags: string[];

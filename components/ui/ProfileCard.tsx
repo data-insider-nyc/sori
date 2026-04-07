@@ -1,14 +1,13 @@
 "use client";
 
 import Image from "next/image";
-import { useState, useEffect } from "react";
 import { cn, avatarPalette } from "@/lib/utils";
-import { getRegionEmoji, getRegionLabel } from "@/lib/regions";
+import { getRegionIcon, getRegionLabel } from "@/lib/regions";
 
 interface Props {
   nickname: string;
   handle?: string | null;
-  location?: string | number | null;
+  location?: string | null;
   avatarUrl?: string | null;
   /** sm = 32px (comments), md = 40px (feed/popover), lg = 56px (profile page) */
   size?: "sm" | "md" | "lg";
@@ -33,22 +32,7 @@ export function ProfileCard({
   showLocation = false,
 }: Props) {
   const s = SIZE[size];
-  const [displayLocation, setDisplayLocation] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (!location) {
-      setDisplayLocation(null);
-      return;
-    }
-
-    (async () => {
-      const emoji = await getRegionEmoji(location);
-      const label = await getRegionLabel(location);
-      // Show emoji + first word of label (e.g., "🗽 NY")
-      const firstWord = label.split(" ")[0];
-      setDisplayLocation(`${emoji} ${firstWord}`);
-    })();
-  }, [location]);
+  const RegionIcon = location ? getRegionIcon(location) : null;
 
   return (
     <div className={cn("profile-card", className)}>
@@ -56,8 +40,11 @@ export function ProfileCard({
       <div className="profile-info">
         <div className={cn("display-name", s.text)}>
           <span className="truncate">{nickname}</span>
-          {displayLocation && showLocation && (
-            <span className="badge badge-loc">{displayLocation}</span>
+          {location && RegionIcon && showLocation && (
+            <span className="badge badge-loc inline-flex items-center gap-0.5">
+              <RegionIcon className="w-2.5 h-2.5" strokeWidth={2} />
+              {getRegionLabel(location).split(" ")[0]}
+            </span>
           )}
         </div>
         {handle && <div className={cn("handle", s.handle)}>@{handle}</div>}
