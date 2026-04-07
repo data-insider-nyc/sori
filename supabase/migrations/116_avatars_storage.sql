@@ -9,10 +9,12 @@ VALUES (
 )
 ON CONFLICT (id) DO NOTHING;
 
+DROP POLICY IF EXISTS "avatars_public_read" ON storage.objects;
 CREATE POLICY "avatars_public_read"
   ON storage.objects FOR SELECT
   USING (bucket_id = 'avatars');
 
+DROP POLICY IF EXISTS "avatars_own_upload" ON storage.objects;
 CREATE POLICY "avatars_own_upload"
   ON storage.objects FOR INSERT
   WITH CHECK (
@@ -20,6 +22,7 @@ CREATE POLICY "avatars_own_upload"
     AND auth.uid()::text = (storage.foldername(name))[1]
   );
 
+DROP POLICY IF EXISTS "avatars_own_update" ON storage.objects;
 CREATE POLICY "avatars_own_update"
   ON storage.objects FOR UPDATE
   USING (
@@ -27,6 +30,7 @@ CREATE POLICY "avatars_own_update"
     AND auth.uid()::text = (storage.foldername(name))[1]
   );
 
+DROP POLICY IF EXISTS "avatars_own_delete" ON storage.objects;
 CREATE POLICY "avatars_own_delete"
   ON storage.objects FOR DELETE
   USING (
