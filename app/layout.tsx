@@ -6,6 +6,7 @@ import { Header } from "@/components/layout/Header";
 import { MobileNav } from "@/components/layout/MobileNav";
 import { AuthRefresh } from "@/components/layout/AuthRefresh";
 import { LAYOUT_META, SITE } from "@/lib/copy";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 
 const notoSansKR = Noto_Sans_KR({
   subsets: ["latin"],
@@ -49,7 +50,11 @@ export const metadata: Metadata = {
     canonical: "https://oursori.com",
   },
   manifest: "/manifest.json",
-  appleWebApp: { capable: true, statusBarStyle: "default", title: SITE.shortName },
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: SITE.shortName,
+  },
 };
 
 export const viewport: Viewport = {
@@ -99,6 +104,7 @@ export default function RootLayout({
         </footer>
         <MobileNav />
         <Analytics />
+        <SpeedInsights />
       </body>
     </html>
   );
