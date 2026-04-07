@@ -39,9 +39,7 @@ export function LocationEditor({ userId, currentLocation }: Props) {
         <MapPin className="w-3.5 h-3.5 text-blue-400" />
         <p className="text-sm font-semibold text-gray-700">내 활동 지역</p>
       </div>
-      <p className="text-xs text-gray-400 mb-4">
-        프로필 팝오버에 표시돼요
-      </p>
+      <p className="text-xs text-gray-400 mb-4">프로필 팝오버에 표시돼요</p>
 
       {success && (
         <div className="bg-[#FFF0F0] rounded-xl px-4 py-2.5 text-sm text-[#FF5C5C] font-semibold text-center mb-3">
