@@ -7,14 +7,14 @@ import type { Post } from "@/types";
 import { getRegions } from "@/lib/regions";
 import { getPostCategories } from "@/lib/post-categories";
 import type { Region } from "@/lib/regions";
-import type { PostCategory } from "@/lib/post-categories";
+import type { PostCategoryItem } from "@/lib/post-categories";
 
 export function CommunityFeed() {
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
   const [userId, setUserId] = useState<string | null>(null);
   const [regions, setRegions] = useState<Region[]>([]);
-  const [categories, setCategories] = useState<PostCategory[]>([]);
+  const [categories, setCategories] = useState<PostCategoryItem[]>([]);
 
   useEffect(() => {
     async function load() {

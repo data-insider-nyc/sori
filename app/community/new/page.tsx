@@ -37,8 +37,8 @@ export default function NewPostPage() {
   }
 
   return (
-    <div className="py-8 max-w-2xl mx-auto">
-      <div className="mb-6 flex items-center gap-3">
+    <div className="py-4 sm:py-8 max-w-2xl mx-auto">
+      <div className="mb-4 flex items-center gap-3">
         <button
           onClick={() => router.back()}
           className="text-gray-400 hover:text-gray-700 transition-colors text-sm"
@@ -48,7 +48,7 @@ export default function NewPostPage() {
         <h1 className="text-2xl font-black text-gray-900">글쓰기</h1>
       </div>
 
-      <div className="bg-white border border-gray-100 rounded-2xl shadow-sm p-6">
+      <div className="bg-white border border-gray-100 rounded-2xl shadow-sm p-4 sm:p-6">
         <PostForm onSubmit={handleSubmit} submitLabel="게시하기" />
       </div>
     </div>

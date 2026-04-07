@@ -7,7 +7,7 @@ import { UserPopover } from "../community/UserPopover";
 import { ProfileCard } from "@/components/ui/ProfileCard";
 import type { Post } from "@/types";
 import type { Region } from "@/lib/regions";
-import type { PostCategory } from "@/lib/post-categories";
+import type { PostCategoryItem } from "@/lib/post-categories";
 import { PostBadge } from "./PostBadge";
 import { PostMenu } from "@/components/community/PostMenu";
 import { LikeButton } from "@/components/ui/LikeButton";
@@ -17,7 +17,7 @@ interface Props {
   userId?: string | null;
   /** Pre-fetched lookup data from the parent feed — passed through to PostBadge */
   regions?: Region[];
-  categories?: PostCategory[];
+  categories?: PostCategoryItem[];
 }
 
 export const PostCard = React.memo(function PostCard({

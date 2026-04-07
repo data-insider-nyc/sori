@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Heart, MessageCircle, CornerDownRight } from "lucide-react";
 import { createClient } from "@/lib/supabase-browser";
-import { getCategoryLabel, getCategoryEmoji } from "@/lib/constants";
+import { getCategoryLabel, getCategoryEmoji } from "@/lib/post-categories";
 import { timeAgo } from "@/lib/utils";
 import { cn } from "@/lib/utils";
 

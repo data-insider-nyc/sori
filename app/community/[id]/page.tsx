@@ -3,7 +3,7 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import { createClient } from "@/lib/supabase-server";
 import { getCachedPost } from "@/lib/queries";
-import { getCategoryLabel, getCategoryEmoji } from "@/lib/constants";
+import { getCategoryLabel, getCategoryEmoji } from "@/lib/post-categories";
 import { timeAgo } from "@/lib/utils";
 import { ProfileCard } from "@/components/ui/ProfileCard";
 import { PostInteractions } from "./PostInteractions";

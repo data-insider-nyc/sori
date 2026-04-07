@@ -3,14 +3,14 @@
 import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import { getRegions } from "@/lib/regions";
-import { COMMUNITY_CATEGORIES, DEFAULT_CATEGORY } from "@/lib/constants";
-import type { PostCategory } from "@/lib/constants";
+import { getPostCategories, DEFAULT_CATEGORY } from "@/lib/post-categories";
+import type { PostCategoryItem } from "@/lib/post-categories";
 import type { Region } from "@/lib/regions";
 
 export interface PostFormValues {
   title: string;
   content: string;
-  category: PostCategory;
+  category: string;
   region_id: number | null;
 }
 
@@ -36,20 +36,24 @@ export function PostForm({
   compact = false,
   error: externalError,
 }: Props) {
-  const [category, setCategory] = useState<PostCategory>(
+  const [category, setCategory] = useState<string>(
     initialValues?.category ?? DEFAULT_CATEGORY,
   );
   const [regionId, setRegionId] = useState<number | null>(
     initialValues?.region_id ?? null,
   );
   const [regions, setRegions] = useState<Region[]>([]);
+  const [categories, setCategories] = useState<PostCategoryItem[]>([]);
   const [title, setTitle] = useState(initialValues?.title ?? "");
   const [content, setContent] = useState(initialValues?.content ?? "");
   const [saving, setSaving] = useState(false);
   const [internalError, setInternalError] = useState("");
 
   useEffect(() => {
-    getRegions().then(setRegions);
+    Promise.all([getRegions(), getPostCategories()]).then(([r, c]) => {
+      setRegions(r);
+      setCategories(c);
+    });
   }, []);
 
   const error = externalError || internalError;
@@ -75,11 +79,11 @@ export function PostForm({
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-5">
+    <form onSubmit={handleSubmit} className="space-y-4">
       {/* Region */}
       <div>
-        <p className="text-sm font-semibold text-gray-700 mb-3">지역</p>
-        <div className="flex flex-wrap gap-2">
+        <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">지역</p>
+        <div className="flex flex-wrap gap-1.5">
           <button
             type="button"
             onClick={() => setRegionId(null)}
@@ -104,9 +108,9 @@ export function PostForm({
 
       {/* Category */}
       <div>
-        <p className="text-sm font-semibold text-gray-700 mb-3">카테고리</p>
-        <div className="flex flex-wrap gap-2">
-          {COMMUNITY_CATEGORIES.map((cat) => (
+        <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">카테고리</p>
+        <div className="flex flex-wrap gap-1.5">
+          {categories.map((cat) => (
             <button
               key={cat.value}
               type="button"
@@ -160,7 +164,7 @@ export function PostForm({
           value={content}
           onChange={(e) => setContent(e.target.value.slice(0, CONTENT_MAX))}
           placeholder="내용을 입력해주세요"
-          rows={compact ? 8 : 12}
+          rows={compact ? 6 : 8}
           className="input-field resize-none"
           required
         />

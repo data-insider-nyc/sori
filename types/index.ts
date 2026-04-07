@@ -10,11 +10,10 @@ export type Category =
   | "jobs"
   | "other";
 
-// PostCategory is defined in lib/constants.ts — do not duplicate here.
-import type { PostCategory } from "@/lib/constants";
+// PostCategory is managed in the DB (lib/post-categories.ts) — value is a string.
 // Region is now from lib/regions.ts (DB-backed)
 import type { Region } from "@/lib/regions";
-export type { PostCategory, Region };
+export type { Region };
 
 export interface Business {
   id: string;
@@ -43,7 +42,7 @@ export interface Business {
 export interface Post {
   id: string;
   author: { id: string; nickname: string; handle?: string | null; location_id?: number | null; avatar_url?: string };
-  category: PostCategory;
+  category: string;
   region_id: number | null;  // Region ID (INTEGER FK)
   title: string;
   content: string;

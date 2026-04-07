@@ -293,28 +293,28 @@ ON CONFLICT (id) DO NOTHING;
 INSERT INTO posts (id, user_id, category, title, content, tags, like_count, comment_count, created_at, region_id) VALUES
 
   -- ── np01: 룸메이트 구인 ─ Hell's Kitchen (박현수) ─────────────────────────
-  (np01, u_hyunsoo, 'realestate',
+  (np01, u_hyunsoo, 'housing',
    '[룸메이트 구해요] Hell''s Kitchen 2BR — 직장인/대학원생 선호',
    E'안녕하세요! 맨해튼 Hell''s Kitchen(10th Ave & 48th St 근처) 2BR에서 룸메이트 한 분 구합니다.\n\n📍 위치: Hell''s Kitchen — A/C/E, 1 라인 도보 10분\n🏠 개인 침실 약 130sqft + 공용 거실·주방\n💰 월세: $1,650 (전기·인터넷 공용비 약 $50 추가)\n📅 입주: 4월 1일 이후 (협의 가능)\n\n함께 사실 분 조건:\n- 직장인 또는 대학원생 선호\n- 비흡연자, 반려동물 없으신 분\n- 집 깨끗하게 쓰시는 분\n- 주중 늦게까지 파티하시는 분은 어려울 것 같아요 ㅎㅎ\n\n저는 IT 회사 시니어 개발자로 출퇴근 규칙적이고 조용히 사는 편이에요. 주말엔 친구들 소소하게 부르는 정도예요.\n\n관심 있으신 분 댓글이나 DM 주세요!',
    ARRAY['룸메이트','헬스키친','맨해튼','구인'], 8, 0,
    NOW() - INTERVAL '30 days 3 hours', 1),
 
   -- ── np02: 룸메이트 구인 ─ Washington Heights (서아연) ────────────────────
-  (np02, u_ayeon, 'realestate',
+  (np02, u_ayeon, 'housing',
    '[룸메이트] Washington Heights 방 하나 구해요 — 여성분 환영 🙏',
    E'컬럼비아 다니는 대학원생인데요, 학교 근처 Washington Heights에서 3BR 아파트 방 하나 남아서 구합니다.\n\n📍 위치: Washington Heights (181st St A역 도보 3분)\n🏠 개인 침실 (창문 있음, 붙박이 클로젯)\n💰 월세: $1,200 (all utilities included! 🎉)\n📅 입주: 즉시 가능\n\n현재 사는 사람: 저(컬럼비아 석사 여학생) + 컬럼비아 박사 여학생 1명\n\n함께 사실 분:\n- 여성분 선호 (양해 부탁드려요)\n- 학생·직장인 모두 환영\n- 규칙적인 생활 하시는 분\n- 주방 깨끗하게 쓰시는 분\n\n학교 근처라 조용하고 치안도 괜찮아요. 공원 가까워서 산책하기도 좋고요.\n연락 주세요!',
    ARRAY['룸메이트','워싱턴하이츠','컬럼비아','여성룸메이트'], 11, 0,
    NOW() - INTERVAL '27 days 5 hours', 1),
 
   -- ── np03: 비자 ─ OPT/H1B (김도훈) ────────────────────────────────────────
-  (np03, u_dohoon, 'visa',
+  (np03, u_dohoon, 'immigration',
    'NYU MBA 졸업 후 OPT — STEM 연장 안 되면 어떡하죠? 😥',
    E'안녕하세요, NYU Stern MBA 다니는 학생입니다.\n\nMBA는 보통 STEM OPT 연장이 안 된다고 알고 있어요 (일부 STEM designation 받은 프로그램 제외). 그러면 OPT 1년밖에 없잖아요.\n\nH1B 로터리 당첨 확률이 30%도 안 되는 상황에서 졸업 후 플랜이 너무 막막합니다. 주변에 MBA 졸업하고 H1B 못 받은 분들 어떻게 하셨나요?\n\n고려 중인 옵션들:\n- 캐나다 취업 후 TN visa로 미국 복귀?\n- O1 비자는 현실적으로 어떤가요?\n- 스폰서 없이 가능한 비자가 있나요?\n\n뉴욕에서 MBA 졸업하신 선배님들 조언 간절히 부탁드립니다. 졸업이 4개월 남았는데 너무 불안하네요.',
    ARRAY['비자','H1B','OPT','MBA','취업'], 29, 0,
    NOW() - INTERVAL '25 days 2 hours', 1),
 
   -- ── np04: 비자 ─ F1 갱신 (임소희) ───────────────────────────────────────
-  (np04, u_sohee, 'visa',
+  (np04, u_sohee, 'immigration',
    'F1 비자 만료 — 미국에서 갱신이 안 된다는데 어떻게 하셨어요?',
    E'안녕하세요! 뉴욕에서 대학원 다니고 있는 학생입니다.\n\nF1 비자 만료일이 올 여름이에요. 아는 바로는 F1 비자 스티커 갱신은 미국 밖에서 해야 한다고 하는데요.\n\n궁금한 점들:\n1. 비자 스티커가 만료돼도 I-20 유효하면 미국 내에서 공부 계속 할 수 있나요?\n2. 한국에 잠깐 갔다 와서 갱신하는 게 제일 확실한가요?\n3. 캐나다나 멕시코에서 당일 갱신 받아보신 분 계신가요? 실제로 됐나요?\n\n여름에 한국 가기가 여의치 않아서 가능하면 다른 방법 찾고 있어요. 비슷한 상황 겪어보신 분들 경험 공유해 주시면 너무 감사하겠어요!',
    ARRAY['비자','F1','비자갱신','유학생'], 17, 0,
@@ -342,45 +342,45 @@ INSERT INTO posts (id, user_id, category, title, content, tags, like_count, comm
    NOW() - INTERVAL '15 days 4 hours', 1),
 
   -- ── np08: 룸메이트 구인 ─ Midtown East (강나연) ──────────────────────────
-  (np08, u_nayeon, 'realestate',
+  (np08, u_nayeon, 'housing',
    '[룸메이트] Midtown East 2BR — 직장 여성분 구해요',
-   E'Midtown East (2nd Ave & 49th St 근처) 2BR에서 룸메이트 한 분 구합니다.\n\n📍 위치: Midtown East — E/M, 6 라인 도보 5분\n🏠 개인 침실 (창문 있음, 퀸사이즈 침대 구비)\n💰 월세: $1,750 (전기 따로, 인터넷 공용)\n📅 입주: 4월 1일부터\n\n저는 로펌 paralegal이고 집에서 조용히 지내는 편이에요.\n\n함께 사실 분:\n- 직장 여성분 선호 (남성 지원 어려워요, 양해 부탁드려요)\n- 비흡연자\n- 집 깔끔하게 쓰시는 분\n- 야간 파티 NO\n\nMidtown이라 편의시설 다 가깝고 교통도 최고예요. 관심 있으시면 댓글이나 DM 주세요!',
+   E'Midtown East (2nd Ave & 49th St 근처) 2BR에서 룸메이트 한 분 구합니다.\n\n📍 위치: Midtown East — E/M, 6 라인 도보 5분\n🏠 개인 침실 (창문 있음, 퀸사이즈 침대 구비)\n💰 월세: $1,750 (전기 따로, 인터넷 공용)\n📅 입주: 4월 1일부터\n\n저는ㅐ 로펌 paralegal이고 집에서 조용히 지내는 편이에요.\n\n함께 사실 분:\n- 직장 여성분 선호 (남성 지원 어려워요, 양해 부탁드려요)\n- 비흡연자\n- 집 깔끔하게 쓰시는 분\n- 야간 파티 NO\n\nMidtown이라 편의시설 다 가깝고 교통도 최고예요. 관심 있으시면 댓글이나 DM 주세요!',
    ARRAY['룸메이트','미드타운','맨해튼','직장여성'], 9, 0,
    NOW() - INTERVAL '12 days 2 hours', 1),
 
   -- ── np09: 자유게시판 ─ 레지던트 (장민호) ──────────────────────────────
-  (np09, u_minho, 'general',
+  (np09, u_minho, 'health',
    '뉴욕에서 레지던트 하는 게 이렇게 힘든 줄 몰랐어요 ㅠㅠ',
    E'NYU 내과 레지던트 1년차 중반인데 솔직히 죽겠어요.\n\n36시간 연속 근무 끝나고 집에 오면 그냥 쓰러져요. 먹는 것도 대충, 씻는 것도 대충...\n\n한국에서 의대 다닐 때도 힘들었지만, 뉴욕에서 영어로 레지던트 하는 건 차원이 다른 것 같아요. 환자랑 소통할 때도 문화 차이가 있고, attending 눈치도 봐야 하고.\n\n그나마 한인 선배 레지던트 한 명이 있어서 가끔 플러싱 가서 순대국밥 먹으면 살 것 같아요 ㅋㅋ\n\n근데 진짜 이거 3년 더 버틸 수 있을지 모르겠어요. 비슷한 처지인 분들... 소주 한 잔 같이 해요 😢',
    ARRAY['레지던트','뉴욕의대','의사','이민생활'], 42, 0,
    NOW() - INTERVAL '8 days 3 hours', 1),
 
   -- ── np10: 비자 ─ 시민권 합격 (최재원) ───────────────────────────────────
-  (np10, u_jaewon, 'visa',
+  (np10, u_jaewon, 'immigration',
    '시민권 N-400 인터뷰 통과했어요!! 경험 공유합니다 🎉🇺🇸',
    E'드디어 시민권 인터뷰 통과했어요!! 준비하시는 분들 도움이 됐으면 해서 공유합니다.\n\n📅 타임라인\n- N-400 접수: 작년 9월\n- 생체 정보 등록: 10월\n- 인터뷰 통지: 올해 1월\n- 인터뷰: 2월 중순\n- 합격 통지: 지난주\n\n📋 인터뷰 당일\n- 맨해튼 USCIS 오피스 (26 Federal Plaza)\n- 담당 심사관이 친절하게 해주셨어요\n- 영어 읽기/쓰기 테스트: 쉬운 문장 하나씩 (매우 쉬움)\n- 공민 테스트: 100문제 중 10개 뽑아서 6개 이상 맞추면 합격 (저는 10/10!)\n- 전체 소요 시간: 40분\n\n💡 준비 팁\n- USCIS 공식 앱으로 100개 문제 다 외우기 (앱 완전 유용해요)\n- 여행 내역·세금 신고 내역 꼼꼼히 체크 (중요!)\n- 인터뷰 때 긴장하지 말고 모르면 솔직하게\n\n다음 달 선서식 예정이에요. 뉴욕에서 10년 만에 미국 시민이 됐네요!',
    ARRAY['시민권','N400','이민','USCIS'], 31, 0,
    NOW() - INTERVAL '5 days 1 hour', 1)
 
-  ,(np11, u_emily, 'realestate',
+  ,(np11, u_emily, 'housing',
    '[룸메이트] Long Island City 2BR — 디자이너 직장인 환영',
    E'LIC Court Sq 도보 6분 2BR에서 4월 중순 입주 가능한 룸메이트 구해요.\n\n월세 $1,700 + 유틸 분담, 개인방 창문/클로젯 있음.\n저는 제품 디자이너라 재택이 주 2일 있어요. 집 조용하고 깔끔하게 쓰실 분이면 좋겠습니다.\n\n지하철(E/M/7/G) 접근 좋아서 맨해튼 출퇴근 정말 편해요.',
    ARRAY['룸메이트','LIC','퀸즈','직장인'], 7, 0,
    NOW() - INTERVAL '14 days 2 hours', 1)
 
-  ,(np12, u_kevin, 'realestate',
+  ,(np12, u_kevin, 'housing',
    'Astoria 1BR 서브렛 구합니다 (2개월)',
    E'5월-6월 2개월만 Astoria 1BR 서브렛 구해요. 예산은 월 $2,200 이하이고 N/W 라인 근처면 좋습니다.\n\n재택 많아서 인터넷 안정성 중요하고, 가구 포함이면 더 좋습니다. 추천 주시면 감사하겠습니다!',
    ARRAY['서브렛','아스토리아','퀸즈'], 5, 0,
    NOW() - INTERVAL '11 days 6 hours', 1)
 
-  ,(np13, u_daniel, 'visa',
+  ,(np13, u_daniel, 'immigration',
    'O-1 비자 포트폴리오 준비, 어떤 자료가 제일 중요했나요?',
    E'영상 디렉터로 O-1 비자 준비 중입니다. 에이전시에서 기사/수상/심사위원 경력/레터를 강조하던데, 실제 승인 받으신 분들은 어떤 자료가 결정적이었나요?\n\n뉴욕에서 변호사 비용도 천차만별이라 경험담 부탁드립니다.',
    ARRAY['O1','비자','포트폴리오','이민변호사'], 14, 0,
    NOW() - INTERVAL '18 days 7 hours', 1)
 
-  ,(np14, u_eric, 'visa',
+  ,(np14, u_eric, 'immigration',
    'H1B 로터리 2년 연속 탈락... 다음 플랜 뭐가 현실적일까요',
    E'H1B 로터리 2년 연속 탈락했습니다. 지금은 STEM OPT 1년 남은 상태예요.\n\n회사에서는 해외 오피스(토론토) 전환을 제안했는데, 장기적으로 미국 복귀를 노리려면 어떤 전략이 좋을지 고민입니다.\n경험 있으신 분들 진짜 조언 부탁드립니다.',
    ARRAY['H1B','OPT','캐나다오피스'], 19, 0,
@@ -398,13 +398,13 @@ INSERT INTO posts (id, user_id, category, title, content, tags, like_count, comm
    ARRAY['커리어전환','패션','데이터'], 13, 0,
    NOW() - INTERVAL '16 days 5 hours', 1)
 
-  ,(np17, u_olivia, 'general',
+  ,(np17, u_olivia, 'local',
    '브루클린에서 조용히 일할 카페/코워킹 추천 부탁해요',
    E'DUMBO/윌리엄스버그 근처에서 글쓰기 하기 좋은 공간 찾고 있어요.\n와이파이 안정적이고 콘센트 많은 곳이면 최고입니다.\n유료 코워킹도 괜찮아요.',
    ARRAY['브루클린','카페','코워킹'], 10, 0,
    NOW() - INTERVAL '4 days 8 hours', 1)
 
-  ,(np18, u_hannah, 'realestate',
+  ,(np18, u_hannah, 'housing',
    'Queens 이사 후기: LIC보다 Sunnyside가 체감 생활비 훨씬 낮네요',
    E'최근 LIC에서 Sunnyside로 옮겼는데 월세/식비/생활비가 생각보다 많이 줄었어요.\n맨해튼 접근성도 7라인으로 크게 나쁘지 않고요.\n뉴욕에서 가성비 거주지 찾는 분들 참고하세요!',
    ARRAY['퀸즈','이사후기','생활비'], 16, 0,
@@ -416,7 +416,7 @@ INSERT INTO posts (id, user_id, category, title, content, tags, like_count, comm
    ARRAY['USMLE','Match','의대'], 12, 0,
    NOW() - INTERVAL '7 days 7 hours', 1)
 
-  ,(np20, u_chloe, 'visa',
+  ,(np20, u_chloe, 'immigration',
    'CPT 인턴십 승인까지 보통 며칠 걸리나요?',
    E'이번 학기 여름 인턴 오퍼를 받았는데 CPT 승인 타임라인이 촉박해서 걱정입니다.\n학교 국제처는 5-10 business days라고 하는데 실제로는 더 걸리는지 궁금해요.\n컬럼비아/NYU 경험담 있으면 부탁드려요!',
    ARRAY['CPT','유학생','인턴십'], 9, 0,
