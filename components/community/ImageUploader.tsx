@@ -7,8 +7,45 @@ import { createClient } from "@/lib/supabase-browser";
 import { cn } from "@/lib/utils";
 
 export const MAX_IMAGES = 4;
-const MAX_SIZE_BYTES = 5 * 1024 * 1024; // 5 MB
-const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif"];
+const MAX_SIZE_BYTES = 5 * 1024 * 1024; // 5 MB (before compression)
+const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp"];
+const MAX_DIMENSION = 1920;
+const COMPRESS_QUALITY = 0.82;
+
+/** Resize + compress image via canvas. */
+async function compressImage(file: File): Promise<Blob> {
+
+  return new Promise((resolve, reject) => {
+    const img = new window.Image();
+    const url = URL.createObjectURL(file);
+    img.onload = () => {
+      URL.revokeObjectURL(url);
+      let { width, height } = img;
+      if (width > MAX_DIMENSION || height > MAX_DIMENSION) {
+        if (width > height) {
+          height = Math.round((height / width) * MAX_DIMENSION);
+          width = MAX_DIMENSION;
+        } else {
+          width = Math.round((width / height) * MAX_DIMENSION);
+          height = MAX_DIMENSION;
+        }
+      }
+      const canvas = document.createElement("canvas");
+      canvas.width = width;
+      canvas.height = height;
+      const ctx = canvas.getContext("2d");
+      if (!ctx) return reject(new Error("canvas error"));
+      ctx.drawImage(img, 0, 0, width, height);
+      canvas.toBlob(
+        (blob) => blob ? resolve(blob) : reject(new Error("compression failed")),
+        "image/jpeg",
+        COMPRESS_QUALITY,
+      );
+    };
+    img.onerror = reject;
+    img.src = url;
+  });
+}
 
 interface Props {
   userId: string;
@@ -41,38 +78,65 @@ export function ImageUploader({ userId, value, onChange, disabled }: Props) {
       setError(`최대 ${MAX_IMAGES}장까지 첨부할 수 있어요.`);
     }
 
-    for (const file of toUpload) {
-      if (!ALLOWED_TYPES.includes(file.type)) {
-        setError("JPG, PNG, WebP, GIF만 업로드할 수 있어요.");
-        continue;
-      }
-      if (file.size > MAX_SIZE_BYTES) {
-        setError("파일 크기는 5MB 이하여야 해요.");
-        continue;
-      }
+    // Create temp preview items for all files at once
+    const tempItems: UploadingItem[] = toUpload.map((file) => ({
+      id: crypto.randomUUID(),
+      preview: URL.createObjectURL(file),
+      progress: "uploading" as const,
+    }));
+    setUploading((prev) => [...prev, ...tempItems]);
 
-      const tempId = crypto.randomUUID();
-      const preview = URL.createObjectURL(file);
-      setUploading((prev) => [...prev, { id: tempId, preview, progress: "uploading" }]);
+    // Upload all in parallel
+    const supabase = createClient();
+    const results = await Promise.all(
+      toUpload.map(async (file, idx) => {
+        const tempId = tempItems[idx].id;
+        const preview = tempItems[idx].preview;
 
-      const ext = file.name.split(".").pop() ?? "jpg";
-      const path = `${userId}/${crypto.randomUUID()}.${ext}`;
-      const supabase = createClient();
-      const { data, error: uploadError } = await supabase.storage
-        .from("post-images")
-        .upload(path, file, { upsert: false });
+        if (!ALLOWED_TYPES.includes(file.type)) {
+          setError("JPG, PNG, WebP만 업로드할 수 있어요.");
+          setUploading((prev) => prev.filter((u) => u.id !== tempId));
+          URL.revokeObjectURL(preview);
+          return null;
+        }
+        if (file.size > MAX_SIZE_BYTES) {
+          setError("파일 크기는 5MB 이하여야 해요.");
+          setUploading((prev) => prev.filter((u) => u.id !== tempId));
+          URL.revokeObjectURL(preview);
+          return null;
+        }
 
-      if (uploadError || !data) {
-        setUploading((prev) => prev.map((u) => u.id === tempId ? { ...u, progress: "error" } : u));
-        setError("업로드 중 오류가 발생했어요. 다시 시도해주세요.");
-        setTimeout(() => setUploading((prev) => prev.filter((u) => u.id !== tempId)), 2000);
-        continue;
-      }
+        const ext = "jpg";
+        const path = `${userId}/${crypto.randomUUID()}.${ext}`;
 
-      const { data: { publicUrl } } = supabase.storage.from("post-images").getPublicUrl(data.path);
-      setUploading((prev) => prev.filter((u) => u.id !== tempId));
-      URL.revokeObjectURL(preview);
-      onChange([...value, publicUrl]);
+        // Compress before upload (GIFs skipped inside compressImage)
+        let blob: Blob;
+        try {
+          blob = await compressImage(file);
+        } catch {
+          blob = file;
+        }
+
+        const { data, error: uploadError } = await supabase.storage
+          .from("post-images")
+          .upload(path, blob, { upsert: false, contentType: blob.type });
+
+        setUploading((prev) => prev.filter((u) => u.id !== tempId));
+        URL.revokeObjectURL(preview);
+
+        if (uploadError || !data) {
+          setError("업로드 중 오류가 발생했어요. 다시 시도해주세요.");
+          return null;
+        }
+
+        const { data: { publicUrl } } = supabase.storage.from("post-images").getPublicUrl(data.path);
+        return publicUrl;
+      })
+    );
+
+    const newUrls = results.filter((u): u is string => u !== null);
+    if (newUrls.length > 0) {
+      onChange([...value, ...newUrls]);
     }
   }
 
