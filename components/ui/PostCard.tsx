@@ -6,8 +6,6 @@ import { MessageCircle } from "lucide-react";
 import { UserPopover } from "../community/UserPopover";
 import { ProfileCard } from "@/components/ui/ProfileCard";
 import type { Post } from "@/types";
-import type { Region } from "@/lib/regions";
-import type { PostCategoryItem } from "@/lib/post-categories";
 import { PostBadge } from "./PostBadge";
 import { PostMenu } from "@/components/community/PostMenu";
 import { LikeButton } from "@/components/ui/LikeButton";
@@ -15,16 +13,11 @@ import { LikeButton } from "@/components/ui/LikeButton";
 interface Props {
   post: Post;
   userId?: string | null;
-  /** Pre-fetched lookup data from the parent feed — passed through to PostBadge */
-  regions?: Region[];
-  categories?: PostCategoryItem[];
 }
 
 export const PostCard = React.memo(function PostCard({
   post,
   userId = null,
-  regions = [],
-  categories = [],
 }: Props) {
   return (
     <>
@@ -41,7 +34,7 @@ export const PostCard = React.memo(function PostCard({
           </UserPopover>
 
           {/* Badge + menu row */}
-          <PostBadge post={post} regions={regions} categories={categories} />
+          <PostBadge post={post} />
           <PostMenu
             postId={post.id}
             authorId={post.author.id}
@@ -51,7 +44,7 @@ export const PostCard = React.memo(function PostCard({
               title: post.title,
               content: post.content ?? "",
               category: post.category,
-              region_id: post.region_id,
+              region: post.region,
             }}
             onAfterEdit={() => window.location.reload()}
             onAfterDelete={() => {

@@ -9,7 +9,7 @@ interface Props {
     title?: string | null;
     content: string;
     category: string;
-    region_id: number | null;
+    region: string | null;
     authorId: string | null;
     pinned?: boolean;
   };
@@ -29,7 +29,7 @@ export function PostDetailActions({ post, userId }: Props) {
         title: post.title,
         content: post.content,
         category: post.category,
-        region_id: post.region_id,
+        region: post.region,
       }}
       onAfterEdit={() => router.refresh()}
       onAfterDelete={() => { window.location.href = "/community"; }}

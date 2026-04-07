@@ -4,8 +4,8 @@ import { useState, useEffect, useRef } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase-browser";
 import { LOCAL_CATEGORIES } from "@/lib/constants";
-import { getRegions } from "@/lib/regions";
-import { getPostCategories } from "@/lib/post-categories";
+import { REGIONS, getRegionIcon } from "@/lib/regions";
+import { CATEGORIES, getCategoryIcon } from "@/lib/post-categories";
 import { PostCard } from "@/components/ui/PostCard";
 import { cn } from "@/lib/utils";
 import type { Post } from "@/types";
@@ -58,15 +58,9 @@ export function CommunityListing() {
   );
   const [userId, setUserId] = useState<string | null>(null);
   const [searchInput, setSearchInput] = useState(q);
-  const [regions, setRegions] = useState<any[]>([]);
-  const [categories, setCategories] = useState<any[]>([]);
+  const regions = REGIONS;
+  const categories = CATEGORIES;
   const debounceRef = useRef<ReturnType<typeof setTimeout>>(undefined);
-
-  // Load regions + categories from DB
-  useEffect(() => {
-    getRegions().then(setRegions);
-    getPostCategories().then(setCategories);
-  }, []);
 
   // Resolve auth from local session cache (no network round-trip)
   useEffect(() => {
@@ -152,17 +146,13 @@ export function CommunityListing() {
     let query = supabase
       .from("posts")
       .select(
-        "id, title, content, category, region_id, user_id, like_count, comment_count, created_at, pinned, pinned_at, author:profiles!user_id(id, nickname, handle, location_id, avatar_url)",
+        "id, title, content, category, region, user_id, like_count, comment_count, created_at, pinned, pinned_at, author:profiles!user_id(id, nickname, handle, location, avatar_url)",
       )
       .order("created_at", { ascending: false })
       .limit(PAGE_SIZE);
 
     if (category !== "all") query = query.eq("category", category);
-    if (region !== "all") {
-      // Get region ID from region value
-      const regionId = regions.find((r) => r.value === region)?.id;
-      if (regionId) query = query.eq("region_id", regionId);
-    }
+    if (region !== "all") query = query.eq("region", region);
     if (q.trim()) query = query.ilike("title", `%${q.trim()}%`);
     if (afterCursor) query = query.lt("created_at", afterCursor);
 
@@ -269,20 +259,24 @@ export function CommunityListing() {
         >
           전체 지역
         </button>
-        {regions.map((r) => (
-          <button
-            key={r.value}
-            onClick={() => setParam("region", r.value)}
-            className={cn(
-              "flex-shrink-0 px-4 py-1.5 rounded-full text-sm font-bold border transition-all",
-              region === r.value
-                ? "bg-[#FF5C5C] text-white border-[#FF5C5C]"
-                : "bg-white text-gray-500 border-gray-200 hover:border-[#FF5C5C] hover:text-[#FF5C5C]",
-            )}
-          >
-            {r.emoji} {r.label}
-          </button>
-        ))}
+        {regions.map((r) => {
+            const RIcon = getRegionIcon(r.value);
+            return (
+              <button
+                key={r.value}
+                onClick={() => setParam("region", r.value)}
+                className={cn(
+                  "flex-shrink-0 px-4 py-1.5 rounded-full text-sm font-bold border transition-all inline-flex items-center gap-1.5",
+                  region === r.value
+                    ? "bg-[#FF5C5C] text-white border-[#FF5C5C]"
+                    : "bg-white text-gray-500 border-gray-200 hover:border-[#FF5C5C] hover:text-[#FF5C5C]",
+                )}
+              >
+                <RIcon className="w-3.5 h-3.5" strokeWidth={2} />
+                {r.label}
+              </button>
+            );
+          })}
       </div>
 
       {/* Category tabs */}
@@ -298,20 +292,24 @@ export function CommunityListing() {
         >
           전체 토픽
         </button>
-        {categories.map((cat) => (
-          <button
-            key={cat.value}
-            onClick={() => setParam("category", cat.value)}
-            className={cn(
-              "flex-shrink-0 px-4 py-2 rounded-full text-sm font-bold border transition-all",
-              category === cat.value
-                ? "bg-gray-900 text-white border-gray-900"
-                : "bg-white text-gray-500 border-gray-200 hover:border-gray-400",
-            )}
-          >
-            {cat.emoji} {cat.label}
-          </button>
-        ))}
+        {categories.map((cat) => {
+          const CatIcon = getCategoryIcon(cat.value);
+          return (
+            <button
+              key={cat.value}
+              onClick={() => setParam("category", cat.value)}
+              className={cn(
+                "flex-shrink-0 inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-bold border transition-all",
+                category === cat.value
+                  ? "bg-gray-900 text-white border-gray-900"
+                  : "bg-white text-gray-500 border-gray-200 hover:border-gray-400",
+              )}
+            >
+              <CatIcon className="w-3.5 h-3.5" strokeWidth={2} />
+              {cat.label}
+            </button>
+          );
+        })}
       </div>
 
       {/* Feed */}
@@ -336,7 +334,7 @@ export function CommunityListing() {
         <>
           <div className="space-y-4">
             {posts.map((post) => (
-              <PostCard key={post.id} post={post} userId={userId} regions={regions} categories={categories} />
+              <PostCard key={post.id} post={post} userId={userId} />
             ))}
           </div>
 

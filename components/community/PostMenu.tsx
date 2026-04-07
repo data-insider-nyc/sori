@@ -20,7 +20,7 @@ interface Props {
     title?: string | null;
     content: string;
     category: string;
-    region_id?: number | null;
+    region?: string | null;
   };
   /** Called after a successful edit. Use router.refresh() on detail page,
    *  window.location.reload() on listing. */
@@ -77,7 +77,7 @@ export function PostMenu({
         title: values.title || null,
         content: values.content,
         category: values.category,
-        region_id: values.region_id,
+        region: values.region,
       }),
     });
     if (!res.ok) {
@@ -236,7 +236,7 @@ export function PostMenu({
                   title: initialValues.title ?? "",
                   content: initialValues.content,
                   category: initialValues.category as any,
-                  region_id: initialValues.region_id ?? null,
+                  region: initialValues.region ?? null,
                 }}
                 onSubmit={handleEditSave}
                 onCancel={() => setShowEdit(false)}

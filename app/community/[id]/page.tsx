@@ -3,7 +3,7 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import { createClient } from "@/lib/supabase-server";
 import { getCachedPost } from "@/lib/queries";
-import { getCategoryLabel, getCategoryEmoji } from "@/lib/post-categories";
+import { getCategoryLabel, getCategoryIcon } from "@/lib/post-categories";
 import { timeAgo } from "@/lib/utils";
 import { ProfileCard } from "@/components/ui/ProfileCard";
 import { PostInteractions } from "./PostInteractions";
@@ -86,7 +86,7 @@ export default async function PostDetailPage({
               title: post.title,
               content: post.content,
               category: post.category,
-              region_id: post.region_id,
+              region: post.region,
               authorId: author?.id ?? null,
               pinned: (post as any).pinned,
             }}
@@ -106,7 +106,7 @@ export default async function PostDetailPage({
               <ProfileCard
                 nickname={author.nickname}
                 handle={(author as any).handle}
-                location={(author as any).location_id}
+                location={(author as any).location}
                 avatarUrl={(author as any).avatar_url}
                 size="md"
               />

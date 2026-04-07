@@ -4,39 +4,28 @@ import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase-browser";
 import { PostCard } from "@/components/ui/PostCard";
 import type { Post } from "@/types";
-import { getRegions } from "@/lib/regions";
-import { getPostCategories } from "@/lib/post-categories";
-import type { Region } from "@/lib/regions";
-import type { PostCategoryItem } from "@/lib/post-categories";
 
 export function CommunityFeed() {
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
   const [userId, setUserId] = useState<string | null>(null);
-  const [regions, setRegions] = useState<Region[]>([]);
-  const [categories, setCategories] = useState<PostCategoryItem[]>([]);
 
   useEffect(() => {
     async function load() {
       const supabase = createClient();
 
-      // Fetch posts with author join + lookup data in parallel
-      const [{ data: raw }, regionsData, catsData, { data: { session } }] =
+      const [{ data: raw }, { data: { session } }] =
         await Promise.all([
           supabase
             .from("posts")
             .select(
-              "id, title, content, category, region_id, user_id, like_count, comment_count, created_at, pinned, pinned_at, author:profiles!user_id(id, nickname, handle, location_id, avatar_url)",
+              "id, title, content, category, region, user_id, like_count, comment_count, created_at, pinned, pinned_at, author:profiles!user_id(id, nickname, handle, location, avatar_url)",
             )
             .order("created_at", { ascending: false })
             .limit(8),
-          getRegions(),
-          getPostCategories(),
           supabase.auth.getSession(),
         ]);
 
-      setRegions(regionsData);
-      setCategories(catsData);
       setUserId(session?.user?.id ?? null);
 
       const rawPosts = raw ?? [];
@@ -78,8 +67,9 @@ export function CommunityFeed() {
   return (
     <div className="space-y-4">
       {posts.map((post) => (
-        <PostCard key={post.id} post={post} userId={userId} regions={regions} categories={categories} />
+        <PostCard key={post.id} post={post} userId={userId} />
       ))}
     </div>
   );
 }
+

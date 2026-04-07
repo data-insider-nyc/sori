@@ -3,7 +3,7 @@ import { createClient } from "@supabase/supabase-js";
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
 );
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
@@ -11,11 +11,26 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const now = new Date();
 
   const staticPages: MetadataRoute.Sitemap = [
-    { url: base,                  lastModified: now, changeFrequency: "daily",   priority: 1.0 },
-    { url: `${base}/community`,   lastModified: now, changeFrequency: "hourly",  priority: 0.9 },
-    { url: `${base}/directory`,   lastModified: now, changeFrequency: "daily",   priority: 0.9 },
-    { url: `${base}/jobs`,        lastModified: now, changeFrequency: "weekly",  priority: 0.5 },
-    { url: `${base}/advertise`,   lastModified: now, changeFrequency: "monthly", priority: 0.3 },
+    { url: base, lastModified: now, changeFrequency: "daily", priority: 1.0 },
+    {
+      url: `${base}/community`,
+      lastModified: now,
+      changeFrequency: "hourly",
+      priority: 0.9,
+    },
+    // { url: `${base}/directory`,   lastModified: now, changeFrequency: "daily",   priority: 0.9 },
+    {
+      url: `${base}/jobs`,
+      lastModified: now,
+      changeFrequency: "weekly",
+      priority: 0.5,
+    },
+    {
+      url: `${base}/advertise`,
+      lastModified: now,
+      changeFrequency: "monthly",
+      priority: 0.3,
+    },
   ];
 
   // Business detail pages
