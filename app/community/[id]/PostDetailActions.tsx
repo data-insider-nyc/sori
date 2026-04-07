@@ -10,8 +10,10 @@ interface Props {
     content: string;
     category: string;
     region: string | null;
+    images?: string[] | null;
     authorId: string | null;
     pinned?: boolean;
+    isAnnouncement?: boolean;
   };
   userId: string | null;
 }
@@ -25,15 +27,18 @@ export function PostDetailActions({ post, userId }: Props) {
       authorId={post.authorId}
       userId={userId}
       pinned={post.pinned}
+      isAnnouncement={post.isAnnouncement}
       initialValues={{
         title: post.title,
         content: post.content,
         category: post.category,
         region: post.region,
+        images: post.images ?? [],
       }}
       onAfterEdit={() => router.refresh()}
       onAfterDelete={() => { window.location.href = "/community"; }}
       onAfterPin={() => router.refresh()}
+      onAfterAnnouncement={() => router.refresh()}
     />
   );
 }

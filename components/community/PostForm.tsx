@@ -2,15 +2,19 @@
 
 import { useState } from "react";
 import { cn } from "@/lib/utils";
-import { Globe } from "lucide-react";
+import { Globe, Megaphone } from "lucide-react";
 import { REGIONS, getRegionIcon } from "@/lib/regions";
-import { CATEGORIES, DEFAULT_CATEGORY, getCategoryIcon } from "@/lib/post-categories";
+import { CATEGORIES, DEFAULT_CATEGORY } from "@/lib/post-categories";
+import { ImageUploader } from "@/components/community/ImageUploader";
+import { CategoryIcon } from "@/components/ui/CategoryIcon";
 
 export interface PostFormValues {
   title: string;
   content: string;
   category: string;
   region: string | null;
+  images: string[];
+  isAnnouncement?: boolean;
 }
 
 interface Props {
@@ -22,6 +26,10 @@ interface Props {
   /** When true the textarea gets fewer rows (suited for a modal) */
   compact?: boolean;
   error?: string;
+  /** Required for image upload — current user's id */
+  userId?: string;
+  /** When true shows the "공지사항으로 등록" checkbox */
+  isAdmin?: boolean;
 }
 
 const TITLE_MAX = 50;
@@ -34,6 +42,8 @@ export function PostForm({
   submitLabel = "게시하기",
   compact = false,
   error: externalError,
+  userId,
+  isAdmin = false,
 }: Props) {
   const [category, setCategory] = useState<string>(
     initialValues?.category ?? DEFAULT_CATEGORY,
@@ -45,6 +55,8 @@ export function PostForm({
   const categories = CATEGORIES;
   const [title, setTitle] = useState(initialValues?.title ?? "");
   const [content, setContent] = useState(initialValues?.content ?? "");
+  const [images, setImages] = useState<string[]>(initialValues?.images ?? []);
+  const [isAnnouncement, setIsAnnouncement] = useState(initialValues?.isAnnouncement ?? false);
   const [saving, setSaving] = useState(false);
   const [internalError, setInternalError] = useState("");
 
@@ -63,6 +75,8 @@ export function PostForm({
         content: content.trim(),
         category,
         region,
+        images,
+        isAnnouncement,
       });
     } catch (err: any) {
       setInternalError(err.message || "저장에 실패했습니다.");
@@ -108,15 +122,14 @@ export function PostForm({
         <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">카테고리</p>
         <div className="flex flex-wrap gap-1.5">
           {categories.map((cat) => {
-              const CatIcon = getCategoryIcon(cat.value);
               return (
                 <button
                   key={cat.value}
                   type="button"
                   onClick={() => setCategory(cat.value)}
-                  className={cn("chip inline-flex items-center gap-1", category === cat.value && "chip-active")}
+                  className={cn("chip inline-flex items-center gap-1.5 pl-1 pr-3", category === cat.value && "chip-active")}
                 >
-                  <CatIcon className="w-3 h-3" strokeWidth={2} />
+                  <CategoryIcon category={cat.value} size="sm" />
                   {cat.label}
                 </button>
               );
@@ -170,6 +183,54 @@ export function PostForm({
           required
         />
       </div>
+
+      {/* Announcement toggle — admins only */}
+      {isAdmin && (
+        <div>
+          <label className="flex items-center gap-3 cursor-pointer group">
+            <div
+              onClick={() => setIsAnnouncement((v) => !v)}
+              className={cn(
+                "w-5 h-5 rounded flex items-center justify-center border-2 transition-colors flex-shrink-0",
+                isAnnouncement
+                  ? "bg-[#FF5C5C] border-[#FF5C5C]"
+                  : "border-gray-300 group-hover:border-gray-400",
+              )}
+            >
+              {isAnnouncement && (
+                <svg className="w-3 h-3 text-white" viewBox="0 0 12 12" fill="none">
+                  <path d="M2 6l3 3 5-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              )}
+            </div>
+            <span
+              onClick={() => setIsAnnouncement((v) => !v)}
+              className="flex items-center gap-1.5 text-sm font-medium text-gray-700"
+            >
+              <Megaphone className="w-4 h-4 text-[#FF5C5C]" strokeWidth={2} />
+              공지사항으로 등록
+            </span>
+          </label>
+          {isAnnouncement && (
+            <p className="text-xs text-gray-400 mt-1.5 ml-8">
+              사이드바 &apos;운영진 공지사항&apos;에 표시됩니다.
+            </p>
+          )}
+        </div>
+      )}
+
+      {/* Images */}
+      {userId && (
+        <div>
+          <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">사진</p>
+          <ImageUploader
+            userId={userId}
+            value={images}
+            onChange={setImages}
+            disabled={saving}
+          />
+        </div>
+      )}
 
       {error && <p className="text-sm text-red-500">{error}</p>}
 

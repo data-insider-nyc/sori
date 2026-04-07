@@ -11,6 +11,7 @@ import { CommentSection } from "./CommentSection";
 import { UserPopover } from "@/components/community/UserPopover";
 import { PostBadge } from "@/components/ui/PostBadge";
 import { PostDetailActions } from "./PostDetailActions";
+import { PostImages } from "@/components/community/PostImages";
 
 export async function generateMetadata({
   params,
@@ -87,8 +88,10 @@ export default async function PostDetailPage({
               content: post.content,
               category: post.category,
               region: post.region,
+              images: post.images ?? [],
               authorId: author?.id ?? null,
               pinned: (post as any).pinned,
+              isAnnouncement: (post as any).is_announcement,
             }}
             userId={user?.id ?? null}
           />
@@ -134,6 +137,9 @@ export default async function PostDetailPage({
         <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap">
           {post.content}
         </p>
+
+        {/* Images */}
+        <PostImages images={(post as any).images ?? []} />
 
         {/* Like / comment counts */}
         <PostInteractions

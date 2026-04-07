@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import Link from "next/link";
 import { MessageCircle } from "lucide-react";
 import { UserPopover } from "../community/UserPopover";
@@ -9,6 +9,7 @@ import type { Post } from "@/types";
 import { PostBadge } from "./PostBadge";
 import { PostMenu } from "@/components/community/PostMenu";
 import { LikeButton } from "@/components/ui/LikeButton";
+import { ImageLightbox } from "@/components/ui/ImageLightbox";
 
 interface Props {
   post: Post;
@@ -19,8 +20,17 @@ export const PostCard = React.memo(function PostCard({
   post,
   userId = null,
 }: Props) {
+  const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
+
   return (
     <>
+      {lightboxIndex !== null && post.images && (
+        <ImageLightbox
+          images={post.images}
+          initialIndex={lightboxIndex}
+          onClose={() => setLightboxIndex(null)}
+        />
+      )}
       <div className="bg-white border border-gray-100 rounded-2xl p-5 shadow-sm hover:border-[#FF5C5C]/30 transition-colors">
         {/* Author row */}
         <div className="flex items-center mb-3">
@@ -45,6 +55,7 @@ export const PostCard = React.memo(function PostCard({
               content: post.content ?? "",
               category: post.category,
               region: post.region,
+              images: post.images ?? [],
             }}
             onAfterEdit={() => window.location.reload()}
             onAfterDelete={() => {
@@ -70,6 +81,24 @@ export const PostCard = React.memo(function PostCard({
           <p className="text-sm text-gray-500 leading-relaxed line-clamp-2">
             {post.content}
           </p>
+
+          {/* Image horizontal scroll */}
+          {post.images && post.images.length > 0 && (
+            <div className="mt-3 flex gap-2 overflow-x-auto scrollbar-hide -mx-1 px-1">
+              {post.images.slice(0, 4).map((url, i) => (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  key={i}
+                  src={url}
+                  alt=""
+                  onClick={(e) => { e.preventDefault(); setLightboxIndex(i); }}
+                  className={`rounded-xl object-cover flex-shrink-0 bg-gray-100 border border-gray-200 cursor-pointer hover:opacity-90 transition-opacity ${
+                    post.images!.length === 1 ? "w-full max-h-[280px]" : "w-[210px] h-[280px]"
+                  }`}
+                />
+              ))}
+            </div>
+          )}
         </Link>
 
         {/* Actions */}

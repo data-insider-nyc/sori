@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { Search } from "lucide-react";
 import { createClient } from "@/lib/supabase-server";
 import { NavLinks } from "./NavLinks";
 import { UserMenu, LoginButton } from "./UserMenu";
@@ -25,26 +24,19 @@ export async function Header() {
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-sm border-b border-gray-100 hidden lg:block">
       <div className="max-w-7xl mx-auto px-6 h-16 flex items-center gap-6">
-        <Link href="/" className="flex items-center gap-2 flex-shrink-0">
+        <Link href="/" className="flex items-center gap-1.5 flex-shrink-0">
           <span className="text-2xl font-bold text-[#FF5C5C] leading-none">
             소리
           </span>
-          <span className="text-[10px] text-gray-400 font-medium tracking-widest mt-1">
+          <span className="text-[12px] text-gray-400 font-medium tracking-widest leading-none">
             SORI
           </span>
         </Link>
 
-        <div className="flex-1 max-w-sm">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-            <input
-              type="text"
-              placeholder="병원, 변호사, 식당 검색..."
-              className="w-full pl-10 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-full text-sm
-                         focus:outline-none focus:ring-2 focus:ring-[#FF5C5C]/20 focus:border-[#FF5C5C] transition-all"
-            />
-          </div>
-        </div>
+        {/* Tagline — fills center space, keeps layout balanced */}
+        <p className="flex-1 text-sm text-gray-600 font-medium tracking-wide truncate leading-none">
+          미국 한인들이 만들어가는 커뮤니티 — 어디서든, 누구든
+        </p>
 
         <NavLinks />
 

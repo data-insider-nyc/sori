@@ -105,12 +105,66 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
     return NextResponse.json(data);
   }
 
-  // Fallback: regular post updates (title/content/images)
-  const { title, content, images } = json;
+  // Handle is_announcement toggle — admin only
+  if (typeof json.is_announcement !== "undefined") {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("is_admin")
+      .eq("id", user.id)
+      .single();
+    if (!profile?.is_admin) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+
+    const admin = createAdminClient();
+    const { data, error } = await admin
+      .from("posts")
+      .update({ is_announcement: !!json.is_announcement })
+      .eq("id", id)
+      .select()
+      .maybeSingle();
+
+    if (error) {
+      console.error("[PATCH /api/posts is_announcement]", error);
+      return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+
+    try {
+      // @ts-ignore
+      revalidateTag("posts");
+    } catch (e) {
+      console.warn("[PATCH /api/posts] revalidateTag failed", e);
+    }
+
+    return NextResponse.json(data);
+  }
+
+  // Fallback: regular post updates (title/content/category/region/images)
+  const { title, content, category, region, images } = json;
   const updates: any = {};
   if (typeof title !== "undefined") updates.title = title;
   if (typeof content !== "undefined") updates.content = content;
-  if (typeof images !== "undefined") updates.images = images;
+  if (typeof category !== "undefined") updates.category = category;
+  if (typeof region !== "undefined") updates.region = region;
+
+  // Handle image updates — delete removed images from Storage
+  if (typeof images !== "undefined") {
+    updates.images = images;
+    // Fetch old images to detect removed ones
+    const admin = createAdminClient();
+    const { data: existing } = await admin.from("posts").select("images").eq("id", id).maybeSingle();
+    const oldImages: string[] = existing?.images ?? [];
+    const removedImages = oldImages.filter((url: string) => !(images as string[]).includes(url));
+    if (removedImages.length > 0) {
+      const paths = removedImages.map((url: string) => {
+        const u = new URL(url);
+        // path after /object/public/post-images/
+        return u.pathname.replace(/^\/storage\/v1\/object\/public\/post-images\//, "");
+      });
+      await admin.storage.from("post-images").remove(paths);
+    }
+  }
 
   const { data, error, status } = await supabase
     .from("posts")
@@ -155,12 +209,26 @@ export async function DELETE(req: Request, { params }: { params: Promise<{ id: s
   // Admin: use service role to bypass RLS
   const db = isAdmin ? createAdminClient() : supabase;
 
+  // Fetch images before delete for Storage cleanup
+  const admin = createAdminClient();
+  const { data: postData } = await admin.from("posts").select("images").eq("id", id).maybeSingle();
+
   // Hard delete — RLS own_post or admin_delete_post policy permits this
   const { error } = await db.from("posts").delete().eq("id", id);
 
   if (error) {
     console.error("[DELETE /api/posts] error:", error.message);
     return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+
+  // Clean up Storage images
+  const imageUrls: string[] = postData?.images ?? [];
+  if (imageUrls.length > 0) {
+    const paths = imageUrls.map((url: string) => {
+      const u = new URL(url);
+      return u.pathname.replace(/^\/storage\/v1\/object\/public\/post-images\//, "");
+    });
+    await admin.storage.from("post-images").remove(paths);
   }
 
   try {

@@ -26,18 +26,78 @@ export function getRegionColor(value: string): { bg: string; text: string } {
 }
 
 // ── Post category badge colors ─────────────────────────────────────────────────
-export const CATEGORY_COLORS: Record<string, { bg: string; text: string }> = {
-  general: { bg: "bg-gray-100", text: "text-gray-600" },
-  food: { bg: "bg-orange-100", text: "text-orange-700" },
-  local: { bg: "bg-teal-100", text: "text-teal-700" },
-  jobs: { bg: "bg-blue-100", text: "text-blue-700" },
-  housing: { bg: "bg-green-100", text: "text-green-700" },
-  family: { bg: "bg-purple-100", text: "text-purple-700" },
-  market: { bg: "bg-amber-100", text: "text-amber-800" },
-  immigration: { bg: "bg-sky-100", text: "text-sky-700" },
-  health: { bg: "bg-rose-100", text: "text-rose-700" },
+export const CATEGORY_COLORS: Record<
+  string,
+  { bg: string; text: string; iconBg: string; iconColor: string }
+> = {
+  general: {
+    bg: "bg-gray-100",
+    text: "text-gray-600",
+    iconBg: "#F3F4F6",
+    iconColor: "#4B5563",
+  },
+  food: {
+    bg: "bg-orange-100",
+    text: "text-orange-700",
+    iconBg: "#FFEDD5",
+    iconColor: "#C2410C",
+  },
+  local: {
+    bg: "bg-teal-100",
+    text: "text-teal-700",
+    iconBg: "#CCFBF1",
+    iconColor: "#0F766E",
+  },
+  jobs: {
+    bg: "bg-blue-100",
+    text: "text-blue-700",
+    iconBg: "#DBEAFE",
+    iconColor: "#1D4ED8",
+  },
+  housing: {
+    bg: "bg-green-100",
+    text: "text-green-700",
+    iconBg: "#DCFCE7",
+    iconColor: "#15803D",
+  },
+  family: {
+    bg: "bg-purple-100",
+    text: "text-purple-700",
+    iconBg: "#F3E8FF",
+    iconColor: "#7E22CE",
+  },
+  market: {
+    bg: "bg-amber-100",
+    text: "text-amber-800",
+    iconBg: "#FEF3C7",
+    iconColor: "#92400E",
+  },
+  immigration: {
+    bg: "bg-sky-100",
+    text: "text-sky-700",
+    iconBg: "#E0F2FE",
+    iconColor: "#0369A1",
+  },
+  health: {
+    bg: "bg-rose-100",
+    text: "text-rose-700",
+    iconBg: "#FFE4E6",
+    iconColor: "#BE123C",
+  },
 };
 
-export function getCategoryColor(value: string): { bg: string; text: string } {
-  return CATEGORY_COLORS[value] ?? { bg: "bg-gray-100", text: "text-gray-600" };
+export function getCategoryColor(value: string): {
+  bg: string;
+  text: string;
+  iconBg: string;
+  iconColor: string;
+} {
+  return (
+    CATEGORY_COLORS[value] ?? {
+      bg: "bg-gray-100",
+      text: "text-gray-600",
+      iconBg: "#F3F4F6",
+      iconColor: "#4B5563",
+    }
+  );
 }

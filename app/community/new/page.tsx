@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase-browser";
 import { clearFeedCache } from "@/app/community/CommunityListing";
@@ -22,6 +23,8 @@ export default function NewPostPage() {
         content: values.content,
         region: values.region,
         category: values.category,
+        images: values.images,
+        is_announcement: values.isAnnouncement ?? false,
         tags: [],
       })
       .select("id")
@@ -36,6 +39,23 @@ export default function NewPostPage() {
     router.replace(`/community/${post.id}`);
   }
 
+  const [userId, setUserId] = useState<string | null>(null);
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  useEffect(() => {
+    supabase.auth.getUser().then(async ({ data: { user } }) => {
+      setUserId(user?.id ?? null);
+      if (user) {
+        const { data } = await supabase
+          .from("profiles")
+          .select("is_admin")
+          .eq("id", user.id)
+          .single();
+        setIsAdmin(data?.is_admin ?? false);
+      }
+    });
+  }, []);
+
   return (
     <div className="py-4 sm:py-8 max-w-2xl mx-auto">
       <div className="mb-4 flex items-center gap-3">
@@ -49,7 +69,7 @@ export default function NewPostPage() {
       </div>
 
       <div className="bg-white border border-gray-100 rounded-2xl shadow-sm p-4 sm:p-6">
-        <PostForm onSubmit={handleSubmit} submitLabel="게시하기" />
+        <PostForm onSubmit={handleSubmit} submitLabel="게시하기" userId={userId ?? undefined} isAdmin={isAdmin} />
       </div>
     </div>
   );

@@ -5,8 +5,9 @@ import { useSearchParams, useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase-browser";
 import { LOCAL_CATEGORIES } from "@/lib/constants";
 import { REGIONS, getRegionIcon } from "@/lib/regions";
-import { CATEGORIES, getCategoryIcon } from "@/lib/post-categories";
+import { CATEGORIES } from "@/lib/post-categories";
 import { PostCard } from "@/components/ui/PostCard";
+import { CategoryIcon } from "@/components/ui/CategoryIcon";
 import { cn } from "@/lib/utils";
 import type { Post } from "@/types";
 import { applyLikeOverrides } from "@/lib/post-like-store";
@@ -49,7 +50,9 @@ export function CommunityListing() {
 
   // Initialise from cache so returning users see posts immediately (no skeleton)
   // applyLikeOverrides ensures any likes done on the detail page are reflected instantly
-  const [posts, setPosts] = useState<Post[]>(fresh ? applyLikeOverrides(cached.posts) : []);
+  const [posts, setPosts] = useState<Post[]>(
+    fresh ? applyLikeOverrides(cached.posts) : [],
+  );
   const [loading, setLoading] = useState(!fresh);
   const [loadingMore, setLoadingMore] = useState(false);
   const [hasMore, setHasMore] = useState(fresh ? cached.hasMore : false);
@@ -116,12 +119,18 @@ export function CommunityListing() {
         body: JSON.stringify({ post_ids: list.map((p) => p.id) }),
       });
       if (!res.ok) {
-        console.error("[CommunityListing] overlayLikes failed to fetch likes", res.status);
+        console.error(
+          "[CommunityListing] overlayLikes failed to fetch likes",
+          res.status,
+        );
         return applyLikeOverrides(list.map((p) => ({ ...p, is_liked: false })));
       }
       const body = await res.json().catch(() => ({}));
       const likedSet = new Set<string>(body.liked ?? []);
-      const withLikes = list.map((p) => ({ ...p, is_liked: likedSet.has(p.id) }));
+      const withLikes = list.map((p) => ({
+        ...p,
+        is_liked: likedSet.has(p.id),
+      }));
       // Apply any recent like toggles the user made (survives page navigation)
       return applyLikeOverrides(withLikes);
     } catch (err) {
@@ -260,23 +269,23 @@ export function CommunityListing() {
           전체 지역
         </button>
         {regions.map((r) => {
-            const RIcon = getRegionIcon(r.value);
-            return (
-              <button
-                key={r.value}
-                onClick={() => setParam("region", r.value)}
-                className={cn(
-                  "flex-shrink-0 px-4 py-1.5 rounded-full text-sm font-bold border transition-all inline-flex items-center gap-1.5",
-                  region === r.value
-                    ? "bg-[#FF5C5C] text-white border-[#FF5C5C]"
-                    : "bg-white text-gray-500 border-gray-200 hover:border-[#FF5C5C] hover:text-[#FF5C5C]",
-                )}
-              >
-                <RIcon className="w-3.5 h-3.5" strokeWidth={2} />
-                {r.label}
-              </button>
-            );
-          })}
+          const RIcon = getRegionIcon(r.value);
+          return (
+            <button
+              key={r.value}
+              onClick={() => setParam("region", r.value)}
+              className={cn(
+                "flex-shrink-0 px-4 py-1.5 rounded-full text-sm font-bold border transition-all inline-flex items-center gap-1.5",
+                region === r.value
+                  ? "bg-[#FF5C5C] text-white border-[#FF5C5C]"
+                  : "bg-white text-gray-500 border-gray-200 hover:border-[#FF5C5C] hover:text-[#FF5C5C]",
+              )}
+            >
+              <RIcon className="w-3.5 h-3.5" strokeWidth={2} />
+              {r.label}
+            </button>
+          );
+        })}
       </div>
 
       {/* Category tabs */}
@@ -293,19 +302,18 @@ export function CommunityListing() {
           전체 토픽
         </button>
         {categories.map((cat) => {
-          const CatIcon = getCategoryIcon(cat.value);
           return (
             <button
               key={cat.value}
               onClick={() => setParam("category", cat.value)}
               className={cn(
-                "flex-shrink-0 inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-bold border transition-all",
+                "flex-shrink-0 inline-flex items-center gap-1.5 pl-1.5 pr-4 py-1.5 rounded-full text-sm font-bold border transition-all",
                 category === cat.value
                   ? "bg-gray-900 text-white border-gray-900"
                   : "bg-white text-gray-500 border-gray-200 hover:border-gray-400",
               )}
             >
-              <CatIcon className="w-3.5 h-3.5" strokeWidth={2} />
+              <CategoryIcon category={cat.value} />
               {cat.label}
             </button>
           );
