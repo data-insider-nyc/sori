@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { LayoutGrid, List } from "lucide-react";
 import { supabase } from "@/lib/supabase";
+import { getDirectoryCityValuesByRegion } from "@/lib/directory-geography";
 import { BusinessCard } from "@/components/directory/BusinessCard";
 import type { Business } from "@/types";
 
@@ -21,21 +22,29 @@ const GRID_CLASS: Record<number, string> = {
 
 interface Props {
   category?: string;
-  city?: string;
+  region?: string;
+  cities?: string[];
   search?: string;
   page?: number;
 }
 
-export function BusinessList({ category, city, search, page = 1 }: Props) {
+export function BusinessList({
+  category,
+  region = "all",
+  cities = [],
+  search,
+  page = 1,
+}: Props) {
   const [businesses, setBusinesses] = useState<Business[]>([]);
-  const [total, setTotal]           = useState(0);
-  const [loading, setLoading]       = useState(true);
-  const [error, setError]           = useState<string | null>(null);
-  const [viewMode, setViewMode]     = useState<"grid" | "list">("grid");
+  const [total, setTotal] = useState(0);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
 
-  const router       = useRouter();
+  const router = useRouter();
   const searchParams = useSearchParams();
-  const totalPages   = Math.ceil(total / PER_PAGE);
+  const totalPages = Math.ceil(total / PER_PAGE);
+  const cityKey = cities.join("|");
 
   useEffect(() => {
     async function load() {
@@ -43,29 +52,40 @@ export function BusinessList({ category, city, search, page = 1 }: Props) {
       setError(null);
 
       const from = (page - 1) * PER_PAGE;
-      const to   = from + PER_PAGE - 1;
+      const to = from + PER_PAGE - 1;
 
       let query = supabase
         .from("businesses")
         .select("*", { count: "exact" })
         .order("is_premium", { ascending: false })
-        .order("rating",     { ascending: false })
+        .order("rating", { ascending: false })
         .range(from, to);
 
       if (category) query = query.eq("category", category);
-      if (city)     query = query.ilike("city", `%${city}%`);
-      if (search)   query = query.or(
-        `name.ilike.%${search}%,subcategory.ilike.%${search}%`
-      );
+      if (cities.length > 0) {
+        query = query.in("city", cities);
+      } else if (region && region !== "all") {
+        const regionCities = getDirectoryCityValuesByRegion(region);
+        if (regionCities.length > 0) query = query.in("city", regionCities);
+        else query = query.eq("city", "__no_matching_city__");
+      }
+      if (search)
+        query = query.or(
+          `name.ilike.%${search}%,subcategory.ilike.%${search}%`,
+        );
 
       const { data, count, error: err } = await query;
-      if (err) { setError(err.message); setLoading(false); return; }
+      if (err) {
+        setError(err.message);
+        setLoading(false);
+        return;
+      }
       setBusinesses((data ?? []) as Business[]);
       setTotal(count ?? 0);
       setLoading(false);
     }
     load();
-  }, [category, city, search, page]);
+  }, [category, region, cityKey, search, page]);
 
   function goPage(p: number) {
     const params = new URLSearchParams(searchParams.toString());
@@ -74,33 +94,47 @@ export function BusinessList({ category, city, search, page = 1 }: Props) {
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
-  if (loading) return (
-    <div className={`grid ${GRID_CLASS[GRID_COLS]} gap-4`}>
-      {Array.from({ length: GRID_COLS * 2 }).map((_, i) => (
-        <div key={i} className="h-52 bg-gray-100 rounded-2xl animate-pulse" />
-      ))}
-    </div>
-  );
+  if (loading)
+    return (
+      <div className={`grid ${GRID_CLASS[GRID_COLS]} gap-4`}>
+        {Array.from({ length: GRID_COLS * 2 }).map((_, i) => (
+          <div key={i} className="h-52 bg-gray-100 rounded-2xl animate-pulse" />
+        ))}
+      </div>
+    );
 
-  if (error) return (
-    <div className="text-center py-12 text-red-400 text-sm">오류: {error}</div>
-  );
+  if (error)
+    return (
+      <div className="text-center py-12 text-red-400 text-sm">
+        오류: {error}
+      </div>
+    );
 
-  if (businesses.length === 0) return (
-    <div className="text-center py-20 text-gray-400">
-      <div className="text-5xl mb-4">🔍</div>
-      <p className="text-base font-medium">검색 결과가 없어요.</p>
-      <p className="text-sm mt-1">다른 키워드나 지역을 선택해보세요.</p>
-    </div>
-  );
+  if (businesses.length === 0)
+    return (
+      <div className="text-center py-20 text-gray-400">
+        <div className="text-5xl mb-4">🔍</div>
+        <p className="text-base font-medium">검색 결과가 없어요.</p>
+        <p className="text-sm mt-1">다른 키워드나 지역을 선택해보세요.</p>
+      </div>
+    );
 
   return (
     <div>
       {/* 헤더 — 결과 수 + 뷰 토글 */}
       <div className="flex items-center justify-between mb-5">
         <p className="text-sm text-gray-400 font-medium">
-          총 <span className="text-gray-900 font-bold text-base">{total.toLocaleString()}</span>개
-          {page > 1 && <span className="text-gray-400"> · {page}/{totalPages}페이지</span>}
+          총{" "}
+          <span className="text-gray-900 font-bold text-base">
+            {total.toLocaleString()}
+          </span>
+          개
+          {page > 1 && (
+            <span className="text-gray-400">
+              {" "}
+              · {page}/{totalPages}페이지
+            </span>
+          )}
         </p>
         {/* 그리드/리스트 토글 */}
         <div className="flex items-center gap-1 bg-gray-100 rounded-xl p-1">

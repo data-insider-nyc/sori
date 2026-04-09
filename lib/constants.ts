@@ -34,7 +34,7 @@ export const LOCAL_CATEGORIES = new Set<string>([
 
 // ─── Hyperlocal target cities (business directory only) ──────────────────────
 export const TARGET_CITIES = [
-  { value: "", label: "All Cities" },
+  { value: "", label: "All Neighborhoods" },
   // ── 뉴저지 ─────────────────────────────────────
   { value: "Fort Lee", label: "Fort Lee, NJ" },
   { value: "Palisades Park", label: "Palisades Park, NJ" },
@@ -47,4 +47,3 @@ export const TARGET_CITIES = [
   // ── 뉴욕 맨해튼 ────────────────────────────────
   { value: "Manhattan", label: "Manhattan, NY" },
 ] as const;
-
