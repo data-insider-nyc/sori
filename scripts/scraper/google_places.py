@@ -28,16 +28,21 @@ supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
 # ─────────────────────────────────────────────
 CENTERS = [
     # ── 뉴저지 ──────────────────────────────────
-    {"name": "Fort Lee",       "state": "NJ", "lat": 40.8504, "lng": -73.9710},
-    {"name": "Palisades Park", "state": "NJ", "lat": 40.8468, "lng": -73.9932},
-    {"name": "Leonia",         "state": "NJ", "lat": 40.8618, "lng": -73.9849},
-    {"name": "Englewood",      "state": "NJ", "lat": 40.8934, "lng": -73.9726},
+    # {"name": "Fort Lee", "state": "NJ", "lat": 40.8504, "lng": -73.9710},
+    # {"name": "Palisades Park", "state": "NJ", "lat": 40.8468, "lng": -73.9932},
+    # {"name": "Leonia", "state": "NJ", "lat": 40.8618, "lng": -73.9849},
+    # {"name": "Englewood", "state": "NJ", "lat": 40.8934, "lng": -73.9726},
     # ── 뉴욕 퀸즈 ────────────────────────────────
-    {"name": "Flushing",       "state": "NY", "lat": 40.7675, "lng": -73.8330},
-    {"name": "Bayside",        "state": "NY", "lat": 40.7632, "lng": -73.7710},
-    {"name": "Fresh Meadows",  "state": "NY", "lat": 40.7302, "lng": -73.7880},
+    # {"name": "Flushing", "state": "NY", "lat": 40.7675, "lng": -73.8330},
+    # {"name": "Bayside", "state": "NY", "lat": 40.7632, "lng": -73.7710},
+    # {"name": "Fresh Meadows", "state": "NY", "lat": 40.7302, "lng": -73.7880},
     # ── 뉴욕 맨해튼 ──────────────────────────────
     # {"name": "Manhattan",    "state": "NY", "lat": 40.7580, "lng": -73.9855},
+    # ── Los Angeles ──────────────────────────────
+    {"name": "Los Angeles", "state": "CA", "lat": 34.0522, "lng": -118.2437},
+    # ── Bay Area ──────────────────────────────
+    {"name": "San Francisco", "state": "CA", "lat": 37.7749, "lng": -122.4194},
+    {"name": "San Jose", "state": "CA", "lat": 37.3382, "lng": -121.8863},
 ]
 
 # ─────────────────────────────────────────────
