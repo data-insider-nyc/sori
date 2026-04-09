@@ -84,7 +84,7 @@ export function PlatformPillars() {
           <br className="sm:hidden" /> 한인 생활
         </h2>
         <p className="text-sm text-gray-500 mt-3 max-w-sm mx-auto leading-relaxed">
-        커뮤니티를 시작으로, 비즈니스 디렉토리와 채용 보드까지 미국 전역으로
+          커뮤니티를 시작으로, 비즈니스 디렉토리와 채용 보드까지 미국 전역으로
           순차적으로 오픈합니다.
         </p>
       </div>
