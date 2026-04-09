@@ -228,7 +228,7 @@ export default async function ProfilePage() {
           <SettingsCard>
             <LocationEditor
               userId={user.id}
-              currentLocation={profile.location ?? 'other'}
+              currentLocation={profile.location ?? "other"}
             />
           </SettingsCard>
 

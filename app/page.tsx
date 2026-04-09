@@ -1,8 +1,8 @@
-import type { Metadata }        from "next";
-import { LandingHero }          from "@/components/home/LandingHero";
-import { PlatformPillars }      from "@/components/home/PlatformPillars";
-import { CommunityFeed }        from "@/components/home/CommunityFeed";
-import { JoinCTA }              from "@/components/home/JoinCTA";
+import type { Metadata } from "next";
+import { LandingHero } from "@/components/home/LandingHero";
+import { PlatformPillars } from "@/components/home/PlatformPillars";
+import { CommunityFeed } from "@/components/home/CommunityFeed";
+import { JoinCTA } from "@/components/home/JoinCTA";
 import { PAGE_META, JSON_LD as LD } from "@/lib/copy";
 
 export const revalidate = 30;
@@ -51,25 +51,27 @@ export default function HomePage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-    <div className="py-4 lg:py-6 space-y-8 lg:space-y-10">
-      {/* Hero */}
-      <LandingHero />
+      <div className="py-4 lg:py-6 space-y-8 lg:space-y-10">
+        {/* Hero */}
+        <LandingHero />
 
-      {/* Platform pillars: Community (live) + Directory + Jobs (coming) */}
-      <PlatformPillars />
+        {/* Platform pillars: Community (live) + Directory + Jobs (coming) */}
+        <PlatformPillars />
 
-      {/* Live community feed */}
-      <section>
-        <div className="section-header">
-          <h2 className="section-title">커뮤니티 최신 글</h2>
-          <a href="/community" className="see-all-link">전체 보기 →</a>
-        </div>
-        <CommunityFeed />
-      </section>
+        {/* Live community feed */}
+        <section>
+          <div className="section-header">
+            <h2 className="section-title">커뮤니티 최신 글</h2>
+            <a href="/community" className="see-all-link">
+              전체 보기 →
+            </a>
+          </div>
+          <CommunityFeed />
+        </section>
 
-      {/* Bottom CTA */}
-      <JoinCTA />
-    </div>
+        {/* Bottom CTA */}
+        <JoinCTA />
+      </div>
     </>
   );
 }

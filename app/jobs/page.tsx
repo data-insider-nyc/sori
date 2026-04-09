@@ -63,7 +63,7 @@ const CATEGORIES = [
 
 export default function JobsPage() {
   return (
-    <div className="py-6 lg:py-10 max-w-3xl mx-auto">
+    <div className="py-4 lg:py-6 space-y-8 lg:space-y-10">
       {/* ── Hero ──────────────────────────────────────────────── */}
       <div className="relative rounded-3xl overflow-hidden hero-gradient px-7 py-12 lg:px-12 lg:py-16 mb-10">
         {/* Noise grain */}
@@ -165,7 +165,7 @@ export default function JobsPage() {
               <span className="text-xs font-semibold text-gray-600 text-center leading-snug">
                 {cat.label}
               </span>
-              <span className="absolute top-2 right-2 text-[9px] font-bold text-gray-300 uppercase tracking-wide">
+              <span className="absolute top-2 right-2 text-[9px] font-bold text-gray-600 uppercase tracking-wide">
                 준비중
               </span>
             </div>
