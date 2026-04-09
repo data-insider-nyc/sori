@@ -19,7 +19,11 @@ export const DIRECTORY_CITIES: DirectoryCity[] = [
   { value: "Manhattan", label: "맨해튼 (Manhattan, NY)", region: "nyc" },
 
   // ─── Los Angeles ────────────────────────────────────────
-  { value: "Koreatown LA", label: "한인타운 (Koreatown, LA)", region: "la" },
+  {
+    value: "Los Angeles",
+    label: "한인타운/미드윌셔 (Los Angeles, CA)",
+    region: "la",
+  },
   { value: "Glendale", label: "글렌데일 (Glendale, CA)", region: "la" },
   { value: "Torrance", label: "토렌스 (Torrance, CA)", region: "la" },
   {
@@ -42,7 +46,7 @@ export const DIRECTORY_CITIES: DirectoryCity[] = [
 
   // ─── Chicago ─────────────────────────────────────────────
   {
-    value: "Chicago Koreatown",
+    value: "Chicago",
     label: "시카고 한인타운 (Chicago Koreatown, IL)",
     region: "chicago",
   },
@@ -66,8 +70,8 @@ export const DIRECTORY_CITIES: DirectoryCity[] = [
 
   // ─── Seattle ────────────────────────────────────────────
   {
-    value: "Seattle International District",
-    label: "국제 지구 (International District, WA)",
+    value: "Seattle",
+    label: "국제 지구 (Seattle, WA)",
     region: "seattle",
   },
   { value: "Bellevue", label: "벨뷰 (Bellevue, WA)", region: "seattle" },
@@ -76,8 +80,8 @@ export const DIRECTORY_CITIES: DirectoryCity[] = [
 
   // ─── Boston ─────────────────────────────────────────────
   {
-    value: "Boston Chinatown",
-    label: "보스턴 중국타운 (Boston, MA)",
+    value: "Boston",
+    label: "보스턴 차이나타운 (Boston, MA)",
     region: "boston",
   },
   { value: "Quincy", label: "퀸시 (Quincy, MA)", region: "boston" },
