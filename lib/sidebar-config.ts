@@ -18,14 +18,14 @@ export type SidebarWidget = {
 export const SIDEBAR_WIDGETS: SidebarWidget[] = [
   {
     id: "announcements",
-    title: "운영진 공지사항",
+    title: "공지사항",
     icon: Megaphone,
     enabled: true,
     limit: 5,
   },
   {
     id: "pinned",
-    title: "운영진 추천글",
+    title: "추천글",
     icon: Bookmark,
     enabled: true,
     limit: 5,
