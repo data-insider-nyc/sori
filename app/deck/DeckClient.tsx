@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useCallback, useState } from "react";
+import Image from "next/image";
 import Link from "next/link";
 
 type Theme = "light" | "dark";
@@ -1222,34 +1223,50 @@ function SlideCompetitive({ dark }: { dark: boolean }) {
 ───────────────────────────────────────────────────────────────── */
 function SlideTeam({ dark, columns }: { dark: boolean; columns: number }) {
   const t = tokens(dark);
-  const team = [
+  const founder = {
+    role: "Founder & CEO: Karl Kwon, CS PhD",
+    badge: "Deep Tech Operator",
+    tags: ["BS/MS/PhD in CS", "0 to 1", "Full-Stack Builder"],
+    intro:
+      "Deep tech 배경과 0 to 1 제품 개발 경험을 바탕으로, 현재 SORI의 제품 전략부터 설계, 개발, 출시까지 전체 스택을 직접 이끌고 있습니다.",
+    points: [
+      "Deep Tech Background: BS/MS/PhD in Computer Science",
+      "0 to 1 Expert: Startup Founding Engineer, built MDES from scratch",
+      "Big Tech Experience: Lead Software Engineer at MITRE, led scalable system architectures",
+      "Solo Builder: Built SORI's entire stack",
+    ],
+  };
+  const hires = [
     {
-      role: "CEO & Co-founder",
-      badge: "VC 심사역 출신",
-      tags: ["VC 투자 경험", "Startup Exit", "한인 커뮤니티"],
-      bio: "VC 심사역 출신. 스타트업 Exit 경험. 뉴욕/뉴저지 한인 커뮤니티 깊은 이해.",
-      hi: true,
+      role: "Founding Engineer / Mobile",
+      badge: "Key Hire 01",
+      tags: ["iOS/Android", "제품 속도", "Infra"],
+      bio: "투자 유치 후 가장 먼저 채용할 포지션. 모바일 앱 완성도와 제품 개발 속도를 끌어올릴 핵심 엔지니어.",
     },
     {
-      role: "CTO & Co-founder",
-      badge: "엔지니어링 리드",
-      tags: ["Full-Stack", "Mobile", "SaaS 아키텍처"],
-      bio: "모바일 앱 + 웹 플랫폼 개발. SaaS 광고 시스템 설계 및 구현.",
-    },
-    {
-      role: "Head of Growth",
-      badge: "채용 예정",
-      tags: ["한인 커뮤니티", "영업", "마케팅"],
-      bio: "NY/NJ 한인 비즈니스 네트워크 보유. 오프라인 영업 + 디지털 그로쓰 하이브리드.",
-      hiring: true,
+      role: "Founding Growth Lead",
+      badge: "Key Hire 02",
+      tags: ["Biz Dev", "Local Sales", "Partnerships"],
+      bio: "NY/NJ 한인 비즈니스 세일즈, 파트너십, 오프라인 네트워크 확장을 담당할 초기 그로스 리더.",
     },
   ];
+  const founderSpan =
+    columns > 1 ? `span ${Math.max(1, columns - 1)}` : undefined;
+  const founderLayoutColumns =
+    columns === 1 ? "1fr" : "minmax(220px, 280px) minmax(0, 1fr)";
 
   return (
     <SlideWrap dark={dark} alt>
       <SlideLabel n="07" label="The Team" dark={dark} />
       <SlideTitleBlock
-        title={<>이 시장에서 가장 적합한 사람들</>}
+        title={
+          <>
+            창업자가 직접 만들고,
+            <br />
+            시작부터 기술적 깊이로 증명합니다
+          </>
+        }
+        sub="핵심 메시지는 명확합니다. 이미 직접 만들 수 있는 창업자이며, 투자 후에는 제품과 성장을 가속할 핵심 인재를 채웁니다."
         dark={dark}
       />
       <div
@@ -1259,15 +1276,191 @@ function SlideTeam({ dark, columns }: { dark: boolean; columns: number }) {
           gap: "clamp(8px,1.5vw,20px)",
         }}
       >
-        {team.map((m) => (
+        <div
+          style={{
+            background: t.bg,
+            border: `1px solid ${t.accent}`,
+            borderRadius: 8,
+            padding: "clamp(18px,2.5vw,32px) clamp(14px,2vw,26px)",
+            gridColumn: founderSpan,
+          }}
+        >
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: founderLayoutColumns,
+              gap: "clamp(14px,2vw,24px)",
+              alignItems: "stretch",
+            }}
+          >
+            <div
+              style={{
+                minHeight: columns === 1 ? 220 : 320,
+                borderRadius: 8,
+                border: `1px solid ${t.accent}`,
+                background: dark
+                  ? "rgba(255,255,255,0.02)"
+                  : "rgba(0,0,0,0.02)",
+                position: "relative",
+                overflow: "hidden",
+              }}
+            >
+              <Image
+                src="/karlkwon.jpeg"
+                alt="Karl Kwon founder portrait"
+                fill
+                sizes="(max-width: 767px) 100vw, 280px"
+                style={{ objectFit: "cover", objectPosition: "center top" }}
+                priority
+              />
+              <div
+                style={{
+                  position: "absolute",
+                  inset: "auto 0 0 0",
+                  padding: "clamp(12px,1.8vw,18px)",
+                  background: dark
+                    ? "linear-gradient(180deg, rgba(13,13,13,0) 0%, rgba(13,13,13,0.82) 100%)"
+                    : "linear-gradient(180deg, rgba(255,255,255,0) 0%, rgba(17,17,17,0.78) 100%)",
+                }}
+              >
+                <div
+                  style={{
+                    fontFamily: "Pretendard, sans-serif",
+                    fontSize: "clamp(0.82rem,1vw,0.96rem)",
+                    fontWeight: 700,
+                    color: "#FFFFFF",
+                    lineHeight: 1.3,
+                  }}
+                >
+                  Karl Kwon
+                </div>
+                <div
+                  style={{
+                    fontFamily: "Pretendard, sans-serif",
+                    fontSize: "clamp(0.68rem,0.9vw,0.8rem)",
+                    color: "rgba(255,255,255,0.8)",
+                    marginTop: 4,
+                  }}
+                >
+                  Founder & CEO
+                </div>
+              </div>
+            </div>
+            <div>
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  marginBottom: "clamp(14px,1.8vw,22px)",
+                  gap: 12,
+                  flexWrap: "wrap" as const,
+                }}
+              >
+                <span
+                  style={{
+                    fontFamily: "Pretendard, sans-serif",
+                    fontSize: "clamp(9px,0.85vw,11px)",
+                    fontWeight: 700,
+                    padding: "4px 10px",
+                    borderRadius: 4,
+                    border: `1px solid ${t.border}`,
+                    color: t.accent,
+                    background: t.highlight,
+                  }}
+                >
+                  {founder.badge}
+                </span>
+              </div>
+              <div
+                style={{
+                  fontFamily: "Pretendard, sans-serif",
+                  fontSize: "clamp(1rem,1.8vw,1.45rem)",
+                  fontWeight: 900,
+                  color: t.text,
+                  marginBottom: 12,
+                  lineHeight: 1.2,
+                }}
+              >
+                {founder.role}
+              </div>
+              <div
+                style={{
+                  display: "flex",
+                  gap: 6,
+                  flexWrap: "wrap" as const,
+                  marginBottom: 14,
+                }}
+              >
+                {founder.tags.map((tag) => (
+                  <span
+                    key={tag}
+                    style={{
+                      fontFamily: "Pretendard, sans-serif",
+                      fontSize: "clamp(8px,0.8vw,10px)",
+                      fontWeight: 600,
+                      padding: "3px 9px",
+                      borderRadius: 3,
+                      background: t.chip,
+                      color: t.sub,
+                      border: `1px solid ${t.border}`,
+                      letterSpacing: "0.04em",
+                    }}
+                  >
+                    {tag}
+                  </span>
+                ))}
+              </div>
+              <div
+                style={{
+                  fontFamily: "Pretendard, sans-serif",
+                  fontSize: "clamp(0.8rem,1.15vw,0.95rem)",
+                  color: t.text,
+                  lineHeight: 1.7,
+                  marginBottom: 16,
+                  maxWidth: 720,
+                }}
+              >
+                {founder.intro}
+              </div>
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateColumns:
+                    columns === 1 ? "1fr" : "repeat(2, minmax(0, 1fr))",
+                  gap: 10,
+                }}
+              >
+                {founder.points.map((point) => (
+                  <div
+                    key={point}
+                    style={{
+                      border: `1px solid ${t.border}`,
+                      borderRadius: 6,
+                      padding: "clamp(10px,1.5vw,16px)",
+                      background: t.bgAlt,
+                      fontFamily: "Pretendard, sans-serif",
+                      fontSize: "clamp(0.75rem,1.05vw,0.9rem)",
+                      color: t.text,
+                      lineHeight: 1.6,
+                      fontWeight: 600,
+                    }}
+                  >
+                    {point}
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+        {hires.map((m) => (
           <div
             key={m.role}
             style={{
               background: t.bg,
-              border: `1px solid ${m.hi ? t.accent : t.border}`,
+              border: `1px solid ${t.border}`,
               borderRadius: 8,
               padding: "clamp(18px,2.5vw,32px) clamp(14px,2vw,26px)",
-              opacity: m.hiring ? 0.6 : 1,
             }}
           >
             <div
@@ -1276,6 +1469,7 @@ function SlideTeam({ dark, columns }: { dark: boolean; columns: number }) {
                 justifyContent: "space-between",
                 alignItems: "center",
                 marginBottom: "clamp(12px,1.8vw,22px)",
+                gap: 12,
               }}
             >
               <div
@@ -1283,18 +1477,18 @@ function SlideTeam({ dark, columns }: { dark: boolean; columns: number }) {
                   width: "clamp(32px,3.5vw,44px)",
                   height: "clamp(32px,3.5vw,44px)",
                   borderRadius: "50%",
-                  background: m.hi ? t.highlight : t.bgAlt,
-                  border: `1px solid ${m.hi ? t.accent : t.border}`,
+                  background: t.bgAlt,
+                  border: `1px solid ${t.border}`,
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
                   fontFamily: "Pretendard, sans-serif",
-                  fontSize: "clamp(10px,1vw,14px)",
+                  fontSize: "clamp(10px,1vw,13px)",
                   fontWeight: 800,
-                  color: m.hi ? t.accent : t.sub,
+                  color: t.sub,
                 }}
               >
-                {m.hiring ? "+" : "★"}
+                +
               </div>
               <span
                 style={{
@@ -1304,8 +1498,8 @@ function SlideTeam({ dark, columns }: { dark: boolean; columns: number }) {
                   padding: "4px 10px",
                   borderRadius: 4,
                   border: `1px solid ${t.border}`,
-                  color: m.hi ? t.accent : t.sub,
-                  background: m.hi ? t.highlight : t.chip,
+                  color: t.sub,
+                  background: t.chip,
                 }}
               >
                 {m.badge}

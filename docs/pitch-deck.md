@@ -123,19 +123,24 @@ oursori.com · NY / NJ → USA · Seed Round 2025 · Consumer · SaaS
 
 ## 07 — The Team
 
-### 이 시장에서 가장 적합한 사람들
+### 창업자가 직접 만들고, 시작부터 기술적 깊이로 증명합니다
 
-**CEO & Co-founder**  
-VC 심사역 출신. 스타트업 Exit 경험. 뉴욕/뉴저지 한인 커뮤니티 깊은 이해.  
-Tags: VC 투자 경험 · Startup Exit · 한인 커뮤니티
+**Founder & CEO: Karl Kwon, CS PhD**  
+Deep tech 배경과 0 to 1 제품 개발 경험을 바탕으로, 현재 SORI의 제품 전략부터 설계, 개발, 출시까지 전체 스택을 직접 이끌고 있습니다.  
+Tags: BS/MS/PhD in CS · 0 to 1 · Full-Stack Builder
 
-**CTO & Co-founder**  
-엔지니어링 리드. 모바일 앱 + 웹 플랫폼. SaaS 광고 시스템 설계 및 구현.  
-Tags: Full-Stack · Mobile · SaaS 아키텍처
+- Deep Tech Background: BS/MS/PhD in Computer Science
+- 0 to 1 Expert: Startup Founding Engineer at Blackboard (AIG startup), support for $65M business decisions
+- Big Tech Experience: Lead Software Engineer at MITRE. Led scalable system architectures
+- Solo Builder: Built SORI's entire stack
 
-**Head of Growth** _(채용 예정)_  
-NY/NJ 한인 비즈니스 네트워크 보유. 오프라인 영업 + 디지털 그로쓰 하이브리드.  
-Tags: 한인 커뮤니티 · 영업 · 마케팅
+**Key Hire 01 — Founding Engineer / Mobile** _(투자 후 채용)_  
+모바일 앱 완성도와 제품 개발 속도를 끌어올릴 핵심 엔지니어.  
+Tags: iOS/Android · 제품 속도 · Infra
+
+**Key Hire 02 — Founding Growth Lead** _(투자 후 채용)_  
+NY/NJ 한인 비즈니스 세일즈, 파트너십, 오프라인 네트워크 확장을 담당할 초기 그로스 리더.  
+Tags: Biz Dev · Local Sales · Partnerships
 
 ---
 
