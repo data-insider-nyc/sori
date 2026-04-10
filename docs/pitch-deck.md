@@ -5,7 +5,7 @@
 미국 한인 커뮤니티 & 비즈니스 플랫폼  
 소리는 '목소리'에서 온 이름입니다.  
 미국 전역 한인들이 만들어가는 커뮤니티.  
-oursori.com · NY / NJ → USA · Seed Round 2025 · Consumer · SaaS
+oursori.com · NY / NJ → USA · Seed Round 2026 · Consumer · SaaS
 
 ---
 
@@ -34,6 +34,13 @@ oursori.com · NY / NJ → USA · Seed Round 2025 · Consumer · SaaS
 
 > 한인 전문직 광고 시장 추정: **$50 ~ 100M / 년**
 
+### Why Now — 데이터로 증명되는 기회
+
+- 미국 태생 한인(2세대 이상): **810,000명 (2023)**
+- 가구당 중간소득: **$104,900 (2세대+) vs $88,400 (1세대)**
+
+> 구매력은 높지만 기존 한인 플랫폼을 쓰지 않는 81만 명의 디지털 네이티브를 위한 최초의 플랫폼
+
 ---
 
 ## 03 — The Solution
@@ -51,6 +58,8 @@ oursori.com · NY / NJ → USA · Seed Round 2025 · Consumer · SaaS
 
 - 한인 병원 · 치과
 - 변호사 · 회계사
+- Google Raw Data 정규화
+- 수동 + 알고리즘 검증(Verification)
 - 식당 · 뷰티
 - 이민 · 유학
 
@@ -60,6 +69,7 @@ oursori.com · NY / NJ → USA · Seed Round 2025 · Consumer · SaaS
 - 해외 채용 보드
 - 프리미엄 리스팅
 - 분석 & 리포트
+- AI 신뢰도 분석(로드맵)
 
 ---
 
@@ -76,6 +86,14 @@ oursori.com · NY / NJ → USA · Seed Round 2025 · Consumer · SaaS
 | **합계 — Year 1 목표**               |             |               | **$450K ARR** |
 
 > **핵심:** 한인 전문직 1명(변호사·의사) = 일반 광고주 10명 가치
+
+### Anchor Pricing Benchmark
+
+- **Martindale-Hubbell:** $399/월~ (법률 디렉토리 벤치마크)
+- **Zocdoc:** $50~180/예약 (의료 예약 플랫폼 과금 구조)
+- **SORI Premium:** $499~999/월 (한인 전문직 타겟 광고 단가)
+
+> 한인 변호사/의사가 주류 플랫폼에서 1명 고객 유치에 쓰는 CAC 대비, SORI는 더 낮은 CAC로 고의도 고객을 연결
 
 ---
 
@@ -119,23 +137,34 @@ oursori.com · NY / NJ → USA · Seed Round 2025 · Consumer · SaaS
 
 > **진짜 해자(Moat):** 문화적 신뢰 × 네트워크 효과 × 한국어 + 영어 이중언어 UX
 
+### Tech Moat & AI Roadmap
+
+- Google API raw data 정규화 후 중복/휴폐업/카테고리 오류를 검증하는 Verification 파이프라인
+- 한영 이중언어 리뷰 자동 번역 + 요약(로드맵)
+- AI 기반 비즈니스 신뢰도 점수(리뷰/응답속도/업데이트 빈도 기반, 로드맵)
+
 ---
 
 ## 07 — The Team
 
-### 이 시장에서 가장 적합한 사람들
+### 창업자가 직접 만들고, 시작부터 기술적 깊이로 증명합니다
 
-**CEO & Co-founder**  
-VC 심사역 출신. 스타트업 Exit 경험. 뉴욕/뉴저지 한인 커뮤니티 깊은 이해.  
-Tags: VC 투자 경험 · Startup Exit · 한인 커뮤니티
+**Founder & CEO: Karl Kwon, CS PhD**  
+Deep tech 배경과 0 to 1 제품 개발 경험을 바탕으로, 현재 SORI의 제품 전략부터 설계, 개발, 출시까지 전체 스택을 직접 이끌고 있습니다.  
+Tags: BS/MS/PhD in CS · 0 to 1 · Full-Stack Builder
 
-**CTO & Co-founder**  
-엔지니어링 리드. 모바일 앱 + 웹 플랫폼. SaaS 광고 시스템 설계 및 구현.  
-Tags: Full-Stack · Mobile · SaaS 아키텍처
+- Deep Tech Background: BS/MS/PhD in Computer Science
+- 0 to 1 Expert: Startup Founding Engineer at Blackboard (AIG startup), support for $65M business decisions
+- Big Tech Experience: Lead Software Engineer at MITRE. Led scalable system architectures
+- Solo Builder: Built SORI's entire stack
 
-**Head of Growth** _(채용 예정)_  
-NY/NJ 한인 비즈니스 네트워크 보유. 오프라인 영업 + 디지털 그로쓰 하이브리드.  
-Tags: 한인 커뮤니티 · 영업 · 마케팅
+**Key Hire 01 — Founding Engineer / Mobile** _(투자 후 채용)_  
+모바일 앱 완성도와 제품 개발 속도를 끌어올릴 핵심 엔지니어.  
+Tags: iOS/Android · 제품 속도 · Infra
+
+**Key Hire 02 — Founding Growth Lead** _(투자 후 채용)_  
+NY/NJ 한인 비즈니스 세일즈, 파트너십, 오프라인 네트워크 확장을 담당할 초기 그로스 리더.  
+Tags: Biz Dev · Local Sales · Partnerships
 
 ---
 
