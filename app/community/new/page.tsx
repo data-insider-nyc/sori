@@ -15,18 +15,20 @@ export default function NewPostPage() {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) { router.replace("/auth/login"); return; }
 
+    const payload = {
+      user_id: user.id,
+      title: values.title || null,
+      content: values.content,
+      region: values.region,
+      category: values.category,
+      images: values.images,
+      tags: [],
+      ...(isAdmin ? { is_announcement: values.isAnnouncement ?? false } : {}),
+    };
+
     const { data: post, error } = await supabase
       .from("posts")
-      .insert({
-        user_id: user.id,
-        title: values.title || null,
-        content: values.content,
-        region: values.region,
-        category: values.category,
-        images: values.images,
-        is_announcement: values.isAnnouncement ?? false,
-        tags: [],
-      })
+      .insert(payload)
       .select("id")
       .single();
 
