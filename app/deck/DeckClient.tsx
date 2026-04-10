@@ -200,7 +200,7 @@ function SlideCover({ dark }: { dark: boolean }) {
         <div
           style={{
             fontFamily: "Pretendard, sans-serif",
-            fontSize: "clamp(3rem, 9vw, 8.5rem)",
+            fontSize: "clamp(13rem, 9vw, 18.5rem)",
             fontWeight: 900,
             letterSpacing: "-0.04em",
             lineHeight: 1,
@@ -214,8 +214,8 @@ function SlideCover({ dark }: { dark: boolean }) {
         <div
           style={{
             fontFamily: "Pretendard, sans-serif",
-            fontSize: "clamp(0.8rem,1.5vw,1.35rem)",
-            fontWeight: 600,
+            fontSize: "clamp(3.8rem,1.5vw,10.35rem)",
+            fontWeight: 1000,
             letterSpacing: "0.35em",
             textTransform: "uppercase" as const,
             color: t.sub,
@@ -254,23 +254,23 @@ function SlideCover({ dark }: { dark: boolean }) {
             lineHeight: 1.8,
           }}
         >
-          소리는 &apos;목소리&apos;에서 온 이름입니다.
+          우리의 이야기, 우리의 목소리, 미국 한인들이 만들어가는 커뮤니티
           <br />
-          미국 전역 한인들이 만들어가는 커뮤니티.
+          어디서든, 누구든
         </div>
 
         <div style={{ display: "flex", flexWrap: "wrap" as const, gap: 8 }}>
           {[
             "oursori.com",
             "NY / NJ → USA",
-            "Seed Round 2025",
+            "Seed Round 2026",
             "Consumer · SaaS",
           ].map((l) => (
             <span
               key={l}
               style={{
                 fontFamily: "Pretendard, sans-serif",
-                fontSize: "clamp(10px,1vw,13px)",
+                fontSize: "clamp(20px,1vw,13px)",
                 fontWeight: 600,
                 padding: "6px 14px",
                 border: `1px solid ${t.border}`,
@@ -421,6 +421,18 @@ function SlideMarket({ dark, columns }: { dark: boolean; columns: number }) {
       hi: true,
     },
   ];
+  const whyNow = [
+    {
+      label: "미국 태생 한인(2세대+)",
+      value: "810,000명",
+      desc: "2023년 기준 급증한 디지털 네이티브 세그먼트",
+    },
+    {
+      label: "가구당 중간소득",
+      value: "$104,900 vs $88,400",
+      desc: "2세대 이상이 1세대 대비 더 높은 구매력 보유",
+    },
+  ];
 
   return (
     <SlideWrap dark={dark}>
@@ -546,6 +558,94 @@ function SlideMarket({ dark, columns }: { dark: boolean; columns: number }) {
           한인 전문직 광고 시장 추정 / 년
         </span>
       </div>
+      <div
+        style={{
+          marginTop: "clamp(14px,2vw,24px)",
+          border: `1px solid ${t.accent}`,
+          borderRadius: 8,
+          background: t.highlight,
+          padding: "clamp(12px,1.8vw,20px)",
+        }}
+      >
+        <div
+          style={{
+            fontFamily: "Pretendard, sans-serif",
+            fontSize: "clamp(9px,0.85vw,11px)",
+            fontWeight: 800,
+            letterSpacing: "0.16em",
+            color: t.accent,
+            textTransform: "uppercase" as const,
+            marginBottom: "clamp(10px,1.3vw,16px)",
+          }}
+        >
+          Why Now — Data-backed Opportunity
+        </div>
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns:
+              columns === 1 ? "1fr" : "repeat(2, minmax(0, 1fr))",
+            gap: 10,
+          }}
+        >
+          {whyNow.map((item) => (
+            <div
+              key={item.label}
+              style={{
+                border: `1px solid ${t.border}`,
+                borderRadius: 6,
+                padding: "clamp(10px,1.4vw,16px)",
+                background: t.bg,
+              }}
+            >
+              <div
+                style={{
+                  fontFamily: "Pretendard, sans-serif",
+                  fontSize: "clamp(0.72rem,0.95vw,0.84rem)",
+                  fontWeight: 700,
+                  color: t.sub,
+                  marginBottom: 6,
+                }}
+              >
+                {item.label}
+              </div>
+              <div
+                style={{
+                  fontFamily: "Pretendard, sans-serif",
+                  fontSize: "clamp(1rem,1.5vw,1.28rem)",
+                  fontWeight: 900,
+                  color: t.text,
+                  marginBottom: 4,
+                }}
+              >
+                {item.value}
+              </div>
+              <div
+                style={{
+                  fontFamily: "Pretendard, sans-serif",
+                  fontSize: "clamp(0.7rem,0.95vw,0.82rem)",
+                  color: t.sub,
+                  lineHeight: 1.5,
+                }}
+              >
+                {item.desc}
+              </div>
+            </div>
+          ))}
+        </div>
+        <div
+          style={{
+            marginTop: 10,
+            fontFamily: "Pretendard, sans-serif",
+            fontSize: "clamp(0.74rem,1vw,0.86rem)",
+            color: t.text,
+            lineHeight: 1.6,
+          }}
+        >
+          구매력은 높지만 기존 한인 플랫폼을 쓰지 않는 81만 명의 디지털
+          네이티브를 위한 최초의 플랫폼.
+        </div>
+      </div>
     </SlideWrap>
   );
 }
@@ -569,6 +669,8 @@ function SlideSolution({ dark, columns }: { dark: boolean; columns: number }) {
       items: [
         "한인 병원 · 치과",
         "변호사 · 회계사",
+        "Google Raw Data 정규화",
+        "수동 + 알고리즘 검증(Verification)",
         "식당 · 뷰티",
         "이민 · 유학",
       ],
@@ -583,6 +685,7 @@ function SlideSolution({ dark, columns }: { dark: boolean; columns: number }) {
         "해외 채용 보드",
         "프리미엄 리스팅",
         "분석 & 리포트",
+        "AI 신뢰도 분석(로드맵)",
       ],
     },
   ];
@@ -728,6 +831,23 @@ function SlideRevenue({ dark }: { dark: boolean }) {
     display: "grid",
     gridTemplateColumns: "2.2fr 1fr 1.2fr 0.9fr",
   };
+  const anchors = [
+    {
+      name: "Martindale-Hubbell",
+      price: "$399/월~",
+      note: "미국 법률 디렉토리 대표 벤치마크",
+    },
+    {
+      name: "Zocdoc",
+      price: "$50~180/예약",
+      note: "의료 예약 플랫폼 과금 구조",
+    },
+    {
+      name: "SORI Premium",
+      price: "$499~999/월",
+      note: "한인 전문직 타겟 광고 단가",
+    },
+  ];
 
   return (
     <SlideWrap dark={dark}>
@@ -896,6 +1016,93 @@ function SlideRevenue({ dark }: { dark: boolean }) {
       >
         <strong style={{ color: t.text }}>핵심:</strong> 한인 전문직
         1명(변호사·의사) = 일반 광고주 10명 가치
+      </div>
+      <div
+        style={{
+          marginTop: "clamp(12px,1.8vw,20px)",
+          border: `1px solid ${t.border}`,
+          borderRadius: 8,
+          padding: "clamp(10px,1.5vw,16px)",
+          background: t.bgAlt,
+        }}
+      >
+        <div
+          style={{
+            fontFamily: "Pretendard, sans-serif",
+            fontSize: "clamp(9px,0.85vw,11px)",
+            fontWeight: 800,
+            letterSpacing: "0.14em",
+            color: t.sub,
+            textTransform: "uppercase" as const,
+            marginBottom: 10,
+          }}
+        >
+          Anchor Pricing Benchmark
+        </div>
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
+            gap: 8,
+          }}
+        >
+          {anchors.map((a) => (
+            <div
+              key={a.name}
+              style={{
+                border: `1px solid ${a.name === "SORI Premium" ? t.accent : t.border}`,
+                borderRadius: 6,
+                padding: "10px 12px",
+                background: a.name === "SORI Premium" ? t.highlight : t.bg,
+              }}
+            >
+              <div
+                style={{
+                  fontFamily: "Pretendard, sans-serif",
+                  fontSize: "clamp(0.74rem,1vw,0.86rem)",
+                  color: t.sub,
+                  marginBottom: 4,
+                  fontWeight: 700,
+                }}
+              >
+                {a.name}
+              </div>
+              <div
+                style={{
+                  fontFamily: "Pretendard, sans-serif",
+                  fontSize: "clamp(0.9rem,1.2vw,1.02rem)",
+                  color: a.name === "SORI Premium" ? t.accent : t.text,
+                  fontWeight: 900,
+                  marginBottom: 4,
+                }}
+              >
+                {a.price}
+              </div>
+              <div
+                style={{
+                  fontFamily: "Pretendard, sans-serif",
+                  fontSize: "clamp(0.68rem,0.9vw,0.8rem)",
+                  color: t.sub,
+                  lineHeight: 1.45,
+                }}
+              >
+                {a.note}
+              </div>
+            </div>
+          ))}
+        </div>
+        <div
+          style={{
+            marginTop: 10,
+            fontFamily: "Pretendard, sans-serif",
+            fontSize: "clamp(0.72rem,0.95vw,0.84rem)",
+            color: t.sub,
+            lineHeight: 1.55,
+          }}
+        >
+          한인 변호사/의사가 주류 플랫폼에서 1명 고객 유치에 쓰는 CAC 대비,
+          SORI는 더 낮은 CAC로 고의도 고객을 연결하는 채널이 됩니다.
+        </div>
       </div>
     </SlideWrap>
   );
@@ -1106,6 +1313,11 @@ function SlideCompetitive({ dark }: { dark: boolean }) {
     gap: 8,
     alignItems: "center",
   };
+  const techMoat = [
+    "Google API raw data를 정규화 후 중복/휴폐업/카테고리 오류를 검증하는 Verification 파이프라인",
+    "한영 이중언어 리뷰 자동 번역 + 요약(로드맵)",
+    "AI 기반 비즈니스 신뢰도 점수(리뷰/응답속도/업데이트 빈도 기반, 로드맵)",
+  ];
 
   return (
     <SlideWrap dark={dark}>
@@ -1214,6 +1426,49 @@ function SlideCompetitive({ dark }: { dark: boolean }) {
         <strong style={{ color: t.text }}>진짜 해자:</strong> 문화적 신뢰 ×
         네트워크 효과 × 한국어 + 영어 이중언어 UX
       </div>
+      <div
+        style={{
+          marginTop: "clamp(10px,1.6vw,18px)",
+          border: `1px solid ${t.border}`,
+          borderRadius: 8,
+          padding: "clamp(10px,1.6vw,16px)",
+          background: t.bgAlt,
+        }}
+      >
+        <div
+          style={{
+            fontFamily: "Pretendard, sans-serif",
+            fontSize: "clamp(9px,0.85vw,11px)",
+            fontWeight: 800,
+            letterSpacing: "0.14em",
+            color: t.sub,
+            textTransform: "uppercase" as const,
+            marginBottom: 8,
+          }}
+        >
+          Tech Moat & AI Roadmap
+        </div>
+        <ul style={{ listStyle: "none", margin: 0, padding: 0 }}>
+          {techMoat.map((item) => (
+            <li
+              key={item}
+              style={{
+                display: "flex",
+                gap: 8,
+                alignItems: "flex-start",
+                padding: "4px 0",
+                fontFamily: "Pretendard, sans-serif",
+                fontSize: "clamp(0.72rem,0.98vw,0.84rem)",
+                color: t.sub,
+                lineHeight: 1.5,
+              }}
+            >
+              <span style={{ color: t.accent, marginTop: 1 }}>•</span>
+              <span>{item}</span>
+            </li>
+          ))}
+        </ul>
+      </div>
     </SlideWrap>
   );
 }
@@ -1231,7 +1486,7 @@ function SlideTeam({ dark, columns }: { dark: boolean; columns: number }) {
       "Deep tech 배경과 0 to 1 제품 개발 경험을 바탕으로, 현재 SORI의 제품 전략부터 설계, 개발, 출시까지 전체 스택을 직접 이끌고 있습니다.",
     points: [
       "Deep Tech Background: BS/MS/PhD in Computer Science",
-      "0 to 1 Expert: Startup Founding Engineer, built MDES from scratch",
+      "0 to 1 Expert: Startup Founding Engineer at Blackboard (AIG startup), support for $65M business decisions",
       "Big Tech Experience: Lead Software Engineer at MITRE, led scalable system architectures",
       "Solo Builder: Built SORI's entire stack",
     ],
@@ -1254,6 +1509,7 @@ function SlideTeam({ dark, columns }: { dark: boolean; columns: number }) {
     columns > 1 ? `span ${Math.max(1, columns - 1)}` : undefined;
   const founderLayoutColumns =
     columns === 1 ? "1fr" : "minmax(220px, 280px) minmax(0, 1fr)";
+  const isSingleColumn = columns === 1;
 
   return (
     <SlideWrap dark={dark} alt>
@@ -1295,7 +1551,11 @@ function SlideTeam({ dark, columns }: { dark: boolean; columns: number }) {
           >
             <div
               style={{
-                minHeight: columns === 1 ? 220 : 320,
+                minHeight: isSingleColumn ? 320 : 320,
+                maxHeight: isSingleColumn ? 420 : undefined,
+                width: isSingleColumn ? "min(100%, 340px)" : "100%",
+                margin: isSingleColumn ? "0 auto" : undefined,
+                aspectRatio: isSingleColumn ? "4 / 5" : "3 / 4",
                 borderRadius: 8,
                 border: `1px solid ${t.accent}`,
                 background: dark
@@ -1309,8 +1569,11 @@ function SlideTeam({ dark, columns }: { dark: boolean; columns: number }) {
                 src="/karlkwon.jpeg"
                 alt="Karl Kwon founder portrait"
                 fill
-                sizes="(max-width: 767px) 100vw, 280px"
-                style={{ objectFit: "cover", objectPosition: "center top" }}
+                sizes="(max-width: 767px) 340px, 280px"
+                style={{
+                  objectFit: "cover",
+                  objectPosition: isSingleColumn ? "center 18%" : "center top",
+                }}
                 priority
               />
               <div
@@ -1911,7 +2174,7 @@ export default function DeckClient({ markdown: _ }: { markdown: string }) {
               letterSpacing: "0.04em",
             }}
           >
-            Investor Deck · 2025
+            Investor Deck · 2026
           </span>
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>

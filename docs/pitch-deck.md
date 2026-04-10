@@ -5,7 +5,7 @@
 미국 한인 커뮤니티 & 비즈니스 플랫폼  
 소리는 '목소리'에서 온 이름입니다.  
 미국 전역 한인들이 만들어가는 커뮤니티.  
-oursori.com · NY / NJ → USA · Seed Round 2025 · Consumer · SaaS
+oursori.com · NY / NJ → USA · Seed Round 2026 · Consumer · SaaS
 
 ---
 
@@ -34,6 +34,13 @@ oursori.com · NY / NJ → USA · Seed Round 2025 · Consumer · SaaS
 
 > 한인 전문직 광고 시장 추정: **$50 ~ 100M / 년**
 
+### Why Now — 데이터로 증명되는 기회
+
+- 미국 태생 한인(2세대 이상): **810,000명 (2023)**
+- 가구당 중간소득: **$104,900 (2세대+) vs $88,400 (1세대)**
+
+> 구매력은 높지만 기존 한인 플랫폼을 쓰지 않는 81만 명의 디지털 네이티브를 위한 최초의 플랫폼
+
 ---
 
 ## 03 — The Solution
@@ -51,6 +58,8 @@ oursori.com · NY / NJ → USA · Seed Round 2025 · Consumer · SaaS
 
 - 한인 병원 · 치과
 - 변호사 · 회계사
+- Google Raw Data 정규화
+- 수동 + 알고리즘 검증(Verification)
 - 식당 · 뷰티
 - 이민 · 유학
 
@@ -60,6 +69,7 @@ oursori.com · NY / NJ → USA · Seed Round 2025 · Consumer · SaaS
 - 해외 채용 보드
 - 프리미엄 리스팅
 - 분석 & 리포트
+- AI 신뢰도 분석(로드맵)
 
 ---
 
@@ -76,6 +86,14 @@ oursori.com · NY / NJ → USA · Seed Round 2025 · Consumer · SaaS
 | **합계 — Year 1 목표**               |             |               | **$450K ARR** |
 
 > **핵심:** 한인 전문직 1명(변호사·의사) = 일반 광고주 10명 가치
+
+### Anchor Pricing Benchmark
+
+- **Martindale-Hubbell:** $399/월~ (법률 디렉토리 벤치마크)
+- **Zocdoc:** $50~180/예약 (의료 예약 플랫폼 과금 구조)
+- **SORI Premium:** $499~999/월 (한인 전문직 타겟 광고 단가)
+
+> 한인 변호사/의사가 주류 플랫폼에서 1명 고객 유치에 쓰는 CAC 대비, SORI는 더 낮은 CAC로 고의도 고객을 연결
 
 ---
 
@@ -118,6 +136,12 @@ oursori.com · NY / NJ → USA · Seed Round 2025 · Consumer · SaaS
 | Yelp      | ✓         | ✓         | ✓           | ✗             | ✗        |
 
 > **진짜 해자(Moat):** 문화적 신뢰 × 네트워크 효과 × 한국어 + 영어 이중언어 UX
+
+### Tech Moat & AI Roadmap
+
+- Google API raw data 정규화 후 중복/휴폐업/카테고리 오류를 검증하는 Verification 파이프라인
+- 한영 이중언어 리뷰 자동 번역 + 요약(로드맵)
+- AI 기반 비즈니스 신뢰도 점수(리뷰/응답속도/업데이트 빈도 기반, 로드맵)
 
 ---
 
