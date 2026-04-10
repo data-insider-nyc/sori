@@ -1,9 +1,8 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
-import { useSearchParams, useRouter } from "next/navigation";
+import { useEffect, useRef, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase-browser";
-import { LOCAL_CATEGORIES } from "@/lib/constants";
 import { REGIONS, getRegionIcon } from "@/lib/regions";
 import { CATEGORIES } from "@/lib/post-categories";
 import { PostCard } from "@/components/ui/PostCard";
@@ -24,6 +23,13 @@ type CacheEntry = {
   hasMore: boolean;
   ts: number;
 };
+
+type FilterState = {
+  region: string;
+  category: string;
+  q: string;
+};
+
 const feedCache = new Map<string, CacheEntry>();
 
 function makeCacheKey(region: string, category: string, q: string) {
@@ -38,7 +44,6 @@ export function clearFeedCache() {
 
 export function CommunityListing() {
   const searchParams = useSearchParams();
-  const router = useRouter();
 
   const category = searchParams.get("category") ?? "all";
   const region = searchParams.get("region") ?? "all";
@@ -64,12 +69,22 @@ export function CommunityListing() {
   const regions = REGIONS;
   const categories = CATEGORIES;
   const debounceRef = useRef<ReturnType<typeof setTimeout>>(undefined);
+  const activeRequestRef = useRef(0);
+  const latestFiltersRef = useRef<FilterState>({ region, category, q });
 
   // Resolve auth from local session cache (no network round-trip)
   useEffect(() => {
     createClient()
       .auth.getSession()
       .then(({ data: { session } }) => setUserId(session?.user?.id ?? null));
+  }, []);
+
+  useEffect(() => {
+    latestFiltersRef.current = { region, category, q };
+  }, [category, region, q]);
+
+  useEffect(() => {
+    return () => clearTimeout(debounceRef.current);
   }, []);
 
   // Realtime subscription intentionally removed:
@@ -81,17 +96,27 @@ export function CommunityListing() {
     const entry = feedCache.get(makeCacheKey(region, category, q));
     const isFresh = entry && Date.now() - entry.ts < CACHE_TTL;
     if (isFresh) {
+      activeRequestRef.current += 1;
       // Apply any recent like toggles the user made (e.g., liked on detail page, back to list)
       setPosts(applyLikeOverrides(entry.posts));
       setHasMore(entry.hasMore);
       setCursor(entry.cursor);
+      setLoadingMore(false);
       setLoading(false);
       return;
     }
-    setPosts([]);
+
+    const requestId = activeRequestRef.current + 1;
+    activeRequestRef.current = requestId;
     setCursor(null);
     setHasMore(false);
-    load({ afterCursor: null, append: false });
+    setLoadingMore(false);
+    void load({
+      afterCursor: null,
+      append: false,
+      filters: { region, category, q },
+      requestId,
+    });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [category, region, q]);
 
@@ -109,6 +134,16 @@ export function CommunityListing() {
   useEffect(() => {
     setSearchInput(q);
   }, [q]);
+
+  function isActiveRequest(requestId: number, filters: FilterState) {
+    const latest = latestFiltersRef.current;
+    return (
+      requestId === activeRequestRef.current &&
+      latest.region === filters.region &&
+      latest.category === filters.category &&
+      latest.q === filters.q
+    );
+  }
 
   async function overlayLikes(list: Post[], uid: string): Promise<Post[]> {
     try {
@@ -142,9 +177,15 @@ export function CommunityListing() {
   async function load({
     afterCursor,
     append,
+    filters,
+    requestId,
+    basePosts,
   }: {
     afterCursor: string | null;
     append: boolean;
+    filters: FilterState;
+    requestId: number;
+    basePosts?: Post[];
   }) {
     if (append) setLoadingMore(true);
     else setLoading(true);
@@ -160,12 +201,15 @@ export function CommunityListing() {
       .order("created_at", { ascending: false })
       .limit(PAGE_SIZE);
 
-    if (category !== "all") query = query.eq("category", category);
-    if (region !== "all") query = query.eq("region", region);
-    if (q.trim()) query = query.ilike("title", `%${q.trim()}%`);
+    if (filters.category !== "all") query = query.eq("category", filters.category);
+    if (filters.region !== "all") query = query.eq("region", filters.region);
+    if (filters.q.trim()) query = query.ilike("title", `%${filters.q.trim()}%`);
     if (afterCursor) query = query.lt("created_at", afterCursor);
 
     const { data: raw } = await query;
+
+    if (!isActiveRequest(requestId, filters)) return;
+
     const rows = (raw ?? []) as any[];
 
     if (rows.length === 0) {
@@ -190,7 +234,7 @@ export function CommunityListing() {
       is_liked: false, // overlaid asynchronously after userId resolves
     }));
 
-    const newPosts = append ? [...posts, ...list] : list;
+    const newPosts = append ? [...(basePosts ?? posts), ...list] : list;
     const newCursor = deduped[deduped.length - 1].created_at;
     const newHasMore = deduped.length === PAGE_SIZE;
 
@@ -202,7 +246,7 @@ export function CommunityListing() {
 
     // Cache first page only
     if (!append) {
-      feedCache.set(makeCacheKey(region, category, q), {
+      feedCache.set(makeCacheKey(filters.region, filters.category, filters.q), {
         posts: list,
         cursor: newCursor,
         hasMore: newHasMore,
@@ -213,9 +257,10 @@ export function CommunityListing() {
     // Overlay likes if userId already resolved
     if (userId) {
       overlayLikes(newPosts, userId).then((updated) => {
+        if (!isActiveRequest(requestId, filters)) return;
         setPosts(updated);
         if (!append) {
-          feedCache.set(makeCacheKey(region, category, q), {
+          feedCache.set(makeCacheKey(filters.region, filters.category, filters.q), {
             posts: updated,
             cursor: newCursor,
             hasMore: newHasMore,
@@ -230,7 +275,12 @@ export function CommunityListing() {
     const params = new URLSearchParams(searchParams.toString());
     if (!value || value === "all") params.delete(key);
     else params.set(key, value);
-    router.replace(`/community?${params.toString()}`);
+    const nextQuery = params.toString();
+    window.history.replaceState(
+      null,
+      "",
+      nextQuery ? `/community?${nextQuery}` : "/community",
+    );
   }
 
   function handleSearchChange(val: string) {
@@ -238,6 +288,9 @@ export function CommunityListing() {
     clearTimeout(debounceRef.current);
     debounceRef.current = setTimeout(() => setParam("q", val), 300);
   }
+
+  const showSkeleton = loading && posts.length === 0;
+  const showRefreshing = loading && posts.length > 0;
 
   return (
     <div className="lg:col-span-2">
@@ -321,7 +374,7 @@ export function CommunityListing() {
       </div>
 
       {/* Feed */}
-      {loading ? (
+      {showSkeleton ? (
         <div className="space-y-4">
           {[1, 2, 3].map((i) => (
             <div
@@ -340,7 +393,21 @@ export function CommunityListing() {
         </div>
       ) : (
         <>
-          <div className="space-y-4">
+          {showRefreshing ? (
+            <div className="mb-4 flex justify-center">
+              <div className="inline-flex items-center gap-2 rounded-full border border-gray-200 bg-white/90 px-3 py-1.5 text-xs font-semibold text-gray-500 shadow-sm">
+                <span className="h-3 w-3 rounded-full border-2 border-gray-300 border-t-[#FF5C5C] animate-spin" />
+                목록 업데이트 중...
+              </div>
+            </div>
+          ) : null}
+
+          <div
+            className={cn(
+              "space-y-4 transition-opacity",
+              showRefreshing && "opacity-60",
+            )}
+          >
             {posts.map((post) => (
               <PostCard key={post.id} post={post} userId={userId} />
             ))}
@@ -349,7 +416,17 @@ export function CommunityListing() {
           {hasMore && (
             <div className="mt-8 text-center">
               <button
-                onClick={() => load({ afterCursor: cursor, append: true })}
+                onClick={() => {
+                  const requestId = activeRequestRef.current + 1;
+                  activeRequestRef.current = requestId;
+                  void load({
+                    afterCursor: cursor,
+                    append: true,
+                    filters: latestFiltersRef.current,
+                    requestId,
+                    basePosts: posts,
+                  });
+                }}
                 disabled={loadingMore}
                 className="btn-outline inline-flex items-center gap-2"
               >
