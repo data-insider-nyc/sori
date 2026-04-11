@@ -1,18 +1,21 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from "@playwright/test";
 
-test('has title', async ({ page }) => {
-  await page.goto('https://playwright.dev/');
+test.describe("community core smoke", () => {
+  test("community list loads and filtering query params work", async ({ page }) => {
+    await page.goto("/community");
 
-  // Expect a title "to contain" a substring.
-  await expect(page).toHaveTitle(/Playwright/);
-});
+    await expect(page.getByRole("heading", { name: "커뮤니티" })).toBeVisible();
+    await expect(page.getByPlaceholder("게시글 검색...")).toBeVisible();
 
-test('get started link', async ({ page }) => {
-  await page.goto('https://playwright.dev/');
+    await page.getByRole("button", { name: "NYC Metro" }).click();
+    await expect(page).toHaveURL(/region=nyc/);
 
-  // Click the get started link.
-  await page.getByRole('link', { name: 'Get started' }).click();
+    await page.getByRole("button", { name: "부동산" }).click();
+    await expect(page).toHaveURL(/category=(housing|realestate)/);
+  });
 
-  // Expects page to have a heading with the name of Installation.
-  await expect(page.getByRole('heading', { name: 'Installation' })).toBeVisible();
+  test("guest user write paths redirect to login", async ({ page }) => {
+    await page.goto("/community/new");
+    await expect(page).toHaveURL(/auth\/login/);
+  });
 });
