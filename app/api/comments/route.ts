@@ -25,12 +25,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
-  try {
-    // @ts-ignore - Next's revalidateTag typing may require extra args in this environment
-    revalidateTag("posts");
-  } catch (e) {
-    console.warn('[POST /api/comments] revalidateTag failed', e);
-  }
+  revalidateTag("posts", "max");
 
   return NextResponse.json({ ok: true });
 }

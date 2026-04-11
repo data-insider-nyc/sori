@@ -26,12 +26,7 @@ export async function DELETE(req: Request, { params }: { params: Promise<{ id: s
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
-  try {
-    // @ts-ignore - Next's revalidateTag typing may require extra args in this environment
-    revalidateTag("posts");
-  } catch (e) {
-    console.warn("[DELETE /api/comments] revalidateTag failed", e);
-  }
+  revalidateTag("posts", "max");
 
   return NextResponse.json({ ok: true });
 }

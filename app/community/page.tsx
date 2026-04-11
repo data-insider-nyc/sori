@@ -5,10 +5,11 @@ import { SidebarWidgets } from "@/components/community/SidebarWidgets";
 import { CommunityListing } from "./CommunityListing";
 import { PAGE_META } from "@/lib/copy";
 
-// Page shell (title, layout, HotTopics) cached at Vercel edge for 5 min.
-// CommunityListing is a client component — it runs in the browser and uses
-// its own feedCache, so this revalidate doesn't affect data freshness.
-export const revalidate = 300;
+// Make this page dynamic so the ISR page cache doesn't serve stale sidebar data.
+// SidebarWidgets uses unstable_cache (120s TTL) for its own data freshness,
+// and revalidateTag("posts") busts it when comments are added/deleted.
+// CommunityListing is a client component — it always fetches fresh from the browser.
+export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
   title: PAGE_META.community.title,
