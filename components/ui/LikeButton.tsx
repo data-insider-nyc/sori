@@ -5,6 +5,8 @@ import { Heart } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { createClient } from "@/lib/supabase-browser";
 import { recordLikeToggle } from "@/lib/post-like-store";
+import { fetchWithRetry } from "@/lib/fetch-retry";
+import { showToast } from "@/lib/toast";
 
 interface LikeButtonProps {
   postId: string;
@@ -29,6 +31,7 @@ export function LikeButton({
 }: LikeButtonProps) {
   const [liked, setLiked] = useState(initialLiked);
   const [count, setCount] = useState(initialCount);
+  const [pending, setPending] = useState(false);
 
   // Sync when parent re-renders with fresh data (e.g., overlayLikes resolves)
   useEffect(() => {
@@ -63,22 +66,24 @@ export function LikeButton({
   }, [postId, realtime]);
 
   async function handleLike() {
+    if (pending) return;
     if (!userId) {
       window.location.href = "/auth/login";
       return;
     }
 
     const wasLiked = liked;
+    setPending(true);
     // Optimistic update
     setLiked(!wasLiked);
     setCount((c) => (wasLiked ? c - 1 : c + 1));
 
     try {
-      const res = await fetch(`/api/posts/${postId}`, {
+      const res = await fetchWithRetry(`/api/posts/${postId}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
-      });
+      }, { retries: 1 });
       const body = await res.json().catch(() => ({}));
 
       if (!res.ok) {
@@ -86,6 +91,8 @@ export function LikeButton({
         // Revert optimistic update on failure
         setLiked(wasLiked);
         setCount((c) => (wasLiked ? c + 1 : c - 1));
+        showToast(body?.error || "좋아요 처리에 실패했어요. 다시 시도해주세요.");
+        setPending(false);
         return;
       }
 
@@ -99,12 +106,16 @@ export function LikeButton({
       console.error("[LikeButton] toggle like err", err);
       setLiked(wasLiked);
       setCount((c) => (wasLiked ? c + 1 : c - 1));
+      showToast("네트워크 오류로 좋아요 처리에 실패했어요.");
+    } finally {
+      setPending(false);
     }
   }
 
   return (
     <button
       onClick={handleLike}
+      disabled={pending}
       className={cn(
         "flex items-center gap-1.5 transition-all",
         liked
@@ -113,6 +124,7 @@ export function LikeButton({
         showLabel
           ? "px-4 py-2 rounded-xl text-sm font-medium"
           : "px-3 py-1.5 rounded-lg text-sm",
+        pending && "opacity-70 cursor-not-allowed",
         className,
       )}
     >

@@ -206,29 +206,52 @@ export async function DELETE(req: Request, { params }: { params: Promise<{ id: s
     .single();
   const isAdmin = profile?.is_admin === true;
 
-  // Admin: use service role to bypass RLS
-  const db = isAdmin ? createAdminClient() : supabase;
+  const { data: target, error: targetError } = await supabase
+    .from("posts")
+    .select("id, user_id")
+    .eq("id", id)
+    .maybeSingle();
 
-  // Fetch images before delete for Storage cleanup
+  if (targetError) {
+    console.error("[DELETE /api/posts] target lookup error:", targetError.message);
+    return NextResponse.json({ error: targetError.message }, { status: 500 });
+  }
+  if (!target) {
+    return NextResponse.json({ error: "Not found" }, { status: 404 });
+  }
+  if (!isAdmin && target.user_id !== user.id) {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  }
+
+  // Deterministic soft-delete updates using service role after explicit auth checks.
   const admin = createAdminClient();
-  const { data: postData } = await admin.from("posts").select("images").eq("id", id).maybeSingle();
+  const nowIso = new Date().toISOString();
 
-  // Hard delete — RLS own_post or admin_delete_post policy permits this
-  const { error } = await db.from("posts").delete().eq("id", id);
+  const { data: deleted, error } = await admin
+    .from("posts")
+    .update({ deleted_at: nowIso })
+    .eq("id", id)
+    .is("deleted_at", null)
+    .select("id")
+    .maybeSingle();
 
   if (error) {
     console.error("[DELETE /api/posts] error:", error.message);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
+  if (!deleted) {
+    return NextResponse.json({ error: "Delete failed" }, { status: 500 });
+  }
 
-  // Clean up Storage images
-  const imageUrls: string[] = postData?.images ?? [];
-  if (imageUrls.length > 0) {
-    const paths = imageUrls.map((url: string) => {
-      const u = new URL(url);
-      return u.pathname.replace(/^\/storage\/v1\/object\/public\/post-images\//, "");
-    });
-    await admin.storage.from("post-images").remove(paths);
+  const { error: commentsError } = await admin
+    .from("comments")
+    .update({ deleted_at: nowIso })
+    .eq("post_id", id)
+    .is("deleted_at", null);
+
+  if (commentsError) {
+    console.error("[DELETE /api/posts] soft-delete comments error:", commentsError.message);
+    return NextResponse.json({ error: commentsError.message }, { status: 500 });
   }
 
   try {

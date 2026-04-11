@@ -13,32 +13,32 @@ export default function NewPostPage() {
 
   async function handleSubmit(values: PostFormValues) {
     const { data: { user } } = await supabase.auth.getUser();
-    if (!user) { router.replace("/auth/login"); return; }
+    if (!user) {
+      router.replace("/auth/login");
+      return;
+    }
 
-    const payload = {
-      user_id: user.id,
-      title: values.title || null,
-      content: values.content,
-      region: values.region,
-      category: values.category,
-      images: values.images,
-      tags: [],
-      ...(isAdmin ? { is_announcement: values.isAnnouncement ?? false } : {}),
-    };
+    const res = await fetch("/api/posts", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify({
+        title: values.title || null,
+        content: values.content,
+        region: values.region,
+        category: values.category,
+        images: values.images,
+        ...(isAdmin ? { is_announcement: values.isAnnouncement ?? false } : {}),
+      }),
+    });
 
-    const { data: post, error } = await supabase
-      .from("posts")
-      .insert(payload)
-      .select("id")
-      .single();
-
-    if (error || !post) throw new Error(error?.message ?? "저장에 실패했습니다.");
-
-    // Auto-like with author's own like (Reddit style)
-    await supabase.from("post_likes").insert({ post_id: post.id, user_id: user.id });
+    const body = await res.json().catch(() => ({}));
+    if (!res.ok || !body?.id) {
+      throw new Error(body?.error ?? "저장에 실패했습니다.");
+    }
 
     clearFeedCache();
-    router.replace(`/community/${post.id}`);
+    router.replace(`/community/${body.id}`);
   }
 
   const [userId, setUserId] = useState<string | null>(null);

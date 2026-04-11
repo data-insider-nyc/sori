@@ -19,7 +19,7 @@ const CACHE_TTL = 10 * 60 * 1000; // 10 minutes
 // Like Python's @cache(ttl=120) — "back and forth" navigation is instant.
 type CacheEntry = {
   posts: Post[];
-  cursor: string | null;
+  cursor: { createdAt: string; id: string } | null;
   hasMore: boolean;
   ts: number;
 };
@@ -61,7 +61,7 @@ export function CommunityListing() {
   const [loading, setLoading] = useState(!fresh);
   const [loadingMore, setLoadingMore] = useState(false);
   const [hasMore, setHasMore] = useState(fresh ? cached.hasMore : false);
-  const [cursor, setCursor] = useState<string | null>(
+  const [cursor, setCursor] = useState<{ createdAt: string; id: string } | null>(
     fresh ? cached.cursor : null,
   );
   const [userId, setUserId] = useState<string | null>(null);
@@ -181,7 +181,7 @@ export function CommunityListing() {
     requestId,
     basePosts,
   }: {
-    afterCursor: string | null;
+    afterCursor: { createdAt: string; id: string } | null;
     append: boolean;
     filters: FilterState;
     requestId: number;
@@ -199,12 +199,17 @@ export function CommunityListing() {
         "id, title, content, category, region, user_id, like_count, comment_count, created_at, pinned, pinned_at, author:profiles!user_id(id, nickname, handle, location, avatar_url)",
       )
       .order("created_at", { ascending: false })
+      .order("id", { ascending: false })
       .limit(PAGE_SIZE);
 
     if (filters.category !== "all") query = query.eq("category", filters.category);
     if (filters.region !== "all") query = query.eq("region", filters.region);
     if (filters.q.trim()) query = query.ilike("title", `%${filters.q.trim()}%`);
-    if (afterCursor) query = query.lt("created_at", afterCursor);
+    if (afterCursor) {
+      query = query.or(
+        `created_at.lt.${afterCursor.createdAt},and(created_at.eq.${afterCursor.createdAt},id.lt.${afterCursor.id})`,
+      );
+    }
 
     const { data: raw } = await query;
 
@@ -235,7 +240,8 @@ export function CommunityListing() {
     }));
 
     const newPosts = append ? [...(basePosts ?? posts), ...list] : list;
-    const newCursor = deduped[deduped.length - 1].created_at;
+    const last = deduped[deduped.length - 1];
+    const newCursor = { createdAt: last.created_at, id: last.id };
     const newHasMore = deduped.length === PAGE_SIZE;
 
     setPosts(newPosts);
@@ -287,6 +293,44 @@ export function CommunityListing() {
     setSearchInput(val);
     clearTimeout(debounceRef.current);
     debounceRef.current = setTimeout(() => setParam("q", val), 300);
+  }
+
+  function applyPostsUpdate(nextPosts: Post[]) {
+    setPosts(nextPosts);
+    const entry = feedCache.get(key);
+    if (entry) {
+      feedCache.set(key, { ...entry, posts: nextPosts, ts: Date.now() });
+    }
+  }
+
+  function handlePostEdited(
+    postId: string,
+    updated: {
+      title?: string | null;
+      content?: string;
+      category?: string;
+      region?: string | null;
+      images?: string[];
+    },
+  ) {
+    const nextPosts = posts.map((p) =>
+      p.id === postId
+        ? {
+            ...p,
+            title: typeof updated.title === "undefined" ? p.title : (updated.title ?? ""),
+            content: typeof updated.content === "undefined" ? p.content : updated.content,
+            category: typeof updated.category === "undefined" ? p.category : updated.category,
+            region: typeof updated.region === "undefined" ? p.region : (updated.region ?? null),
+            images: typeof updated.images === "undefined" ? p.images : updated.images,
+          }
+        : p,
+    );
+    applyPostsUpdate(nextPosts);
+  }
+
+  function handlePostDeleted(postId: string) {
+    const nextPosts = posts.filter((p) => p.id !== postId);
+    applyPostsUpdate(nextPosts);
   }
 
   const showSkeleton = loading && posts.length === 0;
@@ -409,7 +453,13 @@ export function CommunityListing() {
             )}
           >
             {posts.map((post) => (
-              <PostCard key={post.id} post={post} userId={userId} />
+              <PostCard
+                key={post.id}
+                post={post}
+                userId={userId}
+                onPostEdited={handlePostEdited}
+                onPostDeleted={handlePostDeleted}
+              />
             ))}
           </div>
 

@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { MessageCircle } from "lucide-react";
 import { UserPopover } from "../community/UserPopover";
 import { ProfileCard } from "@/components/ui/ProfileCard";
@@ -14,13 +15,27 @@ import { ImageLightbox } from "@/components/ui/ImageLightbox";
 interface Props {
   post: Post;
   userId?: string | null;
+  onPostEdited?: (
+    postId: string,
+    updated: {
+      title?: string | null;
+      content?: string;
+      category?: string;
+      region?: string | null;
+      images?: string[];
+    },
+  ) => void;
+  onPostDeleted?: (postId: string) => void;
 }
 
 export const PostCard = React.memo(function PostCard({
   post,
   userId = null,
+  onPostEdited,
+  onPostDeleted,
 }: Props) {
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
+  const router = useRouter();
 
   return (
     <>
@@ -57,17 +72,33 @@ export const PostCard = React.memo(function PostCard({
               region: post.region,
               images: post.images ?? [],
             }}
-            onAfterEdit={() => window.location.reload()}
+            onAfterEdit={(updated) => {
+              if (onPostEdited) {
+                onPostEdited(post.id, {
+                  title: updated?.title,
+                  content: updated?.content,
+                  category: updated?.category,
+                  region: updated?.region,
+                  images: updated?.images,
+                });
+                return;
+              }
+              router.refresh();
+            }}
             onAfterDelete={() => {
+              if (onPostDeleted) {
+                onPostDeleted(post.id);
+                return;
+              }
               if (
                 window.location.pathname.startsWith(`/community/${post.id}`)
               ) {
                 window.location.href = "/community";
               } else {
-                window.location.reload();
+                router.refresh();
               }
             }}
-            onAfterPin={() => window.location.reload()}
+            onAfterPin={() => router.refresh()}
           />
         </div>
 
