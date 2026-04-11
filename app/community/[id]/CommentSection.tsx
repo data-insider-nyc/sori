@@ -8,6 +8,8 @@ import { UserPopover } from "@/components/community/UserPopover";
 import { ProfileAvatar } from "@/components/ui/ProfileCard";
 import { useIsAdmin } from "@/hooks/useIsAdmin";
 import type { Comment } from "@/types";
+import { fetchWithRetry } from "@/lib/fetch-retry";
+import { showToast } from "@/lib/toast";
 
 interface Props {
   postId: string;
@@ -72,9 +74,16 @@ export function CommentSection({ postId, userId }: Props) {
 
       const top = all.filter((c) => !c.parent_id);
       const replies = all.filter((c) => c.parent_id);
+      const replyMap = new Map<string, Comment[]>();
+      for (const reply of replies) {
+        const key = reply.parent_id as string;
+        const bucket = replyMap.get(key);
+        if (bucket) bucket.push(reply);
+        else replyMap.set(key, [reply]);
+      }
       const tree = top.map((c) => ({
         ...c,
-        replies: replies.filter((r) => r.parent_id === c.id),
+        replies: replyMap.get(c.id) ?? [],
       }));
 
       commentCache.set(postId, { comments: tree, ts: Date.now() });
@@ -97,23 +106,27 @@ export function CommentSection({ postId, userId }: Props) {
     setSubmitting(true);
     setCommentError("");
     try {
-      const res = await fetch(`/api/comments`, {
+      const res = await fetchWithRetry(`/api/comments`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
         body: JSON.stringify({ post_id: postId, content: commentText.trim() }),
-      });
+      }, { retries: 1 });
       if (!res.ok) {
         const body = await res.json().catch(() => ({}));
-        setCommentError(body.error || "댓글 등록에 실패했어요. 다시 시도해주세요.");
+        const message = body.error || "댓글 등록에 실패했어요. 다시 시도해주세요.";
+        setCommentError(message);
+        showToast(message);
         setSubmitting(false);
         return;
       }
       setCommentText("");
       await fetchComments({ bust: true });
+      showToast("댓글을 등록했어요.", { type: "success" });
     } catch (err) {
       console.error(err);
       setCommentError("댓글 등록에 실패했어요. 다시 시도해주세요.");
+      showToast("네트워크 오류로 댓글 등록에 실패했어요.");
     } finally {
       setSubmitting(false);
     }
@@ -128,24 +141,28 @@ export function CommentSection({ postId, userId }: Props) {
     setSubmitting(true);
     setCommentError("");
     try {
-      const res = await fetch(`/api/comments`, {
+      const res = await fetchWithRetry(`/api/comments`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
         body: JSON.stringify({ post_id: postId, content: replyText.trim(), parent_id: parentId }),
-      });
+      }, { retries: 1 });
       if (!res.ok) {
         const body = await res.json().catch(() => ({}));
-        setCommentError(body.error || "답글 등록에 실패했어요. 다시 시도해주세요.");
+        const message = body.error || "답글 등록에 실패했어요. 다시 시도해주세요.";
+        setCommentError(message);
+        showToast(message);
         setSubmitting(false);
         return;
       }
       setReplyText("");
       setReplyingTo(null);
       await fetchComments({ bust: true });
+      showToast("답글을 등록했어요.", { type: "success" });
     } catch (err) {
       console.error(err);
       setCommentError("답글 등록에 실패했어요. 다시 시도해주세요.");
+      showToast("네트워크 오류로 답글 등록에 실패했어요.");
     } finally {
       setSubmitting(false);
     }
@@ -153,12 +170,23 @@ export function CommentSection({ postId, userId }: Props) {
 
   async function deleteComment(commentId: string) {
     try {
-      const res = await fetch(`/api/comments/${commentId}`, { method: "DELETE", credentials: "include" });
+      const res = await fetchWithRetry(
+        `/api/comments/${commentId}`,
+        { method: "DELETE", credentials: "include" },
+        { retries: 1 },
+      );
       if (!res.ok) {
-        console.error("Failed to delete comment", await res.text().catch(() => ""));
+        const body = await res.json().catch(() => ({}));
+        const message = body.error || "댓글 삭제에 실패했어요.";
+        console.error("Failed to delete comment", message);
+        showToast(message);
+        return;
       }
+      showToast("댓글을 삭제했어요.", { type: "success" });
     } catch (err) {
       console.error(err);
+      showToast("네트워크 오류로 댓글 삭제에 실패했어요.");
+      return;
     }
     await fetchComments({ bust: true });
   }

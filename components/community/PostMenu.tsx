@@ -6,6 +6,8 @@ import { cn } from "@/lib/utils";
 import { useIsAdmin } from "@/hooks/useIsAdmin";
 import { PostForm } from "@/components/community/PostForm";
 import type { PostFormValues } from "@/components/community/PostForm";
+import { fetchWithRetry } from "@/lib/fetch-retry";
+import { showToast } from "@/lib/toast";
 
 interface Props {
   postId: string;
@@ -27,9 +29,16 @@ interface Props {
   };
   /** Called after a successful edit. Use router.refresh() on detail page,
    *  window.location.reload() on listing. */
-  onAfterEdit?: () => void;
+  onAfterEdit?: (updated?: {
+    id?: string;
+    title?: string | null;
+    content?: string;
+    category?: string;
+    region?: string | null;
+    images?: string[];
+  }) => void;
   /** Called after a successful delete. Redirect or reload as needed. */
-  onAfterDelete?: () => void;
+  onAfterDelete?: (deletedPostId?: string) => void;
   /** Called after a successful pin toggle. */
   onAfterPin?: () => void;
   /** Called after a successful announcement toggle. */
@@ -76,7 +85,7 @@ export function PostMenu({
       window.location.href = "/auth/login";
       return;
     }
-    const res = await fetch(`/api/posts/${postId}`, {
+    const res = await fetchWithRetry(`/api/posts/${postId}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       credentials: "include",
@@ -87,48 +96,56 @@ export function PostMenu({
         region: values.region,
         images: values.images,
       }),
-    });
+    }, { retries: 1 });
     if (!res.ok) {
       const body = await res.json().catch(() => ({}));
       throw new Error(body.error || "수정에 실패했습니다.");
     }
+    const body = await res.json().catch(() => ({}));
     setShowEdit(false);
-    onAfterEdit?.();
+    onAfterEdit?.(body);
   }
 
   async function handlePinToggle() {
     try {
-      const res = await fetch(`/api/posts/${postId}`, {
+      const res = await fetchWithRetry(`/api/posts/${postId}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ pinned: !pinned }),
-      });
+      }, { retries: 1 });
       if (!res.ok) {
         const body = await res.json().catch(() => ({}));
         throw new Error(body.error || "핀 변경에 실패했습니다.");
       }
       onAfterPin?.();
+      showToast(pinned ? "추천을 해제했어요." : "추천으로 등록했어요.", {
+        type: "success",
+      });
     } catch (err) {
       console.error("Pin toggle failed", err);
-      alert("핀 변경에 실패했습니다.");
+      showToast("핀 변경에 실패했습니다.");
     }
   }
 
   async function handleAnnouncementToggle() {
     try {
-      const res = await fetch(`/api/posts/${postId}`, {
+      const res = await fetchWithRetry(`/api/posts/${postId}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ is_announcement: !isAnnouncement }),
-      });
+      }, { retries: 1 });
       if (!res.ok) {
         const body = await res.json().catch(() => ({}));
         throw new Error(body.error || "공지 변경에 실패했습니다.");
       }
       onAfterAnnouncement?.();
+      showToast(
+        isAnnouncement ? "공지 등록을 해제했어요." : "공지로 등록했어요.",
+        { type: "success" },
+      );
     } catch (err) {
       console.error("Announcement toggle failed", err);
-      alert("공지 변경에 실패했습니다.");
+      showToast("공지 변경에 실패했습니다.");
     }
   }
 
@@ -140,13 +157,18 @@ export function PostMenu({
     setDeleting(true);
     setDeleteError("");
     try {
-      const res = await fetch(`/api/posts/${postId}`, { method: "DELETE" });
+      const res = await fetchWithRetry(
+        `/api/posts/${postId}`,
+        { method: "DELETE", credentials: "include" },
+        { retries: 1 },
+      );
       if (!res.ok) {
         const body = await res.json().catch(() => ({}));
         throw new Error(body.error || "삭제에 실패했습니다.");
       }
       setShowDeleteConfirm(false);
-      onAfterDelete?.();
+      showToast("게시글을 삭제했어요.", { type: "success" });
+      onAfterDelete?.(postId);
     } catch (err: any) {
       setDeleteError(err.message || "삭제에 실패했습니다.");
       setDeleting(false);

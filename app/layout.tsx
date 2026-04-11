@@ -5,6 +5,7 @@ import "./globals.css";
 import { Header } from "@/components/layout/Header";
 import { MobileNav } from "@/components/layout/MobileNav";
 import { AuthRefresh } from "@/components/layout/AuthRefresh";
+import { Toaster } from "@/components/ui/Toaster";
 import { LAYOUT_META, SITE } from "@/lib/copy";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 
@@ -103,6 +104,7 @@ export default function RootLayout({
           </div>
         </footer>
         <MobileNav />
+        <Toaster />
         <Analytics />
         <SpeedInsights />
       </body>
