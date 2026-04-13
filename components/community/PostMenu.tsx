@@ -1,7 +1,14 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Bookmark, Edit2, Megaphone, MoreHorizontal, Trash2 } from "lucide-react";
+import { useRouter } from "next/navigation";
+import {
+  Bookmark,
+  Edit2,
+  Megaphone,
+  MoreHorizontal,
+  Trash2,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useIsAdmin } from "@/hooks/useIsAdmin";
 import { PostForm } from "@/components/community/PostForm";
@@ -60,6 +67,7 @@ export function PostMenu({
   const { isAdmin } = useIsAdmin();
   const isAuthor = !!userId && userId === authorId;
   const canManage = isAuthor || isAdmin;
+  const router = useRouter();
 
   const [menuOpen, setMenuOpen] = useState(false);
   const [showEdit, setShowEdit] = useState(false);
@@ -82,21 +90,25 @@ export function PostMenu({
 
   async function handleEditSave(values: PostFormValues) {
     if (!userId) {
-      window.location.href = "/auth/login";
+      router.push("/auth/login");
       return;
     }
-    const res = await fetchWithRetry(`/api/posts/${postId}`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      credentials: "include",
-      body: JSON.stringify({
-        title: values.title || null,
-        content: values.content,
-        category: values.category,
-        region: values.region,
-        images: values.images,
-      }),
-    }, { retries: 1 });
+    const res = await fetchWithRetry(
+      `/api/posts/${postId}`,
+      {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({
+          title: values.title || null,
+          content: values.content,
+          category: values.category,
+          region: values.region,
+          images: values.images,
+        }),
+      },
+      { retries: 1 },
+    );
     if (!res.ok) {
       const body = await res.json().catch(() => ({}));
       throw new Error(body.error || "수정에 실패했습니다.");
@@ -108,11 +120,15 @@ export function PostMenu({
 
   async function handlePinToggle() {
     try {
-      const res = await fetchWithRetry(`/api/posts/${postId}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ pinned: !pinned }),
-      }, { retries: 1 });
+      const res = await fetchWithRetry(
+        `/api/posts/${postId}`,
+        {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ pinned: !pinned }),
+        },
+        { retries: 1 },
+      );
       if (!res.ok) {
         const body = await res.json().catch(() => ({}));
         throw new Error(body.error || "핀 변경에 실패했습니다.");
@@ -129,11 +145,15 @@ export function PostMenu({
 
   async function handleAnnouncementToggle() {
     try {
-      const res = await fetchWithRetry(`/api/posts/${postId}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ is_announcement: !isAnnouncement }),
-      }, { retries: 1 });
+      const res = await fetchWithRetry(
+        `/api/posts/${postId}`,
+        {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ is_announcement: !isAnnouncement }),
+        },
+        { retries: 1 },
+      );
       if (!res.ok) {
         const body = await res.json().catch(() => ({}));
         throw new Error(body.error || "공지 변경에 실패했습니다.");
@@ -151,7 +171,7 @@ export function PostMenu({
 
   async function handleDelete() {
     if (!userId) {
-      window.location.href = "/auth/login";
+      router.push("/auth/login");
       return;
     }
     setDeleting(true);
@@ -311,7 +331,9 @@ export function PostMenu({
             <div className="w-12 h-12 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-4">
               <Trash2 className="w-5 h-5 text-red-500" />
             </div>
-            <h3 className="font-bold text-gray-900 mb-1.5">게시글을 삭제할까요?</h3>
+            <h3 className="font-bold text-gray-900 mb-1.5">
+              게시글을 삭제할까요?
+            </h3>
             <p className="text-sm text-gray-400 mb-5">
               삭제된 글과 댓글은 복구할 수 없습니다.
             </p>

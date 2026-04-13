@@ -1,47 +1,90 @@
 import Link from "next/link";
 import {
-  Stethoscope, Scale, Calculator, UtensilsCrossed,
-  Scissors, Home, BookOpen, Briefcase, MapPin, Phone,
-  Star, CheckCircle, Crown, HelpCircle,
+  Stethoscope,
+  Scale,
+  Calculator,
+  UtensilsCrossed,
+  Scissors,
+  Home,
+  BookOpen,
+  Briefcase,
+  MapPin,
+  Phone,
+  Star,
+  CheckCircle,
+  Crown,
+  HelpCircle,
 } from "lucide-react";
 import { CATEGORIES } from "@/lib/constants";
+import { getBusinessRecommendationTier } from "@/lib/directory-recommendations";
 import { formatPhone } from "@/lib/utils";
 import type { Business } from "@/types";
 
 // ─── 카테고리별 Lucide 아이콘 + 색상 ───────────
-const CAT_ICONS: Record<string, {
-  icon: React.ElementType;
-  bg: string;
-  color: string;
-}> = {
-  hospital:   { icon: Stethoscope,     bg: "#FFF0EE", color: "#E8321C" },
-  lawyer:     { icon: Scale,           bg: "#EEF2FF", color: "#4F46E5" },
-  accountant: { icon: Calculator,      bg: "#FFFBEE", color: "#D97706" },
+const CAT_ICONS: Record<
+  string,
+  {
+    icon: React.ElementType;
+    bg: string;
+    color: string;
+  }
+> = {
+  hospital: { icon: Stethoscope, bg: "#FFF0EE", color: "#E8321C" },
+  lawyer: { icon: Scale, bg: "#EEF2FF", color: "#4F46E5" },
+  accountant: { icon: Calculator, bg: "#FFFBEE", color: "#D97706" },
   restaurant: { icon: UtensilsCrossed, bg: "#EDFDF5", color: "#059669" },
-  beauty:     { icon: Scissors,        bg: "#FFF0F8", color: "#DB2777" },
-  realestate: { icon: Home,            bg: "#F3EEFF", color: "#7C3AED" },
-  education:  { icon: BookOpen,        bg: "#EEFBF8", color: "#0891B2" },
-  jobs:       { icon: Briefcase,       bg: "#FFF6EE", color: "#EA580C" },
-  other:      { icon: HelpCircle,      bg: "#F5F5F3", color: "#6B7280" },
+  beauty: { icon: Scissors, bg: "#FFF0F8", color: "#DB2777" },
+  realestate: { icon: Home, bg: "#F3EEFF", color: "#7C3AED" },
+  education: { icon: BookOpen, bg: "#EEFBF8", color: "#0891B2" },
+  jobs: { icon: Briefcase, bg: "#FFF6EE", color: "#EA580C" },
+  other: { icon: HelpCircle, bg: "#F5F5F3", color: "#6B7280" },
 };
 
 // subcategory 정규화 (Google Places 영문 → 한국어)
 const SUBCAT_MAP: Record<string, string> = {
-  doctor: "의원", hospital: "병원", dentist: "치과", medical_clinic: "클리닉",
-  physician: "내과", family_practice: "가정의학과", internist: "내과",
-  pediatrician: "소아과", dermatologist: "피부과", optometrist: "안과",
-  psychiatrist: "정신건강의학과", physical_therapist: "물리치료", chiropractor: "척추교정",
-  lawyer: "변호사", attorney: "변호사", law_firm: "법률사무소",
+  doctor: "의원",
+  hospital: "병원",
+  dentist: "치과",
+  medical_clinic: "클리닉",
+  physician: "내과",
+  family_practice: "가정의학과",
+  internist: "내과",
+  pediatrician: "소아과",
+  dermatologist: "피부과",
+  optometrist: "안과",
+  psychiatrist: "정신건강의학과",
+  physical_therapist: "물리치료",
+  chiropractor: "척추교정",
+  lawyer: "변호사",
+  attorney: "변호사",
+  law_firm: "법률사무소",
   immigration_attorney: "이민전문",
-  accounting: "회계사무소", accountant: "회계사", tax_preparation: "세금신고",
-  restaurant: "식당", korean_restaurant: "한식당", barbecue_restaurant: "바베큐",
-  seafood_restaurant: "해산물", cafe: "카페", coffee_shop: "커피숍",
-  bakery: "베이커리", ramen_restaurant: "라멘", sushi_restaurant: "스시",
-  beauty_salon: "미용실", hair_salon: "헤어살롱", nail_salon: "네일샵",
-  spa: "스파", massage: "마사지", barber_shop: "이발소",
-  real_estate_agency: "부동산", real_estate: "부동산",
-  school: "학교", tutoring_center: "학원", language_school: "어학원",
-  pharmacy: "약국", grocery_store: "마트", insurance_agency: "보험",
+  accounting: "회계사무소",
+  accountant: "회계사",
+  tax_preparation: "세금신고",
+  restaurant: "식당",
+  korean_restaurant: "한식당",
+  barbecue_restaurant: "바베큐",
+  seafood_restaurant: "해산물",
+  cafe: "카페",
+  coffee_shop: "커피숍",
+  bakery: "베이커리",
+  ramen_restaurant: "라멘",
+  sushi_restaurant: "스시",
+  beauty_salon: "미용실",
+  hair_salon: "헤어살롱",
+  nail_salon: "네일샵",
+  spa: "스파",
+  massage: "마사지",
+  barber_shop: "이발소",
+  real_estate_agency: "부동산",
+  real_estate: "부동산",
+  school: "학교",
+  tutoring_center: "학원",
+  language_school: "어학원",
+  pharmacy: "약국",
+  grocery_store: "마트",
+  insurance_agency: "보험",
 };
 
 function normSub(raw?: string): string {
@@ -67,53 +110,107 @@ export function BusinessCard({
   business: Business;
   variant?: "list" | "grid";
 }) {
-  const cat  = CAT_ICONS[business.category] ?? CAT_ICONS.other;
+  const cat = CAT_ICONS[business.category] ?? CAT_ICONS.other;
   const Icon = cat.icon;
-  const sub  = normSub(business.subcategory ?? undefined);
+  const sub = normSub(business.subcategory ?? undefined);
+  const categoryMeta = CATEGORIES[business.category] ?? CATEGORIES.other;
+  const recommendationTier = getBusinessRecommendationTier(business);
+  const hasKoreanSupport = business.languages?.includes("ko");
+  const locationLabel = `${business.city}, ${business.state}`;
+  const ratingText =
+    business.review_count > 0 ? business.rating.toFixed(1) : null;
+
+  const badges = (
+    <>
+      {recommendationTier ? (
+        <span className="badge-premium">
+          {recommendationTier === "premium" ? (
+            <Crown className="h-3 w-3" />
+          ) : (
+            <Star className="h-3 w-3 fill-current" />
+          )}
+          추천
+        </span>
+      ) : null}
+      {business.is_verified ? (
+        <span className="badge-verified">
+          <CheckCircle className="h-3 w-3" />
+          인증됨
+        </span>
+      ) : null}
+    </>
+  );
 
   if (variant === "grid") {
     return (
       <Link href={`/directory/${business.id}`} className="block group h-full">
-        <div className="h-full bg-white border border-gray-100 rounded-2xl overflow-hidden
-                        hover:border-[#E8321C]/30 hover:shadow-md transition-all duration-200">
-          {/* 아이콘 영역 */}
-          <div className="h-24 flex items-center justify-center relative"
-               style={{ background: cat.bg }}>
-            <Icon className="w-9 h-9" style={{ color: cat.color }} strokeWidth={1.8} />
-            {business.is_premium && (
-              <span className="absolute top-2 left-2 flex items-center gap-1
-                               bg-gray-900 text-white text-[10px] font-bold
-                               px-2 py-0.5 rounded-md">
-                <Crown className="w-2.5 h-2.5" />추천
-              </span>
-            )}
+        <div className="card flex h-full flex-col overflow-hidden p-5">
+          <div className="flex items-start justify-between gap-3">
+            <div
+              className="flex h-14 w-14 items-center justify-center rounded-[20px]"
+              style={{ background: cat.bg }}
+            >
+              <Icon
+                className="h-7 w-7"
+                style={{ color: cat.color }}
+                strokeWidth={1.8}
+              />
+            </div>
+            <div className="flex flex-wrap justify-end gap-1.5">
+              {badges}
+            </div>
           </div>
-          {/* 정보 */}
-          <div className="p-4">
-            <h3 className="font-bold text-[14px] text-gray-900 tracking-tight
-                           group-hover:text-[#E8321C] transition-colors
-                           line-clamp-2 leading-snug mb-1">
+
+          <div className="mt-4">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-gray-400">
+              {categoryMeta.label}
+            </p>
+            <h3 className="mt-2 line-clamp-2 text-lg font-bold tracking-tight text-gray-900 transition-colors group-hover:text-[#E8321C]">
               {business.name}
             </h3>
-            {sub && <p className="text-xs text-gray-400 font-medium mb-2">{sub}</p>}
-            {business.review_count > 0 && (
-              <div className="flex items-center gap-1 mb-2">
-                <Star className="w-3 h-3 text-amber-400 fill-amber-400" />
-                <span className="text-xs font-bold text-gray-900">{business.rating.toFixed(1)}</span>
-                <span className="text-xs text-gray-400">({business.review_count})</span>
-              </div>
-            )}
-            <div className="flex items-center gap-1 text-xs text-gray-400">
-              <MapPin className="w-3 h-3" />
-              {business.city}, {business.state}
+            <p className="mt-1 line-clamp-2 text-sm leading-6 text-gray-500">
+              {sub || `${categoryMeta.label} · ${locationLabel}`}
+            </p>
+          </div>
+
+          <div className="mt-4 flex flex-wrap gap-2">
+            <span className="tag">{locationLabel}</span>
+            {hasKoreanSupport ? <span className="tag">한국어 가능</span> : null}
+          </div>
+
+          <div className="mt-5 space-y-2 text-sm text-gray-500">
+            <div className="flex items-center gap-2">
+              <MapPin className="h-4 w-4 text-gray-300" />
+              <span className="line-clamp-1">{locationLabel}</span>
             </div>
-            {business.is_verified && (
-              <span className="inline-flex items-center gap-1 mt-2
-                               bg-emerald-50 text-emerald-700
-                               text-[10px] font-bold px-2 py-0.5 rounded-md">
-                <CheckCircle className="w-2.5 h-2.5" />인증됨
-              </span>
-            )}
+            {business.phone ? (
+              <div className="flex items-center gap-2">
+                <Phone className="h-4 w-4 text-gray-300" />
+                <span>{formatPhone(business.phone)}</span>
+              </div>
+            ) : null}
+          </div>
+
+          <div className="mt-auto pt-5">
+            <div className="rounded-[20px] border border-gray-100 bg-gray-50 px-4 py-3">
+              {ratingText ? (
+                <div className="flex items-center justify-between gap-3">
+                  <div className="flex items-center gap-2">
+                    <Star className="h-4 w-4 fill-amber-400 text-amber-400" />
+                    <span className="text-sm font-semibold text-gray-900">
+                      {ratingText}
+                    </span>
+                  </div>
+                  <span className="text-xs font-medium text-gray-500">
+                    리뷰 {business.review_count.toLocaleString()}개
+                  </span>
+                </div>
+              ) : (
+                <p className="text-xs font-medium text-gray-400">
+                  아직 리뷰 데이터가 없습니다.
+                </p>
+              )}
+            </div>
           </div>
         </div>
       </Link>
@@ -123,65 +220,91 @@ export function BusinessCard({
   // list variant
   return (
     <Link href={`/directory/${business.id}`} className="block group">
-      <div className="bg-white border border-gray-100 rounded-2xl p-5 flex gap-4
-                      hover:border-[#E8321C]/30 hover:shadow-sm transition-all duration-200">
-        <div className="w-14 h-14 rounded-2xl flex items-center justify-center flex-shrink-0"
-             style={{ background: cat.bg }}>
-          <Icon className="w-7 h-7" style={{ color: cat.color }} strokeWidth={1.8} />
-        </div>
-        <div className="flex-1 min-w-0">
-          <div className="flex items-start justify-between gap-2 mb-0.5">
-            <h3 className="font-bold text-[15px] text-gray-900 tracking-tight
-                           group-hover:text-[#E8321C] transition-colors truncate">
-              {business.name}
-            </h3>
-            <div className="flex gap-1.5 flex-shrink-0">
-              {business.is_premium && (
-                <span className="flex items-center gap-1 bg-gray-900 text-white
-                                 text-[10px] font-bold px-2 py-0.5 rounded-md">
-                  <Crown className="w-2.5 h-2.5" />추천
-                </span>
-              )}
-              {business.is_verified && (
-                <span className="flex items-center gap-1 bg-emerald-50 text-emerald-700
-                                 text-[10px] font-bold px-2 py-0.5 rounded-md">
-                  <CheckCircle className="w-2.5 h-2.5" />인증
-                </span>
-              )}
-            </div>
+      <div className="card p-5 sm:p-6">
+        <div className="flex gap-4 sm:gap-5">
+          <div
+            className="flex h-16 w-16 flex-shrink-0 items-center justify-center rounded-[22px]"
+            style={{ background: cat.bg }}
+          >
+            <Icon
+              className="h-8 w-8"
+              style={{ color: cat.color }}
+              strokeWidth={1.8}
+            />
           </div>
-          {sub && <p className="text-xs text-gray-400 font-medium mb-1.5">{sub}</p>}
-          {business.review_count > 0 && (
-            <div className="flex items-center gap-1.5 mb-1.5">
-              <div className="flex">
-                {[1,2,3,4,5].map((i) => (
-                  <Star key={i} className={`w-3 h-3 ${
-                    i <= Math.round(business.rating)
-                      ? "text-amber-400 fill-amber-400"
-                      : "text-gray-200 fill-gray-200"
-                  }`} />
-                ))}
+          <div className="min-w-0 flex-1">
+            <div className="flex items-start justify-between gap-3">
+              <div className="min-w-0">
+                <div className="mb-1 flex flex-wrap items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-gray-400">
+                  <span>{categoryMeta.label}</span>
+                  {sub ? (
+                    <span className="h-1 w-1 rounded-full bg-gray-300" />
+                  ) : null}
+                  {sub ? (
+                    <span className="normal-case tracking-normal">{sub}</span>
+                  ) : null}
+                </div>
+                <h3 className="line-clamp-1 text-lg font-bold tracking-tight text-gray-900 transition-colors group-hover:text-[#E8321C] sm:text-[19px]">
+                  {business.name}
+                </h3>
+                <p className="mt-1 line-clamp-2 text-sm leading-6 text-gray-500">
+                  {business.address ||
+                    `${locationLabel} · ${categoryMeta.label}`}
+                </p>
               </div>
-              <span className="text-xs font-bold text-gray-900">{business.rating.toFixed(1)}</span>
-              <span className="text-xs text-gray-400">({business.review_count.toLocaleString()})</span>
+
+              <div className="hidden flex-shrink-0 flex-wrap justify-end gap-1.5 sm:flex">
+                {badges}
+              </div>
             </div>
-          )}
-          <div className="flex flex-wrap gap-x-4 gap-y-0.5">
-            <span className="flex items-center gap-1 text-xs text-gray-400 font-medium">
-              <MapPin className="w-3 h-3" />{business.city}, {business.state}
-            </span>
-            {business.phone && (
-              <span className="flex items-center gap-1 text-xs text-gray-400 font-medium">
-                <Phone className="w-3 h-3" />{formatPhone(business.phone)}
-              </span>
-            )}
+
+            <div className="mt-3 flex flex-wrap gap-2 sm:hidden">
+              {badges}
+            </div>
+
+            <div className="mt-4 grid gap-3 border-t border-gray-100 pt-4 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-end">
+              <div className="space-y-2.5 text-sm text-gray-500">
+                <div className="flex flex-wrap gap-x-4 gap-y-2">
+                  <span className="flex items-center gap-2">
+                    <MapPin className="h-4 w-4 text-gray-300" />
+                    {locationLabel}
+                  </span>
+                  {business.phone ? (
+                    <span className="flex items-center gap-2">
+                      <Phone className="h-4 w-4 text-gray-300" />
+                      {formatPhone(business.phone)}
+                    </span>
+                  ) : null}
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  <span className="tag">
+                    {categoryMeta.emoji} {categoryMeta.label}
+                  </span>
+                  {hasKoreanSupport ? (
+                    <span className="tag">한국어 가능</span>
+                  ) : null}
+                </div>
+              </div>
+
+              <div className="rounded-[18px] border border-gray-100 bg-gray-50 px-4 py-3 sm:min-w-[156px]">
+                {ratingText ? (
+                  <>
+                    <div className="flex items-center gap-2 text-sm font-semibold text-gray-900">
+                      <Star className="h-4 w-4 fill-amber-400 text-amber-400" />
+                      {ratingText}
+                    </div>
+                    <p className="mt-1 text-xs text-gray-500">
+                      리뷰 {business.review_count.toLocaleString()}개
+                    </p>
+                  </>
+                ) : (
+                  <p className="text-xs font-medium text-gray-400">
+                    아직 리뷰 데이터가 없습니다.
+                  </p>
+                )}
+              </div>
+            </div>
           </div>
-          {business.languages?.includes("ko") && (
-            <span className="inline-block mt-1.5 text-[10px] font-bold
-                             bg-blue-50 text-blue-600 px-2 py-0.5 rounded-md">
-              한국어 가능
-            </span>
-          )}
         </div>
       </div>
     </Link>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { Heart } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { createClient } from "@/lib/supabase-browser";
@@ -32,6 +33,7 @@ export function LikeButton({
   const [liked, setLiked] = useState(initialLiked);
   const [count, setCount] = useState(initialCount);
   const [pending, setPending] = useState(false);
+  const router = useRouter();
 
   // Sync when parent re-renders with fresh data (e.g., overlayLikes resolves)
   useEffect(() => {
@@ -55,7 +57,8 @@ export function LikeButton({
         },
         (payload) => {
           const updated = payload.new as any;
-          if (typeof updated.like_count === "number") setCount(updated.like_count);
+          if (typeof updated.like_count === "number")
+            setCount(updated.like_count);
         },
       )
       .subscribe();
@@ -68,7 +71,7 @@ export function LikeButton({
   async function handleLike() {
     if (pending) return;
     if (!userId) {
-      window.location.href = "/auth/login";
+      router.push("/auth/login");
       return;
     }
 
@@ -79,11 +82,15 @@ export function LikeButton({
     setCount((c) => (wasLiked ? c - 1 : c + 1));
 
     try {
-      const res = await fetchWithRetry(`/api/posts/${postId}`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-      }, { retries: 1 });
+      const res = await fetchWithRetry(
+        `/api/posts/${postId}`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+        },
+        { retries: 1 },
+      );
       const body = await res.json().catch(() => ({}));
 
       if (!res.ok) {
@@ -91,7 +98,9 @@ export function LikeButton({
         // Revert optimistic update on failure
         setLiked(wasLiked);
         setCount((c) => (wasLiked ? c + 1 : c - 1));
-        showToast(body?.error || "좋아요 처리에 실패했어요. 다시 시도해주세요.");
+        showToast(
+          body?.error || "좋아요 처리에 실패했어요. 다시 시도해주세요.",
+        );
         setPending(false);
         return;
       }
@@ -116,6 +125,8 @@ export function LikeButton({
     <button
       onClick={handleLike}
       disabled={pending}
+      aria-label={liked ? "좋아요 취소" : "좋아요"}
+      aria-pressed={liked}
       className={cn(
         "flex items-center gap-1.5 transition-all",
         liked

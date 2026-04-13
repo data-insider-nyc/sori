@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback, useRef } from "react";
+import { useRouter } from "next/navigation";
 import { CornerDownRight, Trash2 } from "lucide-react";
 import { cn, timeAgo } from "@/lib/utils";
 import { createClient } from "@/lib/supabase-browser";
@@ -42,8 +43,8 @@ export function CommentSection({ postId, userId }: Props) {
 
   const [visibleCount, setVisibleCount] = useState(COMMENTS_PAGE);
   const commentSentinelRef = useRef<HTMLDivElement>(null);
-
-  const supabase = createClient();
+  const supabaseRef = useRef(createClient());
+  const router = useRouter();
 
   const fetchComments = useCallback(
     async ({ bust = false }: { bust?: boolean } = {}) => {
@@ -56,11 +57,17 @@ export function CommentSection({ postId, userId }: Props) {
       }
 
       // Single query: comments + author via FK join (no separate profiles round-trip)
-      const { data: raw } = await supabase
+      const { data: raw, error: queryError } = await supabaseRef.current
         .from("comments")
         .select("*, author:profiles!user_id(id, nickname, handle, avatar_url)")
         .eq("post_id", postId)
         .order("created_at", { ascending: true });
+
+      if (queryError) {
+        console.error("[CommentSection] query error", queryError.message);
+        setLoading(false);
+        return;
+      }
 
       const rawComments = raw ?? [];
       if (rawComments.length === 0) {
@@ -119,7 +126,7 @@ export function CommentSection({ postId, userId }: Props) {
 
   async function submitComment() {
     if (!userId) {
-      window.location.href = "/auth/login";
+      router.push("/auth/login");
       return;
     }
     if (!commentText.trim()) return;
@@ -163,7 +170,7 @@ export function CommentSection({ postId, userId }: Props) {
 
   async function submitReply(parentId: string) {
     if (!userId) {
-      window.location.href = "/auth/login";
+      router.push("/auth/login");
       return;
     }
     if (!replyText.trim()) return;

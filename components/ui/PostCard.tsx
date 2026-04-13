@@ -93,7 +93,7 @@ export const PostCard = React.memo(function PostCard({
               if (
                 window.location.pathname.startsWith(`/community/${post.id}`)
               ) {
-                window.location.href = "/community";
+                router.push("/community");
               } else {
                 router.refresh();
               }
@@ -122,9 +122,14 @@ export const PostCard = React.memo(function PostCard({
                   key={i}
                   src={url}
                   alt=""
-                  onClick={(e) => { e.preventDefault(); setLightboxIndex(i); }}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    setLightboxIndex(i);
+                  }}
                   className={`rounded-xl object-cover flex-shrink-0 bg-gray-100 border border-gray-200 cursor-pointer hover:opacity-90 transition-opacity ${
-                    post.images!.length === 1 ? "w-full max-h-[280px]" : "w-[210px] h-[280px]"
+                    post.images!.length === 1
+                      ? "w-full max-h-[280px]"
+                      : "w-[210px] h-[280px]"
                   }`}
                 />
               ))}
