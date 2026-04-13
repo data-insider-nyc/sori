@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { useWindowVirtualizer } from "@tanstack/react-virtual";
 import { useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase-browser";
 import { REGIONS, getRegionIcon } from "@/lib/regions";
@@ -61,9 +62,10 @@ export function CommunityListing() {
   const [loading, setLoading] = useState(!fresh);
   const [loadingMore, setLoadingMore] = useState(false);
   const [hasMore, setHasMore] = useState(fresh ? cached.hasMore : false);
-  const [cursor, setCursor] = useState<{ createdAt: string; id: string } | null>(
-    fresh ? cached.cursor : null,
-  );
+  const [cursor, setCursor] = useState<{
+    createdAt: string;
+    id: string;
+  } | null>(fresh ? cached.cursor : null);
   const [userId, setUserId] = useState<string | null>(null);
   const [searchInput, setSearchInput] = useState(q);
   const regions = REGIONS;
@@ -71,6 +73,26 @@ export function CommunityListing() {
   const debounceRef = useRef<ReturnType<typeof setTimeout>>(undefined);
   const activeRequestRef = useRef(0);
   const latestFiltersRef = useRef<FilterState>({ region, category, q });
+
+  // Virtual scroll
+  const listRef = useRef<HTMLDivElement>(null);
+  const sentinelRef = useRef<HTMLDivElement>(null);
+  // Stable refs for load callback (avoids re-subscribing IntersectionObserver)
+  const postsRef = useRef<Post[]>(posts);
+  const cursorRef = useRef(cursor);
+  useEffect(() => {
+    postsRef.current = posts;
+  }, [posts]);
+  useEffect(() => {
+    cursorRef.current = cursor;
+  }, [cursor]);
+
+  const virtualizer = useWindowVirtualizer({
+    count: posts.length,
+    estimateSize: () => 180, // ~PostCard height + 16px gap; measured dynamically
+    overscan: 5,
+    scrollMargin: listRef.current?.offsetTop ?? 0,
+  });
 
   // Resolve auth from local session cache (no network round-trip)
   useEffect(() => {
@@ -134,6 +156,31 @@ export function CommunityListing() {
   useEffect(() => {
     setSearchInput(q);
   }, [q]);
+
+  // Auto-load next page when sentinel enters viewport
+  useEffect(() => {
+    const sentinel = sentinelRef.current;
+    if (!sentinel || !hasMore || loadingMore) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) {
+          const requestId = activeRequestRef.current + 1;
+          activeRequestRef.current = requestId;
+          void load({
+            afterCursor: cursorRef.current,
+            append: true,
+            filters: latestFiltersRef.current,
+            requestId,
+            basePosts: postsRef.current,
+          });
+        }
+      },
+      { rootMargin: "400px" },
+    );
+    observer.observe(sentinel);
+    return () => observer.disconnect();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [hasMore, loadingMore]);
 
   function isActiveRequest(requestId: number, filters: FilterState) {
     const latest = latestFiltersRef.current;
@@ -202,7 +249,8 @@ export function CommunityListing() {
       .order("id", { ascending: false })
       .limit(PAGE_SIZE);
 
-    if (filters.category !== "all") query = query.eq("category", filters.category);
+    if (filters.category !== "all")
+      query = query.eq("category", filters.category);
     if (filters.region !== "all") query = query.eq("region", filters.region);
     if (filters.q.trim()) query = query.ilike("title", `%${filters.q.trim()}%`);
     if (afterCursor) {
@@ -266,12 +314,15 @@ export function CommunityListing() {
         if (!isActiveRequest(requestId, filters)) return;
         setPosts(updated);
         if (!append) {
-          feedCache.set(makeCacheKey(filters.region, filters.category, filters.q), {
-            posts: updated,
-            cursor: newCursor,
-            hasMore: newHasMore,
-            ts: Date.now(),
-          });
+          feedCache.set(
+            makeCacheKey(filters.region, filters.category, filters.q),
+            {
+              posts: updated,
+              cursor: newCursor,
+              hasMore: newHasMore,
+              ts: Date.now(),
+            },
+          );
         }
       });
     }
@@ -317,11 +368,24 @@ export function CommunityListing() {
       p.id === postId
         ? {
             ...p,
-            title: typeof updated.title === "undefined" ? p.title : (updated.title ?? ""),
-            content: typeof updated.content === "undefined" ? p.content : updated.content,
-            category: typeof updated.category === "undefined" ? p.category : updated.category,
-            region: typeof updated.region === "undefined" ? p.region : (updated.region ?? null),
-            images: typeof updated.images === "undefined" ? p.images : updated.images,
+            title:
+              typeof updated.title === "undefined"
+                ? p.title
+                : (updated.title ?? ""),
+            content:
+              typeof updated.content === "undefined"
+                ? p.content
+                : updated.content,
+            category:
+              typeof updated.category === "undefined"
+                ? p.category
+                : updated.category,
+            region:
+              typeof updated.region === "undefined"
+                ? p.region
+                : (updated.region ?? null),
+            images:
+              typeof updated.images === "undefined" ? p.images : updated.images,
           }
         : p,
     );
@@ -447,46 +511,46 @@ export function CommunityListing() {
           ) : null}
 
           <div
-            className={cn(
-              "space-y-4 transition-opacity",
-              showRefreshing && "opacity-60",
-            )}
+            ref={listRef}
+            style={{
+              height: `${virtualizer.getTotalSize()}px`,
+              position: "relative",
+            }}
+            className={cn("transition-opacity", showRefreshing && "opacity-60")}
           >
-            {posts.map((post) => (
-              <PostCard
-                key={post.id}
-                post={post}
-                userId={userId}
-                onPostEdited={handlePostEdited}
-                onPostDeleted={handlePostDeleted}
-              />
-            ))}
+            {virtualizer.getVirtualItems().map((virtualItem) => {
+              const post = posts[virtualItem.index];
+              return (
+                <div
+                  key={post.id}
+                  data-index={virtualItem.index}
+                  ref={virtualizer.measureElement}
+                  style={{
+                    position: "absolute",
+                    top: 0,
+                    left: 0,
+                    width: "100%",
+                    paddingBottom: "16px",
+                    transform: `translateY(${virtualItem.start - virtualizer.options.scrollMargin}px)`,
+                  }}
+                >
+                  <PostCard
+                    post={post}
+                    userId={userId}
+                    onPostEdited={handlePostEdited}
+                    onPostDeleted={handlePostDeleted}
+                  />
+                </div>
+              );
+            })}
           </div>
 
-          {hasMore && (
-            <div className="mt-8 text-center">
-              <button
-                onClick={() => {
-                  const requestId = activeRequestRef.current + 1;
-                  activeRequestRef.current = requestId;
-                  void load({
-                    afterCursor: cursor,
-                    append: true,
-                    filters: latestFiltersRef.current,
-                    requestId,
-                    basePosts: posts,
-                  });
-                }}
-                disabled={loadingMore}
-                className="btn-outline inline-flex items-center gap-2"
-              >
-                {loadingMore && (
-                  <span className="w-4 h-4 border-2 border-gray-400/40 border-t-gray-500 rounded-full animate-spin" />
-                )}
-                더 보기
-              </button>
-            </div>
-          )}
+          {/* Sentinel: triggers auto-load; shows spinner while loading */}
+          <div ref={sentinelRef} className="flex justify-center py-6 mt-2">
+            {loadingMore && (
+              <span className="w-5 h-5 border-2 border-gray-200 border-t-[#FF5C5C] rounded-full animate-spin" />
+            )}
+          </div>
         </>
       )}
     </div>

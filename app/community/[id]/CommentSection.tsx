@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { CornerDownRight, Trash2 } from "lucide-react";
 import { cn, timeAgo } from "@/lib/utils";
 import { createClient } from "@/lib/supabase-browser";
@@ -18,6 +18,7 @@ interface Props {
 
 const COMMENT_MAX = 500;
 const REPLY_MAX = 300;
+const COMMENTS_PAGE = 20;
 const CACHE_TTL = 3 * 60 * 1000; // 3 minutes
 
 // Module-level cache keyed by postId
@@ -38,6 +39,9 @@ export function CommentSection({ postId, userId }: Props) {
   const [commentError, setCommentError] = useState("");
   const [replyingTo, setReplyingTo] = useState<string | null>(null);
   const [replyText, setReplyText] = useState("");
+
+  const [visibleCount, setVisibleCount] = useState(COMMENTS_PAGE);
+  const commentSentinelRef = useRef<HTMLDivElement>(null);
 
   const supabase = createClient();
 
@@ -97,6 +101,22 @@ export function CommentSection({ postId, userId }: Props) {
     fetchComments();
   }, [fetchComments]);
 
+  // Reveal more comments as user scrolls
+  useEffect(() => {
+    const sentinel = commentSentinelRef.current;
+    if (!sentinel || visibleCount >= comments.length) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) {
+          setVisibleCount((n) => n + COMMENTS_PAGE);
+        }
+      },
+      { rootMargin: "200px" },
+    );
+    observer.observe(sentinel);
+    return () => observer.disconnect();
+  }, [visibleCount, comments.length]);
+
   async function submitComment() {
     if (!userId) {
       window.location.href = "/auth/login";
@@ -106,15 +126,23 @@ export function CommentSection({ postId, userId }: Props) {
     setSubmitting(true);
     setCommentError("");
     try {
-      const res = await fetchWithRetry(`/api/comments`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({ post_id: postId, content: commentText.trim() }),
-      }, { retries: 1 });
+      const res = await fetchWithRetry(
+        `/api/comments`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify({
+            post_id: postId,
+            content: commentText.trim(),
+          }),
+        },
+        { retries: 1 },
+      );
       if (!res.ok) {
         const body = await res.json().catch(() => ({}));
-        const message = body.error || "댓글 등록에 실패했어요. 다시 시도해주세요.";
+        const message =
+          body.error || "댓글 등록에 실패했어요. 다시 시도해주세요.";
         setCommentError(message);
         showToast(message);
         setSubmitting(false);
@@ -122,6 +150,7 @@ export function CommentSection({ postId, userId }: Props) {
       }
       setCommentText("");
       await fetchComments({ bust: true });
+      setVisibleCount(Infinity);
       showToast("댓글을 등록했어요.", { type: "success" });
     } catch (err) {
       console.error(err);
@@ -141,15 +170,24 @@ export function CommentSection({ postId, userId }: Props) {
     setSubmitting(true);
     setCommentError("");
     try {
-      const res = await fetchWithRetry(`/api/comments`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({ post_id: postId, content: replyText.trim(), parent_id: parentId }),
-      }, { retries: 1 });
+      const res = await fetchWithRetry(
+        `/api/comments`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify({
+            post_id: postId,
+            content: replyText.trim(),
+            parent_id: parentId,
+          }),
+        },
+        { retries: 1 },
+      );
       if (!res.ok) {
         const body = await res.json().catch(() => ({}));
-        const message = body.error || "답글 등록에 실패했어요. 다시 시도해주세요.";
+        const message =
+          body.error || "답글 등록에 실패했어요. 다시 시도해주세요.";
         setCommentError(message);
         showToast(message);
         setSubmitting(false);
@@ -158,6 +196,7 @@ export function CommentSection({ postId, userId }: Props) {
       setReplyText("");
       setReplyingTo(null);
       await fetchComments({ bust: true });
+      setVisibleCount(Infinity);
       showToast("답글을 등록했어요.", { type: "success" });
     } catch (err) {
       console.error(err);
@@ -245,76 +284,83 @@ export function CommentSection({ postId, userId }: Props) {
           첫 번째 댓글을 남겨보세요 💬
         </p>
       ) : (
-        <div className="space-y-4">
-          {comments.map((comment) => (
-            <div key={comment.id}>
-              <CommentItem
-                comment={comment}
-                userId={userId}
-                isAdmin={isAdmin}
-                onDelete={deleteComment}
-                onReply={() =>
-                  setReplyingTo(replyingTo === comment.id ? null : comment.id)
-                }
-              />
+        <>
+          <div className="space-y-4">
+            {comments.slice(0, visibleCount).map((comment) => (
+              <div key={comment.id}>
+                <CommentItem
+                  comment={comment}
+                  userId={userId}
+                  isAdmin={isAdmin}
+                  onDelete={deleteComment}
+                  onReply={() =>
+                    setReplyingTo(replyingTo === comment.id ? null : comment.id)
+                  }
+                />
 
-              {/* Replies */}
-              {comment.replies && comment.replies.length > 0 && (
-                <div className="ml-8 mt-2 space-y-2">
-                  {comment.replies.map((reply) => (
-                    <CommentItem
-                      key={reply.id}
-                      comment={reply}
-                      userId={userId}
-                      isAdmin={isAdmin}
-                      onDelete={deleteComment}
-                      isReply
-                    />
-                  ))}
-                </div>
-              )}
+                {/* Replies */}
+                {comment.replies && comment.replies.length > 0 && (
+                  <div className="ml-8 mt-2 space-y-2">
+                    {comment.replies.map((reply) => (
+                      <CommentItem
+                        key={reply.id}
+                        comment={reply}
+                        userId={userId}
+                        isAdmin={isAdmin}
+                        onDelete={deleteComment}
+                        isReply
+                      />
+                    ))}
+                  </div>
+                )}
 
-              {/* Reply input */}
-              {replyingTo === comment.id && (
-                <div className="ml-8 mt-2">
-                  <div className="relative">
-                    <textarea
-                      value={replyText}
-                      onChange={(e) =>
-                        setReplyText(e.target.value.slice(0, REPLY_MAX))
-                      }
-                      placeholder="대댓글을 입력하세요..."
-                      rows={2}
-                      className="input-field resize-none text-sm"
-                      autoFocus
-                    />
-                    <span className="absolute bottom-2 right-3 text-[11px] text-gray-300">
-                      {REPLY_MAX - replyText.length}
-                    </span>
+                {/* Reply input */}
+                {replyingTo === comment.id && (
+                  <div className="ml-8 mt-2">
+                    <div className="relative">
+                      <textarea
+                        value={replyText}
+                        onChange={(e) =>
+                          setReplyText(e.target.value.slice(0, REPLY_MAX))
+                        }
+                        placeholder="대댓글을 입력하세요..."
+                        rows={2}
+                        className="input-field resize-none text-sm"
+                        autoFocus
+                      />
+                      <span className="absolute bottom-2 right-3 text-[11px] text-gray-300">
+                        {REPLY_MAX - replyText.length}
+                      </span>
+                    </div>
+                    <div className="flex justify-end gap-2 mt-1.5">
+                      <button
+                        onClick={() => {
+                          setReplyingTo(null);
+                          setReplyText("");
+                        }}
+                        className="text-xs text-gray-400 hover:text-gray-600 px-3 py-1.5"
+                      >
+                        취소
+                      </button>
+                      <button
+                        onClick={() => submitReply(comment.id)}
+                        disabled={!replyText.trim() || submitting}
+                        className="btn-coral text-xs !py-1.5 !px-3 disabled:opacity-40"
+                      >
+                        등록
+                      </button>
+                    </div>
                   </div>
-                  <div className="flex justify-end gap-2 mt-1.5">
-                    <button
-                      onClick={() => {
-                        setReplyingTo(null);
-                        setReplyText("");
-                      }}
-                      className="text-xs text-gray-400 hover:text-gray-600 px-3 py-1.5"
-                    >
-                      취소
-                    </button>
-                    <button
-                      onClick={() => submitReply(comment.id)}
-                      disabled={!replyText.trim() || submitting}
-                      className="btn-coral text-xs !py-1.5 !px-3 disabled:opacity-40"
-                    >
-                      등록
-                    </button>
-                  </div>
-                </div>
-              )}
-            </div>
-          ))}
-        </div>
+                )}
+              </div>
+            ))}
+          </div>
+
+          {/* Sentinel: reveals next page of comments as user scrolls */}
+          {visibleCount < comments.length && (
+            <div ref={commentSentinelRef} className="py-2" />
+          )}
+        </>
       )}
     </div>
   );
