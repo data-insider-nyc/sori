@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { RefreshCw, AtSign, Check, X } from "lucide-react";
+import { RefreshCw, AtSign, Check, X, Lock } from "lucide-react";
 import { createClient } from "@/lib/supabase-browser";
 import { generateNickname } from "@/lib/nickname";
 
@@ -14,6 +14,15 @@ interface Props {
   currentHandle: string | null;
   cooldownDays: number | null;
   handleCooldown: number | null;
+}
+
+function CooldownBadge({ days }: { days: number }) {
+  return (
+    <span className="inline-flex items-center gap-1 text-[11px] font-medium text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full">
+      <Lock className="w-3 h-3" />
+      {days}일 후 변경 가능
+    </span>
+  );
 }
 
 export function NicknameEditor({
@@ -37,7 +46,6 @@ export function NicknameEditor({
   const isLocked = cooldownDays !== null;
   const isHandleLocked = handleCooldown !== null;
 
-  // 핸들 중복 체크
   async function checkHandle(val: string) {
     if (!val || !HANDLE_REGEX.test(val) || val === currentHandle) {
       setHandleStatus(val === currentHandle ? "ok" : "idle");
@@ -116,20 +124,14 @@ export function NicknameEditor({
       {/* 표시이름 */}
       <div>
         <div className="flex items-center justify-between mb-1">
-          <p className="text-sm font-bold text-gray-700">표시이름</p>
-          {cooldownDays && (
-            <span className="text-xs text-gray-400">
-              {cooldownDays}일 후 변경 가능
-            </span>
-          )}
+          <p className="text-sm font-semibold text-gray-700">표시이름</p>
+          {isLocked && <CooldownBadge days={cooldownDays!} />}
         </div>
-        <p className="text-xs text-gray-400 mb-3">
-          피드에 보이는 이름 · 14일마다 변경 가능
-        </p>
+        <p className="text-xs text-gray-400 mb-3">90일마다 변경할 수 있어요</p>
 
         {isLocked ? (
           <div className="bg-gray-50 rounded-xl px-4 py-3 text-sm text-gray-500 text-center">
-            🔒 {cooldownDays}일 후에 변경할 수 있어요
+            {currentNickname}
           </div>
         ) : (
           <>
@@ -174,20 +176,16 @@ export function NicknameEditor({
       {/* @핸들 */}
       <div>
         <div className="flex items-center justify-between mb-1">
-          <p className="text-sm font-bold text-gray-700">@핸들</p>
-          {isHandleLocked && (
-            <span className="text-xs text-gray-400">
-              {handleCooldown}일 후 변경 가능
-            </span>
-          )}
+          <p className="text-sm font-semibold text-gray-700">@핸들</p>
+          {isHandleLocked && <CooldownBadge days={handleCooldown!} />}
         </div>
         <p className="text-xs text-gray-400 mb-3">
-          고유 ID · 90일마다 변경 가능
+          고유 ID · 영문 소문자, 숫자, 밑줄(_) · 90일마다 변경 가능
         </p>
 
         {isHandleLocked ? (
           <div className="bg-gray-50 rounded-xl px-4 py-3 text-sm text-gray-500 text-center">
-            🔒 {handleCooldown}일 후에 변경할 수 있어요
+            @{currentHandle ?? "—"}
           </div>
         ) : (
           <>

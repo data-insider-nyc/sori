@@ -3,12 +3,18 @@ import { revalidateTag } from "next/cache";
 import { createClient } from "@/lib/supabase-server";
 import { createAdminClient } from "@/lib/supabase-admin";
 
-export async function POST(req: Request, { params }: { params: Promise<{ id: string }> }) {
+export async function POST(
+  req: Request,
+  { params }: { params: Promise<{ id: string }> },
+) {
   // Toggle like for the authenticated user on this post and revalidate posts tag
   const { id } = await params;
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user)
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   // See if like exists (use admin client so DB trigger can update posts despite RLS)
   const admin = createAdminClient();
@@ -24,13 +30,18 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
   }
 
   if (existing) {
-    const { error } = await admin.from("post_likes").delete().match({ post_id: id, user_id: user.id });
+    const { error } = await admin
+      .from("post_likes")
+      .delete()
+      .match({ post_id: id, user_id: user.id });
     if (error) {
       console.error("[POST /api/posts/:id] delete like err", error);
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
   } else {
-    const { error } = await admin.from("post_likes").insert({ post_id: id, user_id: user.id });
+    const { error } = await admin
+      .from("post_likes")
+      .insert({ post_id: id, user_id: user.id });
     if (error) {
       console.error("[POST /api/posts/:id] insert like err", error);
       return NextResponse.json({ error: error.message }, { status: 500 });
@@ -38,7 +49,11 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
   }
 
   // get updated like_count using admin client for consistent view
-  const { data: postData, error: postErr } = await admin.from("posts").select("like_count").eq("id", id).maybeSingle();
+  const { data: postData, error: postErr } = await admin
+    .from("posts")
+    .select("like_count")
+    .eq("id", id)
+    .maybeSingle();
   if (postErr) console.error("[POST /api/posts/:id] fetch post err", postErr);
 
   try {
@@ -48,10 +63,16 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
     console.warn("[POST /api/posts/:id] revalidateTag failed", e);
   }
 
-  return NextResponse.json({ ok: true, like_count: postData?.like_count ?? null });
+  return NextResponse.json({
+    ok: true,
+    like_count: postData?.like_count ?? null,
+  });
 }
 
-export async function PATCH(req: Request, { params }: { params: Promise<{ id: string }> }) {
+export async function PATCH(
+  req: Request,
+  { params }: { params: Promise<{ id: string }> },
+) {
   const { id } = await params;
   const json = await req.json();
   const supabase = await createClient();
@@ -59,8 +80,11 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
   // Handle pinned updates separately and require admin
   if (typeof json.pinned !== "undefined") {
     // Identify caller
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user)
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
     // Check admin status
     const { data: profile } = await supabase
@@ -69,7 +93,8 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
       .eq("id", user.id)
       .single();
     const isAdmin = profile?.is_admin === true;
-    if (!isAdmin) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    if (!isAdmin)
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
     // Use admin client to bypass RLS for pinned flag
     const admin = createAdminClient();
@@ -107,15 +132,19 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
 
   // Handle is_announcement toggle — admin only
   if (typeof json.is_announcement !== "undefined") {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user)
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
     const { data: profile } = await supabase
       .from("profiles")
       .select("is_admin")
       .eq("id", user.id)
       .single();
-    if (!profile?.is_admin) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    if (!profile?.is_admin)
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
     const admin = createAdminClient();
     const { data, error } = await admin
@@ -153,14 +182,23 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
     updates.images = images;
     // Fetch old images to detect removed ones
     const admin = createAdminClient();
-    const { data: existing } = await admin.from("posts").select("images").eq("id", id).maybeSingle();
+    const { data: existing } = await admin
+      .from("posts")
+      .select("images")
+      .eq("id", id)
+      .maybeSingle();
     const oldImages: string[] = existing?.images ?? [];
-    const removedImages = oldImages.filter((url: string) => !(images as string[]).includes(url));
+    const removedImages = oldImages.filter(
+      (url: string) => !(images as string[]).includes(url),
+    );
     if (removedImages.length > 0) {
       const paths = removedImages.map((url: string) => {
         const u = new URL(url);
         // path after /object/public/post-images/
-        return u.pathname.replace(/^\/storage\/v1\/object\/public\/post-images\//, "");
+        return u.pathname.replace(
+          /^\/storage\/v1\/object\/public\/post-images\//,
+          "",
+        );
       });
       await admin.storage.from("post-images").remove(paths);
     }
@@ -177,7 +215,11 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
     console.error("[PATCH /api/posts]", error);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
-  if (!data) return NextResponse.json({ error: "Not found or not authorized" }, { status: 403 });
+  if (!data)
+    return NextResponse.json(
+      { error: "Not found or not authorized" },
+      { status: 403 },
+    );
 
   // Invalidate cached posts so the post detail page reflects the change immediately
   try {
@@ -190,13 +232,19 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
   return NextResponse.json(data);
 }
 
-export async function DELETE(req: Request, { params }: { params: Promise<{ id: string }> }) {
+export async function DELETE(
+  req: Request,
+  { params }: { params: Promise<{ id: string }> },
+) {
   const { id } = await params;
   const supabase = await createClient();
 
   // Identify caller
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user)
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   // Check admin status
   const { data: profile } = await supabase
@@ -213,7 +261,10 @@ export async function DELETE(req: Request, { params }: { params: Promise<{ id: s
     .maybeSingle();
 
   if (targetError) {
-    console.error("[DELETE /api/posts] target lookup error:", targetError.message);
+    console.error(
+      "[DELETE /api/posts] target lookup error:",
+      targetError.message,
+    );
     return NextResponse.json({ error: targetError.message }, { status: 500 });
   }
   if (!target) {
@@ -250,7 +301,10 @@ export async function DELETE(req: Request, { params }: { params: Promise<{ id: s
     .is("deleted_at", null);
 
   if (commentsError) {
-    console.error("[DELETE /api/posts] soft-delete comments error:", commentsError.message);
+    console.error(
+      "[DELETE /api/posts] soft-delete comments error:",
+      commentsError.message,
+    );
     return NextResponse.json({ error: commentsError.message }, { status: 500 });
   }
 

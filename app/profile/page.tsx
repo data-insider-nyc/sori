@@ -10,7 +10,7 @@ import { LocationEditor } from "./LocationEditor";
 import { AvatarEditor } from "./AvatarEditor";
 import { LogoutButton } from "./LogoutButton";
 import { ProfileAvatar } from "@/components/ui/ProfileCard";
-import { MapPin, FileText, MessageCircle, CalendarDays } from "lucide-react";
+import { FileText, MessageCircle, CalendarDays } from "lucide-react";
 
 export const metadata: Metadata = { title: "내 프로필" };
 
@@ -21,16 +21,8 @@ function formatJoinDate(dateStr: string) {
   });
 }
 
-function daysUntilChange(changedAt: string | null): number | null {
-  if (!changedAt) return null;
-  const elapsed = Math.floor(
-    (Date.now() - new Date(changedAt).getTime()) / (1000 * 60 * 60 * 24),
-  );
-  const remaining = 1 - elapsed;
-  return remaining > 0 ? remaining : null;
-}
-
-function daysUntilChange90(changedAt: string | null): number | null {
+/** Returns days remaining in a 90-day cooldown, or null if unlocked. */
+function daysUntil90(changedAt: string | null): number | null {
   if (!changedAt) return null;
   const elapsed = Math.floor(
     (Date.now() - new Date(changedAt).getTime()) / (1000 * 60 * 60 * 24),
@@ -90,8 +82,21 @@ export default async function ProfilePage() {
 
   if (!profile) redirect("/auth/nickname");
 
-  const cooldownDays = daysUntilChange(profile.nickname_changed_at);
-  const handleCooldownDays = daysUntilChange90(profile.handle_changed_at);
+  // location_changed_at is added via migration 119; query separately so a missing
+  // column doesn't break the whole page load.
+  const { data: locationCooldownRow } = await supabase
+    .from("profiles")
+    .select("location_changed_at")
+    .eq("id", user.id)
+    .single();
+
+  const locationChangedAt =
+    (locationCooldownRow as { location_changed_at?: string | null } | null)
+      ?.location_changed_at ?? null;
+
+  const nicknameCooldown = daysUntil90(profile.nickname_changed_at);
+  const handleCooldown = daysUntil90(profile.handle_changed_at);
+  const locationCooldown = daysUntil90(locationChangedAt);
 
   const [{ count: postCount }, { count: commentCount }] = await Promise.all([
     supabase
@@ -110,7 +115,6 @@ export default async function ProfilePage() {
     <div className="py-6 max-w-5xl mx-auto space-y-5">
       {/* ── Identity banner ───────────────────────────────────────────── */}
       <div className="relative rounded-3xl overflow-hidden hero-gradient px-6 py-8 lg:px-10 lg:py-10">
-        {/* Personalized color glow — unique to this user */}
         <div
           aria-hidden="true"
           className="absolute inset-0 pointer-events-none"
@@ -118,7 +122,6 @@ export default async function ProfilePage() {
             background: `radial-gradient(ellipse 60% 80% at 0% 50%, ${palette.background}22 0%, transparent 70%)`,
           }}
         />
-        {/* Subtle noise grain */}
         <div
           aria-hidden="true"
           className="absolute inset-0 pointer-events-none opacity-[0.03]"
@@ -129,7 +132,6 @@ export default async function ProfilePage() {
         />
 
         <div className="relative z-10 flex flex-col sm:flex-row sm:items-center gap-6">
-          {/* Avatar with personalized color ring */}
           <div className="flex-shrink-0">
             <div
               className="rounded-full"
@@ -147,7 +149,6 @@ export default async function ProfilePage() {
             </div>
           </div>
 
-          {/* Identity text */}
           <div className="flex-1 min-w-0">
             <div className="flex flex-wrap items-baseline gap-2 mb-0.5">
               <h1 className="text-2xl font-black text-white tracking-tight leading-none">
@@ -170,7 +171,6 @@ export default async function ProfilePage() {
               </p>
             )}
 
-            {/* Stats row */}
             <div className="flex flex-wrap items-center gap-4 mt-4 pt-4 border-t border-white/10">
               <div className="flex items-center gap-1.5 text-white/50 text-xs font-medium">
                 <FileText className="w-3.5 h-3.5" />
@@ -199,7 +199,7 @@ export default async function ProfilePage() {
 
       {/* ── Main grid ──────────────────────────────────────────────────── */}
       <div className="flex flex-col lg:grid lg:grid-cols-[1fr_320px] gap-5 lg:items-start">
-        {/* LEFT — Activity feed (order-2 on mobile so settings appear first) */}
+        {/* LEFT — Activity feed */}
         <div className="order-2 lg:order-1">
           <ProfileActivity
             userId={user.id}
@@ -208,10 +208,10 @@ export default async function ProfilePage() {
           />
         </div>
 
-        {/* RIGHT — Settings (order-1 on mobile = top, order-2 on desktop = right column) */}
+        {/* RIGHT — Settings */}
         <div className="order-1 lg:order-2 space-y-2 lg:sticky lg:top-24">
-          {/* Profile settings group */}
-          <SectionLabel>프로필 설정</SectionLabel>
+          {/* ── Profile group ── */}
+          <SectionLabel>프로필</SectionLabel>
 
           <SettingsCard>
             <AvatarEditor
@@ -225,46 +225,38 @@ export default async function ProfilePage() {
             <BioEditor userId={user.id} currentBio={profile.bio} />
           </SettingsCard>
 
-          <SettingsCard>
-            <LocationEditor
-              userId={user.id}
-              currentLocation={profile.location ?? "other"}
-            />
-          </SettingsCard>
+          {/* ── Identity group (90-day cooldowns) ── */}
+          <SectionLabel className="mt-4">아이디 설정</SectionLabel>
 
           <SettingsCard>
-            <div className="flex items-center justify-between mb-1">
-              <p className="text-sm font-semibold text-gray-700">닉네임 변경</p>
-              {cooldownDays && (
-                <span className="text-xs text-gray-400">
-                  {cooldownDays}일 후 변경 가능
-                </span>
-              )}
-            </div>
-            <p className="text-xs text-gray-400 mb-4">
-              7일에 한 번 변경할 수 있어요.
-            </p>
             <NicknameEditor
               userId={user.id}
               currentNickname={profile.nickname}
               currentHandle={profile.handle ?? null}
-              cooldownDays={cooldownDays}
-              handleCooldown={handleCooldownDays}
+              cooldownDays={nicknameCooldown}
+              handleCooldown={handleCooldown}
             />
           </SettingsCard>
 
-          {/* Account group */}
-          <SectionLabel className="mt-4">계정</SectionLabel>
+          <SettingsCard>
+            <LocationEditor
+              userId={user.id}
+              currentLocation={profile.location ?? "other"}
+              cooldownDays={locationCooldown}
+            />
+          </SettingsCard>
 
+          {/* ── Account group ── */}
+          <SectionLabel className="mt-4">계정</SectionLabel>
           <SettingsCard>
             <LogoutButton />
           </SettingsCard>
 
-          {/* Danger zone */}
+          {/* ── Danger zone ── */}
           <SectionLabel className="mt-4">위험 영역</SectionLabel>
-
           <SettingsCard danger>
             <p className="text-sm font-semibold text-red-500 mb-1">계정 삭제</p>
+            <p className="text-sm text-gray-500 mb-1">{user.email}</p>
             <p className="text-xs text-gray-400 mb-4">
               삭제 시 프로필 및 모든 데이터가 영구 삭제되며 복구할 수 없어요.
             </p>

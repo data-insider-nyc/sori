@@ -1,7 +1,9 @@
 import { test, expect } from "@playwright/test";
 
 test.describe("community core smoke", () => {
-  test("community list loads and filtering query params work", async ({ page }) => {
+  test("community list loads and filtering query params work", async ({
+    page,
+  }) => {
     await page.goto("/community");
 
     await expect(page.getByRole("heading", { name: "커뮤니티" })).toBeVisible();

@@ -3,12 +3,18 @@ import { revalidateTag } from "next/cache";
 import { createClient } from "@/lib/supabase-server";
 import { createAdminClient } from "@/lib/supabase-admin";
 
-export async function DELETE(req: Request, { params }: { params: Promise<{ id: string }> }) {
+export async function DELETE(
+  req: Request,
+  { params }: { params: Promise<{ id: string }> },
+) {
   const { id } = await params;
   const supabase = await createClient();
 
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user)
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const { data: profile } = await supabase
     .from("profiles")
@@ -24,7 +30,10 @@ export async function DELETE(req: Request, { params }: { params: Promise<{ id: s
     .maybeSingle();
 
   if (targetError) {
-    console.error("[DELETE /api/comments] target lookup error:", targetError.message);
+    console.error(
+      "[DELETE /api/comments] target lookup error:",
+      targetError.message,
+    );
     return NextResponse.json({ error: targetError.message }, { status: 500 });
   }
   if (!target) {
@@ -63,7 +72,10 @@ export async function DELETE(req: Request, { params }: { params: Promise<{ id: s
       .is("deleted_at", null);
 
     if (replyError) {
-      console.error("[DELETE /api/comments] soft-delete replies error:", replyError.message);
+      console.error(
+        "[DELETE /api/comments] soft-delete replies error:",
+        replyError.message,
+      );
       return NextResponse.json({ error: replyError.message }, { status: 500 });
     }
   }
