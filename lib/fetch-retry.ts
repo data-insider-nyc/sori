@@ -30,5 +30,7 @@ export async function fetchWithRetry(
     await sleep(retryDelayMs * attempt);
   }
 
-  throw lastError instanceof Error ? lastError : new Error("Network request failed");
+  throw lastError instanceof Error
+    ? lastError
+    : new Error("Network request failed");
 }

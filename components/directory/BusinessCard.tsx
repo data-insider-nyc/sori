@@ -156,9 +156,7 @@ export function BusinessCard({
                 strokeWidth={1.8}
               />
             </div>
-            <div className="flex flex-wrap justify-end gap-1.5">
-              {badges}
-            </div>
+            <div className="flex flex-wrap justify-end gap-1.5">{badges}</div>
           </div>
 
           <div className="mt-4">
@@ -258,9 +256,7 @@ export function BusinessCard({
               </div>
             </div>
 
-            <div className="mt-3 flex flex-wrap gap-2 sm:hidden">
-              {badges}
-            </div>
+            <div className="mt-3 flex flex-wrap gap-2 sm:hidden">{badges}</div>
 
             <div className="mt-4 grid gap-3 border-t border-gray-100 pt-4 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-end">
               <div className="space-y-2.5 text-sm text-gray-500">

@@ -36,7 +36,9 @@ export function PostDetailActions({ post, userId }: Props) {
         images: post.images ?? [],
       }}
       onAfterEdit={() => router.refresh()}
-      onAfterDelete={() => { router.push("/community"); }}
+      onAfterDelete={() => {
+        router.push("/community");
+      }}
       onAfterPin={() => router.refresh()}
       onAfterAnnouncement={() => router.refresh()}
     />

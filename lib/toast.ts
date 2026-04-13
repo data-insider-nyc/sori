@@ -11,7 +11,8 @@ function ensureToasterRoot() {
 
   root = document.createElement("div");
   root.id = "toaster";
-  root.className = "fixed bottom-24 left-1/2 -translate-x-1/2 z-50 pointer-events-none";
+  root.className =
+    "fixed bottom-24 left-1/2 -translate-x-1/2 z-50 pointer-events-none";
   document.body.appendChild(root);
   return root;
 }
@@ -30,10 +31,13 @@ export function showToast(message: string, options: ToastOptions = {}) {
 
   root.appendChild(node);
 
-  window.setTimeout(() => {
-    node.style.opacity = "0";
-    node.style.transform = "translateY(6px)";
-  }, Math.max(durationMs - 180, 0));
+  window.setTimeout(
+    () => {
+      node.style.opacity = "0";
+      node.style.transform = "translateY(6px)";
+    },
+    Math.max(durationMs - 180, 0),
+  );
 
   window.setTimeout(() => {
     node.remove();

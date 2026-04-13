@@ -1,5 +1,5 @@
 .env.local
-.env
+.env*
 node_modules
 dist
 build
@@ -8,7 +8,6 @@ coverage
 *.log
 .next
 .vercel
-.env*.local
 
 # Playwright
 /test-results/

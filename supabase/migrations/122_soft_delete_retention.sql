@@ -29,7 +29,6 @@ BEGIN
 END;
 $$;
 
-COMMENT ON FUNCTION purge_soft_deleted_community(integer)
-  IS 'Hard-deletes soft-deleted posts/comments older than retention_days.';
+COMMENT ON FUNCTION purge_soft_deleted_community (integer) IS 'Hard-deletes soft-deleted posts/comments older than retention_days.';
 
 COMMIT;

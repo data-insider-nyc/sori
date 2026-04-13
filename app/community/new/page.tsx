@@ -12,7 +12,9 @@ export default function NewPostPage() {
   const supabase = createClient();
 
   async function handleSubmit(values: PostFormValues) {
-    const { data: { user } } = await supabase.auth.getUser();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
     if (!user) {
       router.replace("/auth/login");
       return;
@@ -71,7 +73,12 @@ export default function NewPostPage() {
       </div>
 
       <div className="bg-white border border-gray-100 rounded-2xl shadow-sm p-4 sm:p-6">
-        <PostForm onSubmit={handleSubmit} submitLabel="게시하기" userId={userId ?? undefined} isAdmin={isAdmin} />
+        <PostForm
+          onSubmit={handleSubmit}
+          submitLabel="게시하기"
+          userId={userId ?? undefined}
+          isAdmin={isAdmin}
+        />
       </div>
     </div>
   );
