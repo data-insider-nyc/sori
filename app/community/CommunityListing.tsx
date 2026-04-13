@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useWindowVirtualizer } from "@tanstack/react-virtual";
 import { useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase-browser";
@@ -259,9 +259,16 @@ export function CommunityListing() {
       );
     }
 
-    const { data: raw } = await query;
+    const { data: raw, error: queryError } = await query;
 
     if (!isActiveRequest(requestId, filters)) return;
+
+    if (queryError) {
+      console.error("[CommunityListing] query error", queryError.message);
+      setLoading(false);
+      setLoadingMore(false);
+      return;
+    }
 
     const rows = (raw ?? []) as any[];
 
@@ -346,56 +353,64 @@ export function CommunityListing() {
     debounceRef.current = setTimeout(() => setParam("q", val), 300);
   }
 
-  function applyPostsUpdate(nextPosts: Post[]) {
-    setPosts(nextPosts);
-    const entry = feedCache.get(key);
-    if (entry) {
-      feedCache.set(key, { ...entry, posts: nextPosts, ts: Date.now() });
-    }
-  }
-
-  function handlePostEdited(
-    postId: string,
-    updated: {
-      title?: string | null;
-      content?: string;
-      category?: string;
-      region?: string | null;
-      images?: string[];
+  const handlePostEdited = useCallback(
+    (
+      postId: string,
+      updated: {
+        title?: string | null;
+        content?: string;
+        category?: string;
+        region?: string | null;
+        images?: string[];
+      },
+    ) => {
+      setPosts((prev) => {
+        const nextPosts = prev.map((p) =>
+          p.id === postId
+            ? {
+                ...p,
+                title:
+                  typeof updated.title === "undefined"
+                    ? p.title
+                    : (updated.title ?? ""),
+                content:
+                  typeof updated.content === "undefined"
+                    ? p.content
+                    : updated.content,
+                category:
+                  typeof updated.category === "undefined"
+                    ? p.category
+                    : updated.category,
+                region:
+                  typeof updated.region === "undefined"
+                    ? p.region
+                    : (updated.region ?? null),
+                images:
+                  typeof updated.images === "undefined"
+                    ? p.images
+                    : updated.images,
+              }
+            : p,
+        );
+        const entry = feedCache.get(key);
+        if (entry) feedCache.set(key, { ...entry, posts: nextPosts, ts: Date.now() });
+        return nextPosts;
+      });
     },
-  ) {
-    const nextPosts = posts.map((p) =>
-      p.id === postId
-        ? {
-            ...p,
-            title:
-              typeof updated.title === "undefined"
-                ? p.title
-                : (updated.title ?? ""),
-            content:
-              typeof updated.content === "undefined"
-                ? p.content
-                : updated.content,
-            category:
-              typeof updated.category === "undefined"
-                ? p.category
-                : updated.category,
-            region:
-              typeof updated.region === "undefined"
-                ? p.region
-                : (updated.region ?? null),
-            images:
-              typeof updated.images === "undefined" ? p.images : updated.images,
-          }
-        : p,
-    );
-    applyPostsUpdate(nextPosts);
-  }
+    [key],
+  );
 
-  function handlePostDeleted(postId: string) {
-    const nextPosts = posts.filter((p) => p.id !== postId);
-    applyPostsUpdate(nextPosts);
-  }
+  const handlePostDeleted = useCallback(
+    (postId: string) => {
+      setPosts((prev) => {
+        const nextPosts = prev.filter((p) => p.id !== postId);
+        const entry = feedCache.get(key);
+        if (entry) feedCache.set(key, { ...entry, posts: nextPosts, ts: Date.now() });
+        return nextPosts;
+      });
+    },
+    [key],
+  );
 
   const showSkeleton = loading && posts.length === 0;
   const showRefreshing = loading && posts.length > 0;
