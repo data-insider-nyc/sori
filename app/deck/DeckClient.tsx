@@ -1131,7 +1131,7 @@ function SlideGTM({ dark, columns }: { dark: boolean; columns: number }) {
       time: "6–18개월",
       items: [
         "한인 유튜버 파트너십",
-        "SEO: 뉴저지 한인 병원 키워드 장악",
+        "SEO: 미국 한인 병원 키워드 장악",
         "카카오채널 마케팅",
       ],
       goal: "MAU 30,000",

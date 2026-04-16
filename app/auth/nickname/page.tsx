@@ -128,11 +128,11 @@ export default function NicknamePage() {
           커뮤니티에서 사용할 정보예요
         </p>
 
-        {/* 표시이름 */}
+        {/* 표시되는 별명 */}
         <div className="mb-5">
           <div className="flex items-center justify-between mb-2">
             <label className="text-sm font-bold text-gray-700">
-              표시이름
+              표시되는 별명
               <span className="text-gray-400 font-normal ml-1 text-xs">
                 — 피드에 보이는 이름
               </span>
