@@ -47,3 +47,13 @@ export const TARGET_CITIES = [
   // ── 뉴욕 맨해튼 ────────────────────────────────
   { value: "Manhattan", label: "Manhattan, NY" },
 ] as const;
+
+export const RECENCY_LABEL_BUCKETS = [
+  { maxAgeDays: 1, label: "오늘" },
+  { maxAgeDays: 5, label: "최근" },
+  { maxAgeDays: 7, label: "이번주" },
+  { maxAgeDays: 14, label: "지난주" },
+  { maxAgeDays: 30, label: "이번달" },
+  { maxAgeDays: 60, label: "지난달" },
+  { maxAgeDays: Number.POSITIVE_INFINITY, label: "예전" },
+] as const;

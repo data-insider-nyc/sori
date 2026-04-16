@@ -72,15 +72,17 @@ NEXT_PUBLIC_APP_URL=http://localhost:3000
 ```
 
 > ⚠️ Make sure `supabase/.env` is gitignored. Check your root `.gitignore` includes `.env` — never commit OAuth secrets.
+>
+> `NEXT_PUBLIC_APP_URL` should be treated as your canonical/public site URL for metadata and links. Auth callbacks should return to the **current app origin** that started the flow.
 
 ### 4. `/app/auth/callback/route.ts`
 
 ```ts
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
-  // ⚠️ Do NOT use `origin` from request.url in local dev
-  // request.url may come in as 127.0.0.1, but your app is on localhost
-  const origin = process.env.NEXT_PUBLIC_APP_URL || new URL(request.url).origin;
+  // Return to the same host that initiated auth.
+  // This keeps local dev working even when using prod Supabase credentials.
+  const origin = request.nextUrl.origin;
   const code = searchParams.get("code");
 
   if (code) {
@@ -122,7 +124,18 @@ Adding `localhost:3000/auth/callback` to Google Console does nothing. Google onl
 If your `redirectTo` URL (set in `signInWithOAuth`) isn't in Supabase's allow-list, Supabase silently falls back to `site_url` — skipping your callback route entirely. The user ends up on the home page **without a session established in the app**.
 
 ### ❌ `127.0.0.1` vs `localhost` mismatch
-`site_url = "http://127.0.0.1:3000"` and running Next.js on `localhost:3000` are different origins to the browser. Cookies set on one won't apply to the other. Always set `site_url` to match your actual dev URL (`localhost`), and use `NEXT_PUBLIC_APP_URL` to control redirects explicitly.
+`site_url = "http://127.0.0.1:3000"` and running Next.js on `localhost:3000` are different origins to the browser. Cookies set on one won't apply to the other. Always set `site_url` to match your actual dev URL, and make your auth callback return to the current request origin.
+
+### ❌ Local `HTTP ERROR 431` after login
+If local auth works in production but fails in `next dev` with `HTTP ERROR 431`, the request headers are usually too large because Supabase SSR auth cookies are chunked across multiple cookies. This is more likely when you're developing locally against a production Supabase project.
+
+Increase the local Node header limit for dev:
+
+```json
+"dev": "NODE_OPTIONS='--max-http-header-size=32768' next dev"
+```
+
+Apply the same override to any custom local dev scripts like `dev:local` or `dev:prod`.
 
 ### ❌ Using `.single()` for profile check
 `.single()` throws a PGRST116 error if no row is found. Use `.maybeSingle()` when a missing row is a valid, expected state (e.g., new user who hasn't set up a profile yet).
@@ -139,7 +152,7 @@ The Supabase CLI reads `env(VAR_NAME)` substitutions from **`supabase/.env`**, n
 
 - **Two separate tables**: `auth.users` (Supabase-managed) and `public.profiles` (your app data). Never store app-specific data in `auth.users`.
 - **App-managed profile creation**: Redirect new users to an onboarding page rather than auto-inserting a blank row via SQL trigger. This lets you collect required fields (nickname, handle) before they enter the app.
-- **`NEXT_PUBLIC_APP_URL`**: Always define this explicitly rather than inferring from `request.url` in server routes. In local dev, the request origin can differ from where your app is actually running.
+- **`NEXT_PUBLIC_APP_URL`**: Use this for canonical metadata, sitemap, and other public links. For auth callbacks, return to the current request origin so local dev, previews, and production each land back on the host that initiated auth.
 - **`skip_nonce_check = true` for local only**: Google's nonce verification doesn't work with Supabase local auth. This flag is safe locally but should not be set in production config.
 - **Wildcard redirect URLs**: Use `http://localhost:3000/**` in `additional_redirect_urls` rather than exact paths so any future callback routes work without config changes.
 

@@ -3,9 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
-    "dev:local": "env-cmd -f .env.local next dev",
-    "dev:prod": "env-cmd -f .env.prod next dev",
+    "dev": "NODE_OPTIONS='--max-http-header-size=32768' next dev",
+    "dev:local": "NODE_OPTIONS='--max-http-header-size=32768' env-cmd -f .env.local next dev",
+    "dev:prod": "NODE_OPTIONS='--max-http-header-size=32768' env-cmd -f .env.prod next dev",
     "build": "next build",
     "start": "next start",
     "test:e2e": "playwright test --reporter=line",
