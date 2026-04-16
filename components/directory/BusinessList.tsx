@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { LayoutGrid, List } from "lucide-react";
+import { LayoutGrid, List, SlidersHorizontal } from "lucide-react";
 import { CATEGORY_LIST } from "@/lib/constants";
 import { getRegionLabel } from "@/lib/regions";
 import { supabase } from "@/lib/supabase";
@@ -133,7 +133,7 @@ export function BusinessList({
 
   if (businesses.length === 0)
     return (
-      <div className="rounded-[28px] border border-dashed border-gray-200 bg-white px-6 py-20 text-center text-gray-400">
+      <div className="rounded-2xl border border-dashed border-gray-200 bg-white px-6 py-20 text-center text-gray-400">
         <div className="mb-4 text-5xl">🔍</div>
         <p className="text-base font-medium">검색 결과가 없어요.</p>
         <p className="mt-1 text-sm">다른 키워드나 지역을 선택해보세요.</p>
@@ -142,18 +142,18 @@ export function BusinessList({
 
   return (
     <div>
-      <div className="mb-5 rounded-[28px] border border-[#F2E7E2] bg-white p-5 shadow-sm sm:p-6">
+      <div className="mb-5 rounded-2xl border border-gray-100 bg-white p-5 shadow-sm sm:p-6">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-gray-400">
-              Directory Listing
+            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-gray-400">
+              Directory
             </p>
             <h2 className="mt-2 text-2xl font-black tracking-tight text-gray-900">
-              조건에 맞는 비즈니스
+              비즈니스 목록
             </h2>
             <p className="mt-1 text-sm text-gray-500">
-              추천과 인증 정보를 먼저 보여주고, 전화와 지역 정보를 빠르게 비교할
-              수 있게 정리했습니다.
+              커뮤니티처럼 가볍게 훑어보고, 필요한 업체를 바로 비교할 수 있게
+              정리했습니다.
             </p>
           </div>
 
@@ -172,7 +172,7 @@ export function BusinessList({
               )}
             </p>
 
-            <div className="flex items-center gap-1 rounded-2xl bg-gray-100 p-1">
+            <div className="flex items-center gap-1 rounded-xl bg-gray-100 p-1">
               <button
                 onClick={() => setViewMode("list")}
                 aria-label="리스트 보기"
@@ -206,14 +206,15 @@ export function BusinessList({
             {activePills.map((pill) => (
               <span
                 key={pill}
-                className="inline-flex items-center rounded-full bg-[#FFF6F2] px-3 py-1 text-xs font-semibold text-[#C55A3D]"
+                className="inline-flex items-center rounded-full bg-[#FFF0F0] px-3 py-1 text-xs font-semibold text-[#FF5C5C]"
               >
                 {pill}
               </span>
             ))}
           </div>
         ) : (
-          <div className="mt-4 rounded-2xl bg-gray-50 px-4 py-3 text-sm text-gray-500">
+          <div className="mt-4 flex items-center gap-2 rounded-2xl bg-gray-50 px-4 py-3 text-sm text-gray-500">
+            <SlidersHorizontal className="h-4 w-4 text-gray-400" />
             지역과 카테고리를 조합해 원하는 한인 비즈니스를 빠르게 좁혀보세요.
           </div>
         )}
@@ -238,7 +239,7 @@ export function BusinessList({
           <button
             onClick={() => goPage(page - 1)}
             disabled={page === 1}
-            className="flex h-10 w-10 items-center justify-center rounded-2xl border border-gray-200 text-lg font-bold text-gray-600 transition-colors hover:border-gray-400 disabled:opacity-30"
+            className="flex h-10 w-10 items-center justify-center rounded-xl border border-gray-200 text-lg font-bold text-gray-600 transition-colors hover:border-gray-400 disabled:opacity-30"
           >
             ‹
           </button>
@@ -253,7 +254,7 @@ export function BusinessList({
                 key={p}
                 onClick={() => goPage(p)}
                 className={cn(
-                  "h-10 w-10 rounded-2xl text-sm font-bold transition-all",
+                  "h-10 w-10 rounded-xl text-sm font-bold transition-all",
                   p === page
                     ? "bg-gray-900 text-white"
                     : "border border-gray-200 text-gray-600 hover:border-gray-400",
@@ -266,7 +267,7 @@ export function BusinessList({
           <button
             onClick={() => goPage(page + 1)}
             disabled={page === totalPages}
-            className="flex h-10 w-10 items-center justify-center rounded-2xl border border-gray-200 text-lg font-bold text-gray-600 transition-colors hover:border-gray-400 disabled:opacity-30"
+            className="flex h-10 w-10 items-center justify-center rounded-xl border border-gray-200 text-lg font-bold text-gray-600 transition-colors hover:border-gray-400 disabled:opacity-30"
           >
             ›
           </button>
