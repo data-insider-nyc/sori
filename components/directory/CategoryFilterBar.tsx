@@ -25,9 +25,11 @@ export function CategoryFilterBar({
       <button
         onClick={() => select(null)}
         className={cn(
-          "chip flex-shrink-0 whitespace-nowrap border-gray-300 bg-white text-gray-700 hover:border-gray-400 hover:text-gray-900",
+          "flex-shrink-0 rounded-full border px-4 py-2 text-sm font-bold transition-all whitespace-nowrap",
           !activeCategory &&
-            "border-[#0F1B2D] bg-[#0F1B2D] text-white hover:border-[#1E3050] hover:bg-[#1E3050] hover:text-white",
+            "border-gray-900 bg-gray-900 text-white",
+          activeCategory &&
+            "border-gray-200 bg-white text-gray-500 hover:border-gray-400 hover:text-gray-900",
         )}
       >
         전체
@@ -39,9 +41,11 @@ export function CategoryFilterBar({
             select(activeCategory === cat.value ? null : cat.value)
           }
           className={cn(
-            "chip flex-shrink-0 whitespace-nowrap border-gray-300 bg-white text-gray-700 hover:border-gray-400 hover:text-gray-900",
+            "flex-shrink-0 rounded-full border px-4 py-2 text-sm font-bold transition-all whitespace-nowrap",
             activeCategory === cat.value &&
-              "border-[#0F1B2D] bg-[#0F1B2D] text-white hover:border-[#1E3050] hover:bg-[#1E3050] hover:text-white",
+              "border-gray-900 bg-gray-900 text-white",
+            activeCategory !== cat.value &&
+              "border-gray-200 bg-white text-gray-500 hover:border-gray-400 hover:text-gray-900",
           )}
         >
           {cat.emoji} {cat.label}

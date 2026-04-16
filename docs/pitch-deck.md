@@ -111,7 +111,7 @@ oursori.com · NY / NJ → USA · Seed Round 2026 · Consumer · SaaS
 ### Phase 02 — Digital Growth (6–18개월)
 
 - 한인 유튜버 파트너십
-- SEO: '뉴저지 한인 병원' 키워드 장악
+- SEO: '미국 한인 병원' 키워드 장악
 - 카카오채널 마케팅
 - **목표: MAU 30,000**
 

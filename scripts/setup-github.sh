@@ -186,7 +186,7 @@ gh issue create --repo $REPO \
 - [ ] \`og:image\` 설정 (SNS 공유 시 썸네일)
 - [ ] Lighthouse 점수 90+ 목표
 - [ ] 구글 서치콘솔 등록
-- [ ] '뉴저지 한인 병원', '포트리 한인 변호사' 키워드 타겟"
+- [ ] '미국 한인 병원', '포트리 한인 변호사' 키워드 타겟"
 
 gh issue create --repo $REPO \
   --title "론칭 전 초기 콘텐츠 세팅" \

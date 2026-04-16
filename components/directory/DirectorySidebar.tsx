@@ -32,32 +32,16 @@ interface Props {
 function SidebarSection({
   title,
   icon: Icon,
-  tone = "soft",
   children,
 }: {
   title: string;
   icon: React.ElementType;
-  tone?: "soft" | "coral";
   children: React.ReactNode;
 }) {
   return (
-    <section
-      className={cn(
-        "rounded-[26px] border p-5",
-        tone === "coral"
-          ? "border-[#FFD7CF] bg-[linear-gradient(180deg,#FFF8F5_0%,#FFF1EE_100%)]"
-          : "border-gray-100 bg-gray-50",
-      )}
-    >
+    <section className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
       <div className="mb-4 flex items-center gap-2">
-        <span
-          className={cn(
-            "inline-flex h-8 w-8 items-center justify-center rounded-xl",
-            tone === "coral"
-              ? "bg-white text-[#FF5C5C]"
-              : "bg-white text-gray-700",
-          )}
-        >
+        <span className="inline-flex h-8 w-8 items-center justify-center rounded-xl bg-[#FFF0F0] text-[#FF5C5C]">
           <Icon className="h-4 w-4" strokeWidth={2.2} />
         </span>
         <h3 className="text-sm font-semibold text-gray-900">{title}</h3>
@@ -81,7 +65,7 @@ function CompactBusinessRow({
   return (
     <Link
       href={`/directory/${business.id}`}
-      className="flex items-start gap-3 rounded-2xl px-2 py-2.5 transition-colors hover:bg-white"
+      className="flex items-start gap-3 rounded-2xl px-2 py-2.5 transition-colors hover:bg-gray-50"
     >
       <span
         className={cn(
@@ -203,7 +187,7 @@ export function DirectorySidebar({
 
   return (
     <div className="space-y-4">
-      <SidebarSection title="추천 비즈니스" icon={Sparkles} tone="coral">
+      <SidebarSection title="추천 비즈니스" icon={Sparkles}>
         {loading ? (
           <div className="space-y-2">
             {Array.from({ length: 4 }).map((_, index) => (
@@ -260,7 +244,7 @@ export function DirectorySidebar({
       </SidebarSection>
 
       <SidebarSection title="광고 시작하기" icon={Megaphone}>
-        <div className="rounded-[22px] bg-white p-4">
+        <div className="rounded-2xl bg-gray-50 p-4">
           <div className="flex items-start justify-between gap-3">
             <div>
               <p className="text-sm font-semibold text-gray-900">

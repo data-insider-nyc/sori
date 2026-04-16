@@ -1,5 +1,6 @@
 import Link from "next/link";
 import {
+  ArrowUpRight,
   Stethoscope,
   Scale,
   Calculator,
@@ -144,14 +145,14 @@ export function BusinessCard({
   if (variant === "grid") {
     return (
       <Link href={`/directory/${business.id}`} className="block group h-full">
-        <div className="card flex h-full flex-col overflow-hidden p-5">
+        <div className="card flex h-full flex-col p-5 sm:p-6">
           <div className="flex items-start justify-between gap-3">
             <div
-              className="flex h-14 w-14 items-center justify-center rounded-[20px]"
+              className="flex h-12 w-12 items-center justify-center rounded-2xl"
               style={{ background: cat.bg }}
             >
               <Icon
-                className="h-7 w-7"
+                className="h-6 w-6"
                 style={{ color: cat.color }}
                 strokeWidth={1.8}
               />
@@ -160,26 +161,37 @@ export function BusinessCard({
           </div>
 
           <div className="mt-4">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-gray-400">
-              {categoryMeta.label}
-            </p>
-            <h3 className="mt-2 line-clamp-2 text-lg font-bold tracking-tight text-gray-900 transition-colors group-hover:text-[#E8321C]">
+            <div className="flex flex-wrap items-center gap-2 text-[11px] font-semibold text-gray-400">
+              <span className="tag">
+                {categoryMeta.emoji} {categoryMeta.label}
+              </span>
+              {sub ? (
+                <span className="rounded-full bg-gray-100 px-2.5 py-0.5 text-[11px] font-semibold text-gray-500">
+                  {sub}
+                </span>
+              ) : null}
+            </div>
+            <h3 className="mt-3 line-clamp-2 text-lg font-bold tracking-tight text-gray-900 transition-colors group-hover:text-[#FF5C5C]">
               {business.name}
             </h3>
-            <p className="mt-1 line-clamp-2 text-sm leading-6 text-gray-500">
-              {sub || `${categoryMeta.label} · ${locationLabel}`}
+            <p className="mt-2 line-clamp-2 text-sm leading-6 text-gray-500">
+              {business.address || `${locationLabel} · ${categoryMeta.label}`}
             </p>
           </div>
 
           <div className="mt-4 flex flex-wrap gap-2">
-            <span className="tag">{locationLabel}</span>
+            <span className="rounded-full bg-gray-100 px-3 py-1 text-xs font-semibold text-gray-600">
+              {locationLabel}
+            </span>
             {hasKoreanSupport ? <span className="tag">한국어 가능</span> : null}
           </div>
 
           <div className="mt-5 space-y-2 text-sm text-gray-500">
             <div className="flex items-center gap-2">
               <MapPin className="h-4 w-4 text-gray-300" />
-              <span className="line-clamp-1">{locationLabel}</span>
+              <span className="line-clamp-1">
+                {business.address || locationLabel}
+              </span>
             </div>
             {business.phone ? (
               <div className="flex items-center gap-2">
@@ -190,24 +202,28 @@ export function BusinessCard({
           </div>
 
           <div className="mt-auto pt-5">
-            <div className="rounded-[20px] border border-gray-100 bg-gray-50 px-4 py-3">
-              {ratingText ? (
-                <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center justify-between border-t border-gray-100 pt-4">
+              <div className="min-h-[34px]">
+                {ratingText ? (
                   <div className="flex items-center gap-2">
                     <Star className="h-4 w-4 fill-amber-400 text-amber-400" />
                     <span className="text-sm font-semibold text-gray-900">
                       {ratingText}
                     </span>
+                    <span className="text-xs font-medium text-gray-500">
+                      리뷰 {business.review_count.toLocaleString()}개
+                    </span>
                   </div>
-                  <span className="text-xs font-medium text-gray-500">
-                    리뷰 {business.review_count.toLocaleString()}개
-                  </span>
-                </div>
-              ) : (
-                <p className="text-xs font-medium text-gray-400">
-                  아직 리뷰 데이터가 없습니다.
-                </p>
-              )}
+                ) : (
+                  <p className="text-xs font-medium text-gray-400">
+                    아직 리뷰 데이터가 없습니다.
+                  </p>
+                )}
+              </div>
+              <span className="inline-flex items-center gap-1 text-sm font-semibold text-gray-500 transition-colors group-hover:text-[#FF5C5C]">
+                보기
+                <ArrowUpRight className="h-4 w-4" />
+              </span>
             </div>
           </div>
         </div>
@@ -221,11 +237,11 @@ export function BusinessCard({
       <div className="card p-5 sm:p-6">
         <div className="flex gap-4 sm:gap-5">
           <div
-            className="flex h-16 w-16 flex-shrink-0 items-center justify-center rounded-[22px]"
+            className="flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-2xl"
             style={{ background: cat.bg }}
           >
             <Icon
-              className="h-8 w-8"
+              className="h-7 w-7"
               style={{ color: cat.color }}
               strokeWidth={1.8}
             />
@@ -233,16 +249,17 @@ export function BusinessCard({
           <div className="min-w-0 flex-1">
             <div className="flex items-start justify-between gap-3">
               <div className="min-w-0">
-                <div className="mb-1 flex flex-wrap items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-gray-400">
-                  <span>{categoryMeta.label}</span>
+                <div className="mb-2 flex flex-wrap items-center gap-2 text-[11px] font-semibold text-gray-400">
+                  <span className="tag">
+                    {categoryMeta.emoji} {categoryMeta.label}
+                  </span>
                   {sub ? (
-                    <span className="h-1 w-1 rounded-full bg-gray-300" />
-                  ) : null}
-                  {sub ? (
-                    <span className="normal-case tracking-normal">{sub}</span>
+                    <span className="rounded-full bg-gray-100 px-2.5 py-0.5 text-[11px] font-semibold text-gray-500">
+                      {sub}
+                    </span>
                   ) : null}
                 </div>
-                <h3 className="line-clamp-1 text-lg font-bold tracking-tight text-gray-900 transition-colors group-hover:text-[#E8321C] sm:text-[19px]">
+                <h3 className="line-clamp-1 text-lg font-bold tracking-tight text-gray-900 transition-colors group-hover:text-[#FF5C5C] sm:text-[19px]">
                   {business.name}
                 </h3>
                 <p className="mt-1 line-clamp-2 text-sm leading-6 text-gray-500">
@@ -282,22 +299,28 @@ export function BusinessCard({
                 </div>
               </div>
 
-              <div className="rounded-[18px] border border-gray-100 bg-gray-50 px-4 py-3 sm:min-w-[156px]">
+              <div className="sm:min-w-[172px]">
                 {ratingText ? (
                   <>
-                    <div className="flex items-center gap-2 text-sm font-semibold text-gray-900">
+                    <div className="flex items-center justify-end gap-2 text-sm font-semibold text-gray-900">
                       <Star className="h-4 w-4 fill-amber-400 text-amber-400" />
                       {ratingText}
                     </div>
-                    <p className="mt-1 text-xs text-gray-500">
+                    <p className="mt-1 text-right text-xs text-gray-500">
                       리뷰 {business.review_count.toLocaleString()}개
                     </p>
                   </>
                 ) : (
-                  <p className="text-xs font-medium text-gray-400">
+                  <p className="text-xs font-medium text-gray-400 sm:text-right">
                     아직 리뷰 데이터가 없습니다.
                   </p>
                 )}
+                <div className="mt-3 flex justify-start sm:justify-end">
+                  <span className="inline-flex items-center gap-1 text-sm font-semibold text-gray-500 transition-colors group-hover:text-[#FF5C5C]">
+                    상세 보기
+                    <ArrowUpRight className="h-4 w-4" />
+                  </span>
+                </div>
               </div>
             </div>
           </div>
