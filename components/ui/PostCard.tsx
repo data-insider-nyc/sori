@@ -59,7 +59,7 @@ export const PostCard = React.memo(function PostCard({
           </UserPopover>
 
           {/* Badge + menu row */}
-          <PostBadge post={post} />
+          <PostBadge post={post} timeVariant="bucket" />
           <PostMenu
             postId={post.id}
             authorId={post.author.id}

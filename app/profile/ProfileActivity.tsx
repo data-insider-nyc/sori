@@ -5,7 +5,7 @@ import Link from "next/link";
 import { Heart, MessageCircle, CornerDownRight } from "lucide-react";
 import { createClient } from "@/lib/supabase-browser";
 import { getCategoryLabel, getCategoryIcon } from "@/lib/post-categories";
-import { timeAgo } from "@/lib/utils";
+import { recencyLabel } from "@/lib/utils";
 import { cn } from "@/lib/utils";
 
 interface Props {
@@ -182,7 +182,7 @@ export function ProfileActivity({
                         </p>
                         <div className="flex items-center gap-3 text-xs text-gray-400">
                           <span>{getCategoryLabel(post.category)}</span>
-                          <span>{timeAgo(post.created_at)}</span>
+                          <span>{recencyLabel(post.created_at)}</span>
                           <span className="flex items-center gap-1">
                             <Heart className="w-3 h-3" /> {post.like_count}
                           </span>
@@ -232,7 +232,7 @@ export function ProfileActivity({
                         {comment.content}
                       </p>
                       <p className="text-xs text-gray-400">
-                        {timeAgo(comment.created_at)}
+                        {recencyLabel(comment.created_at)}
                       </p>
                     </Link>
                   </li>

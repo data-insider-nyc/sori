@@ -5,8 +5,9 @@ import type { EmailOtpType } from "@supabase/supabase-js";
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
-  // Use APP_URL env var to avoid 127.0.0.1 vs localhost mismatch in local dev
-  const origin = process.env.NEXT_PUBLIC_APP_URL || new URL(request.url).origin;
+  // Always return users to the host that started auth.
+  // This keeps localhost/127.0.0.1 dev working even when the app points at prod Supabase.
+  const origin = request.nextUrl.origin;
 
   const code = searchParams.get("code");           // OAuth (Google, Kakao)
   const token_hash = searchParams.get("token_hash"); // Magic link
