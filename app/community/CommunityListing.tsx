@@ -80,6 +80,9 @@ export function CommunityListing() {
   const latestFiltersRef = useRef<FilterState>({ region, category, q });
   // AbortController for in-flight Supabase queries — cancelled on filter change
   const abortCtrlRef = useRef<AbortController | null>(null);
+  // AbortController for overlayLikes fetch — cancelled on rapid filter switches
+  const overlayAbortRef = useRef<AbortController | null>(null);
+  const keyRef = useRef(key);
 
   // Virtual scroll
   const listRef = useRef<HTMLDivElement>(null);
@@ -110,6 +113,7 @@ export function CommunityListing() {
 
   useEffect(() => {
     latestFiltersRef.current = { region, category, q };
+    keyRef.current = makeCacheKey(region, category, q);
   }, [category, region, q]);
 
   useEffect(() => {
@@ -161,11 +165,23 @@ export function CommunityListing() {
   // Overlay like status once userId is known (non-blocking)
   useEffect(() => {
     if (!userId || posts.length === 0) return;
-    overlayLikes(posts, userId).then((updated) => {
-      setPosts(updated);
-      const entry = feedCache.get(key);
-      if (entry) feedCache.set(key, { ...entry, posts: updated });
+    // Cancel any in-flight overlayLikes request (prevents pileup on rapid filter switching)
+    overlayAbortRef.current?.abort();
+    const controller = new AbortController();
+    overlayAbortRef.current = controller;
+    const capturedKey = keyRef.current;
+
+    overlayLikes(posts, userId, controller.signal).then((updated) => {
+      // Discard if aborted or user has already switched to a different filter
+      if (controller.signal.aborted || keyRef.current !== capturedKey) return;
+      startTransition(() => {
+        setPosts(updated);
+      });
+      const entry = feedCache.get(capturedKey);
+      if (entry) feedCache.set(capturedKey, { ...entry, posts: updated });
     });
+
+    return () => controller.abort();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [userId, posts.length]); // re-run when posts load after userId resolves
 
@@ -211,20 +227,22 @@ export function CommunityListing() {
     );
   }
 
-  async function overlayLikes(list: Post[], uid: string): Promise<Post[]> {
+  async function overlayLikes(list: Post[], uid: string, signal?: AbortSignal): Promise<Post[]> {
     try {
       const res = await fetch("/api/posts/likes", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
         body: JSON.stringify({ post_ids: list.map((p) => p.id) }),
+        signal,
       });
       if (!res.ok) {
         console.error(
           "[CommunityListing] overlayLikes failed to fetch likes",
           res.status,
         );
-        return applyLikeOverrides(list.map((p) => ({ ...p, is_liked: false })));
+        // Preserve existing is_liked state on error rather than resetting to false
+        return applyLikeOverrides(list);
       }
       const body = await res.json().catch(() => ({}));
       const likedSet = new Set<string>(body.liked ?? []);
@@ -235,8 +253,13 @@ export function CommunityListing() {
       // Apply any recent like toggles the user made (survives page navigation)
       return applyLikeOverrides(withLikes);
     } catch (err) {
+      // AbortError is expected when switching filters rapidly — not a real error
+      if (err instanceof Error && err.name === "AbortError") {
+        return applyLikeOverrides(list);
+      }
       console.error("[CommunityListing] overlayLikes err", err);
-      return applyLikeOverrides(list.map((p) => ({ ...p, is_liked: false })));
+      // Preserve existing is_liked state on error rather than resetting to false
+      return applyLikeOverrides(list);
     }
   }
 
@@ -258,114 +281,130 @@ export function CommunityListing() {
     if (append) setLoadingMore(true);
     else setLoading(true);
 
-    // Single query: posts + author profile via FK join (no separate profiles round-trip)
-    let query = supabase
-      .from("posts")
-      .select(
-        "id, title, content, category, region, user_id, like_count, comment_count, created_at, pinned, pinned_at, author:profiles!user_id(id, nickname, handle, location, avatar_url)",
-      )
-      .order("created_at", { ascending: false })
-      .order("id", { ascending: false })
-      .limit(PAGE_SIZE)
-      .abortSignal(signal ?? new AbortController().signal);
+    try {
+      // Single query: posts + author profile via FK join (no separate profiles round-trip)
+      let query = supabase
+        .from("posts")
+        .select(
+          "id, title, content, category, region, user_id, like_count, comment_count, created_at, pinned, pinned_at, author:profiles!user_id(id, nickname, handle, location, avatar_url)",
+        )
+        .order("created_at", { ascending: false })
+        .order("id", { ascending: false })
+        .limit(PAGE_SIZE)
+        .abortSignal(signal ?? new AbortController().signal);
 
-    if (filters.category !== "all")
-      query = query.eq("category", filters.category);
-    if (filters.region !== "all") query = query.eq("region", filters.region);
-    if (filters.q.trim()) query = query.ilike("title", `%${filters.q.trim()}%`);
-    if (afterCursor) {
-      query = query.or(
-        `created_at.lt.${afterCursor.createdAt},and(created_at.eq.${afterCursor.createdAt},id.lt.${afterCursor.id})`,
-      );
-    }
+      if (filters.category !== "all")
+        query = query.eq("category", filters.category);
+      if (filters.region !== "all") query = query.eq("region", filters.region);
+      if (filters.q.trim()) query = query.ilike("title", `%${filters.q.trim()}%`);
+      if (afterCursor) {
+        query = query.or(
+          `created_at.lt.${afterCursor.createdAt},and(created_at.eq.${afterCursor.createdAt},id.lt.${afterCursor.id})`,
+        );
+      }
 
-    const { data: raw, error: queryError } = await query;
+      const { data: raw, error: queryError } = await query;
 
-    // Ignore results from aborted or superseded requests
-    if (signal?.aborted || !isActiveRequest(requestId, filters)) return;
+      // Ignore results from aborted or superseded requests
+      if (signal?.aborted || !isActiveRequest(requestId, filters)) return;
 
-    if (queryError) {
-      // AbortError is expected when the user switches filters rapidly — suppress it
-      if (queryError.message?.includes("AbortError") || signal?.aborted) return;
-      console.error("[CommunityListing] query error", queryError.message);
+      if (queryError) {
+        // AbortError is expected when the user switches filters rapidly — suppress it
+        if (queryError.message?.includes("AbortError") || signal?.aborted) return;
+        console.error("[CommunityListing] query error", queryError.message);
+        startTransition(() => {
+          setLoading(false);
+          setLoadingMore(false);
+        });
+        return;
+      }
+
+      const rows = (raw ?? []) as any[];
+
+      if (rows.length === 0) {
+        startTransition(() => {
+          if (!append) setPosts([]);
+          setHasMore(false);
+          setLoading(false);
+          setLoadingMore(false);
+        });
+        return;
+      }
+
+      // Dedupe by id
+      const seen = new Set<string>();
+      const deduped = rows.filter((p) => {
+        if (seen.has(p.id)) return false;
+        seen.add(p.id);
+        return true;
+      });
+
+      const list: Post[] = deduped.map((p) => ({
+        ...p,
+        author: p.author ?? { id: p.user_id, nickname: "알 수 없음" },
+        is_liked: false, // overlaid asynchronously after userId resolves
+      }));
+
+      const newPosts = append ? [...(basePosts ?? posts), ...list] : list;
+      const last = deduped[deduped.length - 1];
+      const newCursor = { createdAt: last.created_at, id: last.id };
+      const newHasMore = deduped.length === PAGE_SIZE;
+
       startTransition(() => {
+        setPosts(newPosts);
+        setHasMore(newHasMore);
+        setCursor(newCursor);
         setLoading(false);
         setLoadingMore(false);
       });
-      return;
-    }
 
-    const rows = (raw ?? []) as any[];
+      // Cache first page only
+      if (!append) {
+        feedCache.set(makeCacheKey(filters.region, filters.category, filters.q), {
+          posts: list,
+          cursor: newCursor,
+          hasMore: newHasMore,
+          ts: Date.now(),
+        });
+      }
 
-    if (rows.length === 0) {
+      // Overlay likes if userId already resolved
+      if (userId) {
+        // Share the same abort ref so rapid filter switches cancel this request too.
+        overlayAbortRef.current?.abort();
+        const controller = new AbortController();
+        overlayAbortRef.current = controller;
+        overlayLikes(newPosts, userId, controller.signal).then((updated) => {
+          if (!isActiveRequest(requestId, filters) || controller.signal.aborted) return;
+          startTransition(() => setPosts(updated));
+          if (!append) {
+            feedCache.set(
+              makeCacheKey(filters.region, filters.category, filters.q),
+              {
+                posts: updated,
+                cursor: newCursor,
+                hasMore: newHasMore,
+                ts: Date.now(),
+              },
+            );
+          }
+        });
+      }
+    } catch (err) {
+      // Guard: if a different request has already taken over, don't reset its loading state
+      if (!isActiveRequest(requestId, filters)) return;
+      console.error("[CommunityListing] load exception", err);
       startTransition(() => {
-        if (!append) setPosts([]);
-        setHasMore(false);
         setLoading(false);
         setLoadingMore(false);
-      });
-      return;
-    }
-
-    // Dedupe by id
-    const seen = new Set<string>();
-    const deduped = rows.filter((p) => {
-      if (seen.has(p.id)) return false;
-      seen.add(p.id);
-      return true;
-    });
-
-    const list: Post[] = deduped.map((p) => ({
-      ...p,
-      author: p.author ?? { id: p.user_id, nickname: "알 수 없음" },
-      is_liked: false, // overlaid asynchronously after userId resolves
-    }));
-
-    const newPosts = append ? [...(basePosts ?? posts), ...list] : list;
-    const last = deduped[deduped.length - 1];
-    const newCursor = { createdAt: last.created_at, id: last.id };
-    const newHasMore = deduped.length === PAGE_SIZE;
-
-    startTransition(() => {
-      setPosts(newPosts);
-      setHasMore(newHasMore);
-      setCursor(newCursor);
-      setLoading(false);
-      setLoadingMore(false);
-    });
-
-    // Cache first page only
-    if (!append) {
-      feedCache.set(makeCacheKey(filters.region, filters.category, filters.q), {
-        posts: list,
-        cursor: newCursor,
-        hasMore: newHasMore,
-        ts: Date.now(),
-      });
-    }
-
-    // Overlay likes if userId already resolved
-    if (userId) {
-      overlayLikes(newPosts, userId).then((updated) => {
-        if (!isActiveRequest(requestId, filters)) return;
-        setPosts(updated);
-        if (!append) {
-          feedCache.set(
-            makeCacheKey(filters.region, filters.category, filters.q),
-            {
-              posts: updated,
-              cursor: newCursor,
-              hasMore: newHasMore,
-              ts: Date.now(),
-            },
-          );
-        }
       });
     }
   }
 
   function setParam(key: string, value: string) {
-    const params = new URLSearchParams(searchParams.toString());
+    // Read from window.location.search (not searchParams React state) so rapid
+    // successive clicks don't overwrite each other with stale param snapshots.
+    const params = new URLSearchParams(window.location.search);
     if (!value || value === "all") params.delete(key);
     else params.set(key, value);
     const nextQuery = params.toString();
