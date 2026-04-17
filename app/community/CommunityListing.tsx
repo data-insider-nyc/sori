@@ -11,6 +11,7 @@ import { CategoryIcon } from "@/components/ui/CategoryIcon";
 import { cn } from "@/lib/utils";
 import type { Post } from "@/types";
 import { applyLikeOverrides } from "@/lib/post-like-store";
+import { useAuth } from "@/lib/auth-context";
 
 // Module-level Supabase singleton — avoids navigator.locks contention
 // that causes "Lock broken by another request with the 'steal' option"
@@ -71,7 +72,7 @@ export function CommunityListing() {
     createdAt: string;
     id: string;
   } | null>(fresh ? cached.cursor : null);
-  const [userId, setUserId] = useState<string | null>(null);
+  const { userId } = useAuth();
   const [searchInput, setSearchInput] = useState(q);
   const regions = REGIONS;
   const categories = CATEGORIES;
@@ -104,13 +105,7 @@ export function CommunityListing() {
     scrollMargin: listRef.current?.offsetTop ?? 0,
   });
 
-  // Resolve auth from local session cache (no network round-trip)
-  useEffect(() => {
-    supabase.auth
-      .getSession()
-      .then(({ data: { session } }) => setUserId(session?.user?.id ?? null));
-  }, []);
-
+  // userId comes from AuthProvider (no per-component Supabase auth calls)
   useEffect(() => {
     latestFiltersRef.current = { region, category, q };
     keyRef.current = makeCacheKey(region, category, q);

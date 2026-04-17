@@ -4,7 +4,7 @@ import { Noto_Sans_KR } from "next/font/google";
 import "./globals.css";
 import { Header } from "@/components/layout/Header";
 import { MobileNav } from "@/components/layout/MobileNav";
-import { AuthRefresh } from "@/components/layout/AuthRefresh";
+import { AuthProvider } from "@/lib/auth-context";
 import { Toaster } from "@/components/ui/Toaster";
 import { LAYOUT_META, SITE } from "@/lib/copy";
 import { SpeedInsights } from "@vercel/speed-insights/next";
@@ -73,7 +73,7 @@ export default function RootLayout({
   return (
     <html lang="ko" className={notoSansKR.variable}>
       <body className="bg-gray-50 text-gray-900 antialiased">
-        <AuthRefresh />
+        <AuthProvider>
         <Header />
         <main className="min-h-screen pb-20 lg:pb-0 lg:pt-16 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {children}
@@ -107,6 +107,7 @@ export default function RootLayout({
         <Toaster />
         <Analytics />
         <SpeedInsights />
+        </AuthProvider>
       </body>
     </html>
   );

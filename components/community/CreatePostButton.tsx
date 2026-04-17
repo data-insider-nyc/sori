@@ -1,19 +1,17 @@
 "use client";
 import { useRouter } from "next/navigation";
 import { PenSquare } from "lucide-react";
-import { createClient } from "@/lib/supabase-browser";
+import { useAuth } from "@/lib/auth-context";
 
 export function CreatePostButton() {
   const router = useRouter();
+  const { userId } = useAuth();
 
-  async function handleClick() {
-    const supabase = createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) {
+  function handleClick() {
+    if (!userId) {
       router.push("/auth/login");
       return;
     }
-    // TODO: open post creation modal (issue #5)
   }
 
   return (
