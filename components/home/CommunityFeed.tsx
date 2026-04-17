@@ -3,30 +3,25 @@
 import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase-browser";
 import { PostCard } from "@/components/ui/PostCard";
+import { useAuth } from "@/lib/auth-context";
 import type { Post } from "@/types";
+
+const supabase = createClient();
 
 export function CommunityFeed() {
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
-  const [userId, setUserId] = useState<string | null>(null);
+  const { userId } = useAuth();
 
   useEffect(() => {
     async function load() {
-      const supabase = createClient();
-
-      const [{ data: raw }, { data: { session } }] =
-        await Promise.all([
-          supabase
-            .from("posts")
-            .select(
-              "id, title, content, category, region, user_id, like_count, comment_count, created_at, pinned, pinned_at, author:profiles!user_id(id, nickname, handle, location, avatar_url)",
-            )
-            .order("created_at", { ascending: false })
-            .limit(8),
-          supabase.auth.getSession(),
-        ]);
-
-      setUserId(session?.user?.id ?? null);
+      const { data: raw } = await supabase
+        .from("posts")
+        .select(
+          "id, title, content, category, region, user_id, like_count, comment_count, created_at, pinned, pinned_at, author:profiles!user_id(id, nickname, handle, location, avatar_url)",
+        )
+        .order("created_at", { ascending: false })
+        .limit(8);
 
       const rawPosts = raw ?? [];
       const seen = new Set<string>();
