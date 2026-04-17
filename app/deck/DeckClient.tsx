@@ -245,15 +245,7 @@ function SlideCover({ dark }: { dark: boolean }) {
         >
           미국 한인 커뮤니티 & 비즈니스 플랫폼
         </div>
-        <div
-          style={{
-            fontFamily: "Pretendard, sans-serif",
-            fontSize: "clamp(0.8rem,1.2vw,1rem)",
-            color: t.sub,
-            marginBottom: "clamp(24px,3.5vw,48px)",
-            lineHeight: 1.8,
-          }}
-        >
+        <div>
           우리의 이야기, 우리의 목소리, 미국 한인들이 만들어가는 커뮤니티
           <br />
           어디서든, 누구든
