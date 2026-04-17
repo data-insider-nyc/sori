@@ -29,23 +29,23 @@ export const PAGE_META = {
   home: {
     title: `${SITE.name} — ${TAGLINE.full} 디렉토리`,
     description:
-      "포트리·팰팍·플러싱·맨해튼 한인들의 커뮤니티. 한인 병원·변호사·회계사·식당·부동산·학원 찾기, 이민 생활 정보 공유.",
+      "미국 한인들의 커뮤니티. 한인 병원·변호사·회계사·식당·부동산·학원 찾기, 이민 생활 정보 공유.",
     ogTitle: `${SITE.name} — ${TAGLINE.full}`,
-    ogDescription: "포트리·팰팍·플러싱 한인들의 커뮤니티 & 비즈니스 디렉토리",
+    ogDescription: "미국 한인들의 커뮤니티 & 비즈니스 디렉토리",
   },
   directory: {
     title: "한인 비즈니스 디렉토리",
     description:
-      "미국 한인 병원·치과·변호사·회계사·식당·뷰티·부동산·학원 찾기. 포트리·팰팍·플러싱·맨해튼 지역 한인 비즈니스 디렉토리.",
+      "미국 한인 병원·치과·변호사·회계사·식당·뷰티·부동산·학원 찾기. 미국 지역 한인 비즈니스 디렉토리.",
     ogTitle: `${SITE.name} — ${TAGLINE.directory}`,
-    ogDescription: "포트리·팰팍·플러싱 한인 비즈니스 검색 & 리뷰",
+    ogDescription: "미국 한인 비즈니스 검색 & 리뷰",
   },
   community: {
     title: "커뮤니티",
     description:
       "미국 한인들의 이야기. 병원 추천, 부동산, 육아, 비자·이민, 취업 정보를 함께 나눠요.",
     ogTitle: `소리 커뮤니티 — ${TAGLINE.community}`,
-    ogDescription: "포트리·팰팍·플러싱 한인들의 실시간 커뮤니티 피드",
+    ogDescription: "미국 한인들의 실시간 커뮤니티 피드",
   },
 } as const;
 
@@ -62,7 +62,7 @@ export const LAYOUT_META = {
   defaultTitle: `${SITE.name} — ${TAGLINE.full}`,
   titleTemplate: `%s | ${SITE.name}`,
   description:
-    "미국 한인 커뮤니티. 포트리·팰팍·플러싱 한인 병원·변호사·회계사·식당·부동산 찾기 & 생활 정보 공유.",
+    "미국 한인 커뮤니티. 미국 한인 병원·변호사·회계사·식당·부동산 찾기 & 생활 정보 공유.",
   keywords: [
     "한인 커뮤니티",
     "미국 한인",
@@ -81,9 +81,9 @@ export const LAYOUT_META = {
   ],
   ogTitle: `${SITE.name} — ${TAGLINE.full}`,
   ogDescription:
-    "포트리·팰팍·플러싱 한인들의 커뮤니티. 한인 병원·변호사·회계사·식당 찾기 & 생활 정보.",
+    "미국 한인들의 커뮤니티. 한인 병원·변호사·회계사·식당 찾기 & 생활 정보.",
   twitterTitle: `${SITE.name} — ${TAGLINE.full}`,
-  twitterDescription: "포트리·팰팍·플러싱 한인들의 커뮤니티 & 비즈니스 디렉토리",
+  twitterDescription: "미국 한인들의 커뮤니티 & 비즈니스 디렉토리",
 } as const;
 
 /** JSON-LD structured data strings */
