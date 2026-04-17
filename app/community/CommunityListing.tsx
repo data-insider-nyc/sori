@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { startTransition, useCallback, useEffect, useRef, useState } from "react";
 import { useWindowVirtualizer } from "@tanstack/react-virtual";
 import { useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase-browser";
@@ -11,6 +11,11 @@ import { CategoryIcon } from "@/components/ui/CategoryIcon";
 import { cn } from "@/lib/utils";
 import type { Post } from "@/types";
 import { applyLikeOverrides } from "@/lib/post-like-store";
+
+// Module-level Supabase singleton — avoids navigator.locks contention
+// that causes "Lock broken by another request with the 'steal' option"
+// when createClient() is called multiple times in rapid succession.
+const supabase = createClient();
 
 const PAGE_SIZE = 20;
 const CACHE_TTL = 10 * 60 * 1000; // 10 minutes
@@ -73,6 +78,9 @@ export function CommunityListing() {
   const debounceRef = useRef<ReturnType<typeof setTimeout>>(undefined);
   const activeRequestRef = useRef(0);
   const latestFiltersRef = useRef<FilterState>({ region, category, q });
+  // AbortController for in-flight Supabase queries — cancelled on filter change
+  const abortCtrlRef = useRef<AbortController | null>(null);
+  // AbortController for overlayLikes fetch — cancelled on rapid filter switches
   const overlayAbortRef = useRef<AbortController | null>(null);
   const keyRef = useRef(key);
 
@@ -98,8 +106,8 @@ export function CommunityListing() {
 
   // Resolve auth from local session cache (no network round-trip)
   useEffect(() => {
-    createClient()
-      .auth.getSession()
+    supabase.auth
+      .getSession()
       .then(({ data: { session } }) => setUserId(session?.user?.id ?? null));
   }, []);
 
@@ -123,24 +131,33 @@ export function CommunityListing() {
     if (isFresh) {
       activeRequestRef.current += 1;
       // Apply any recent like toggles the user made (e.g., liked on detail page, back to list)
-      setPosts(applyLikeOverrides(entry.posts));
-      setHasMore(entry.hasMore);
-      setCursor(entry.cursor);
-      setLoadingMore(false);
-      setLoading(false);
+      startTransition(() => {
+        setPosts(applyLikeOverrides(entry.posts));
+        setHasMore(entry.hasMore);
+        setCursor(entry.cursor);
+        setLoadingMore(false);
+        setLoading(false);
+      });
       return;
     }
 
+    // Abort any previous in-flight request before starting a new one
+    abortCtrlRef.current?.abort();
+    abortCtrlRef.current = new AbortController();
+
     const requestId = activeRequestRef.current + 1;
     activeRequestRef.current = requestId;
-    setCursor(null);
-    setHasMore(false);
-    setLoadingMore(false);
+    startTransition(() => {
+      setCursor(null);
+      setHasMore(false);
+      setLoadingMore(false);
+    });
     void load({
       afterCursor: null,
       append: false,
       filters: { region, category, q },
       requestId,
+      signal: abortCtrlRef.current.signal,
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [category, region, q]);
@@ -157,7 +174,9 @@ export function CommunityListing() {
     overlayLikes(posts, userId, controller.signal).then((updated) => {
       // Discard if aborted or user has already switched to a different filter
       if (controller.signal.aborted || keyRef.current !== capturedKey) return;
-      setPosts(updated);
+      startTransition(() => {
+        setPosts(updated);
+      });
       const entry = feedCache.get(capturedKey);
       if (entry) feedCache.set(capturedKey, { ...entry, posts: updated });
     });
@@ -177,6 +196,8 @@ export function CommunityListing() {
     const observer = new IntersectionObserver(
       (entries) => {
         if (entries[0].isIntersecting) {
+          const ctrl = new AbortController();
+          abortCtrlRef.current = ctrl;
           const requestId = activeRequestRef.current + 1;
           activeRequestRef.current = requestId;
           void load({
@@ -185,6 +206,7 @@ export function CommunityListing() {
             filters: latestFiltersRef.current,
             requestId,
             basePosts: postsRef.current,
+            signal: ctrl.signal,
           });
         }
       },
@@ -247,19 +269,19 @@ export function CommunityListing() {
     filters,
     requestId,
     basePosts,
+    signal,
   }: {
     afterCursor: { createdAt: string; id: string } | null;
     append: boolean;
     filters: FilterState;
     requestId: number;
     basePosts?: Post[];
+    signal?: AbortSignal;
   }) {
     if (append) setLoadingMore(true);
     else setLoading(true);
 
     try {
-      const supabase = createClient();
-
       // Single query: posts + author profile via FK join (no separate profiles round-trip)
       let query = supabase
         .from("posts")
@@ -268,7 +290,8 @@ export function CommunityListing() {
         )
         .order("created_at", { ascending: false })
         .order("id", { ascending: false })
-        .limit(PAGE_SIZE);
+        .limit(PAGE_SIZE)
+        .abortSignal(signal ?? new AbortController().signal);
 
       if (filters.category !== "all")
         query = query.eq("category", filters.category);
@@ -282,22 +305,29 @@ export function CommunityListing() {
 
       const { data: raw, error: queryError } = await query;
 
-      if (!isActiveRequest(requestId, filters)) return;
+      // Ignore results from aborted or superseded requests
+      if (signal?.aborted || !isActiveRequest(requestId, filters)) return;
 
       if (queryError) {
+        // AbortError is expected when the user switches filters rapidly — suppress it
+        if (queryError.message?.includes("AbortError") || signal?.aborted) return;
         console.error("[CommunityListing] query error", queryError.message);
-        setLoading(false);
-        setLoadingMore(false);
+        startTransition(() => {
+          setLoading(false);
+          setLoadingMore(false);
+        });
         return;
       }
 
       const rows = (raw ?? []) as any[];
 
       if (rows.length === 0) {
-        if (!append) setPosts([]);
-        setHasMore(false);
-        setLoading(false);
-        setLoadingMore(false);
+        startTransition(() => {
+          if (!append) setPosts([]);
+          setHasMore(false);
+          setLoading(false);
+          setLoadingMore(false);
+        });
         return;
       }
 
@@ -320,11 +350,13 @@ export function CommunityListing() {
       const newCursor = { createdAt: last.created_at, id: last.id };
       const newHasMore = deduped.length === PAGE_SIZE;
 
-      setPosts(newPosts);
-      setHasMore(newHasMore);
-      setCursor(newCursor);
-      setLoading(false);
-      setLoadingMore(false);
+      startTransition(() => {
+        setPosts(newPosts);
+        setHasMore(newHasMore);
+        setCursor(newCursor);
+        setLoading(false);
+        setLoadingMore(false);
+      });
 
       // Cache first page only
       if (!append) {
@@ -339,13 +371,12 @@ export function CommunityListing() {
       // Overlay likes if userId already resolved
       if (userId) {
         // Share the same abort ref so rapid filter switches cancel this request too.
-        // If posts.length changed, the overlayLikes useEffect will fire and take over.
         overlayAbortRef.current?.abort();
         const controller = new AbortController();
         overlayAbortRef.current = controller;
         overlayLikes(newPosts, userId, controller.signal).then((updated) => {
           if (!isActiveRequest(requestId, filters) || controller.signal.aborted) return;
-          setPosts(updated);
+          startTransition(() => setPosts(updated));
           if (!append) {
             feedCache.set(
               makeCacheKey(filters.region, filters.category, filters.q),
@@ -363,8 +394,10 @@ export function CommunityListing() {
       // Guard: if a different request has already taken over, don't reset its loading state
       if (!isActiveRequest(requestId, filters)) return;
       console.error("[CommunityListing] load exception", err);
-      setLoading(false);
-      setLoadingMore(false);
+      startTransition(() => {
+        setLoading(false);
+        setLoadingMore(false);
+      });
     }
   }
 
@@ -375,11 +408,13 @@ export function CommunityListing() {
     if (!value || value === "all") params.delete(key);
     else params.set(key, value);
     const nextQuery = params.toString();
-    window.history.replaceState(
-      null,
-      "",
-      nextQuery ? `/community?${nextQuery}` : "/community",
-    );
+    startTransition(() => {
+      window.history.replaceState(
+        null,
+        "",
+        nextQuery ? `/community?${nextQuery}` : "/community",
+      );
+    });
   }
 
   function handleSearchChange(val: string) {
