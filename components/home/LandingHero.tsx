@@ -108,30 +108,12 @@ export function LandingHero() {
             우리의 이야기,
             <br />
             우리의{" "}
-            <span className="relative inline-block text-[#FF5C5C]">
-              소리
-              <svg
-                aria-hidden="true"
-                className="absolute -bottom-1 left-0 w-full overflow-visible"
-                height="6"
-                viewBox="0 0 40 6"
-                fill="none"
-                preserveAspectRatio="none"
-              >
-                <path
-                  d="M1 4.5 Q10 1.5 20 3.5 Q30 5.5 39 2.5"
-                  stroke="#FF5C5C"
-                  strokeWidth="2.5"
-                  strokeLinecap="round"
-                  opacity="0.65"
-                />
-              </svg>
-            </span>
+            <span className="relative inline-block text-[#FF5C5C]">소리</span>
+            <br />
           </h1>
 
           <p className="text-white/75 text-sm mt-5 leading-relaxed max-w-sm">
-            미국 전역 한인들이 만들어가는 커뮤니티. 질문하고, 정보 나누고,
-            이웃을 만나세요.
+            흩어져 있던 우리의 목소리들이 모이는 공간
           </p>
 
           {/* City chips */}

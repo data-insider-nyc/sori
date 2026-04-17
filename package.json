@@ -7,9 +7,7 @@
     "dev:local": "NODE_OPTIONS='--max-http-header-size=32768' env-cmd -f .env.local next dev",
     "dev:prod": "NODE_OPTIONS='--max-http-header-size=32768' env-cmd -f .env.prod next dev",
     "build": "next build",
-    "start": "next start",
-    "test:e2e": "playwright test --reporter=line",
-    "test:e2e:headed": "playwright test --headed"
+    "start": "next start"
   },
   "dependencies": {
     "@supabase/ssr": "^0.9.0",
@@ -28,7 +26,6 @@
     "tailwind-merge": "^2.2.1"
   },
   "devDependencies": {
-    "@playwright/test": "^1.59.1",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",

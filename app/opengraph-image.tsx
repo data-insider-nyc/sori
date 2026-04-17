@@ -1,7 +1,7 @@
 import { ImageResponse } from "next/og";
 
 export const runtime = "edge";
-export const alt = "소리 Sori — 미국 한인 커뮤니티 & 비즈니스 디렉토리";
+export const alt = "소리 Sori — 미국 한인 커뮤니티";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
@@ -69,7 +69,7 @@ export default function Image() {
         </div>
         <div
           style={{
-            fontSize: 64,
+            fontSize: 88,
             fontWeight: 800,
             color: "#FFFFFF",
             letterSpacing: -2,
@@ -89,16 +89,16 @@ export default function Image() {
           textAlign: "center",
         }}
       >
-        NY · NJ Korean Community & Business
+        우리의 이야기, 우리의 소리
       </div>
       <div
         style={{
-          fontSize: 22,
+          fontSize: 26,
           color: "rgba(255,255,255,0.45)",
           textAlign: "center",
         }}
       >
-        Fort Lee · Palisades Park · Flushing · Manhattan
+        흩어져 있던 우리의 목소리들이 모이는 공간
       </div>
 
       {/* Bottom pill tags */}
@@ -109,23 +109,21 @@ export default function Image() {
           marginTop: 40,
         }}
       >
-        {["Hospital", "Lawyer", "Restaurant", "Beauty", "Real Estate"].map(
-          (label) => (
-            <div
-              key={label}
-              style={{
-                background: "rgba(255,255,255,0.1)",
-                color: "rgba(255,255,255,0.7)",
-                fontSize: 16,
-                padding: "8px 18px",
-                borderRadius: 100,
-                border: "1px solid rgba(255,255,255,0.15)",
-              }}
-            >
-              {label}
-            </div>
-          ),
-        )}
+        {["의료", "레스토랑", "뷰티", "부동산"].map((label) => (
+          <div
+            key={label}
+            style={{
+              background: "rgba(255,255,255,0.1)",
+              color: "rgba(255,255,255,0.7)",
+              fontSize: 24,
+              padding: "8px 18px",
+              borderRadius: 100,
+              border: "1px solid rgba(255,255,255,0.15)",
+            }}
+          >
+            {label}
+          </div>
+        ))}
       </div>
     </div>,
     { ...size },
