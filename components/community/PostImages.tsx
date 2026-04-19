@@ -30,7 +30,7 @@ export function PostImages({ images }: Props) {
             alt=""
             onClick={() => setLightboxIndex(i)}
             className={`rounded-xl object-cover flex-shrink-0 bg-gray-100 border border-gray-200 cursor-pointer hover:opacity-90 transition-opacity ${
-              images.length === 1 ? "w-full max-h-[360px]" : "w-[210px] h-[280px]"
+              images.length === 1 ? "w-[360px]" : "w-[360px]"
             }`}
           />
         ))}
