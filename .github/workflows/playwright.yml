@@ -1,3 +1,0 @@
-# Playwright workflow disabled per request on 2026-04-17.
-# Original file removed to prevent CI failures. If you want to re-enable,
-# restore this file or create a new workflow that runs Playwright tests.
