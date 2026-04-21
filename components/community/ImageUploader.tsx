@@ -6,15 +6,15 @@ import { ImagePlus, X, Loader2 } from "lucide-react";
 import { createClient } from "@/lib/supabase-browser";
 import { cn } from "@/lib/utils";
 
-export const MAX_IMAGES = 4;
-const MAX_SIZE_BYTES = 5 * 1024 * 1024; // 5 MB (before compression)
+export const MAX_IMAGES = 8;
+// Allow large camera originals; we compress before upload.
+const MAX_SIZE_BYTES = 15 * 1024 * 1024; // 15 MB (before compression)
 const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp"];
 const MAX_DIMENSION = 1920;
 const COMPRESS_QUALITY = 0.82;
 
 /** Resize + compress image via canvas. */
 async function compressImage(file: File): Promise<Blob> {
-
   return new Promise((resolve, reject) => {
     const img = new window.Image();
     const url = URL.createObjectURL(file);
@@ -36,11 +36,16 @@ async function compressImage(file: File): Promise<Blob> {
       const ctx = canvas.getContext("2d");
       if (!ctx) return reject(new Error("canvas error"));
       ctx.drawImage(img, 0, 0, width, height);
-      canvas.toBlob(
-        (blob) => blob ? resolve(blob) : reject(new Error("compression failed")),
-        "image/jpeg",
-        COMPRESS_QUALITY,
-      );
+      // Prefer WebP for size, fall back to JPEG if unsupported.
+      canvas.toBlob((webp) => {
+        if (webp) return resolve(webp);
+        canvas.toBlob(
+          (jpeg) =>
+            jpeg ? resolve(jpeg) : reject(new Error("compression failed")),
+          "image/jpeg",
+          COMPRESS_QUALITY,
+        );
+      }, "image/webp", COMPRESS_QUALITY);
     };
     img.onerror = reject;
     img.src = url;
@@ -100,16 +105,15 @@ export function ImageUploader({ userId, value, onChange, disabled }: Props) {
           return null;
         }
         if (file.size > MAX_SIZE_BYTES) {
-          setError("파일 크기는 5MB 이하여야 해요.");
+          setError("파일 크기가 너무 커요. (최대 15MB)");
           setUploading((prev) => prev.filter((u) => u.id !== tempId));
           URL.revokeObjectURL(preview);
           return null;
         }
 
-        const ext = "jpg";
-        const path = `${userId}/${crypto.randomUUID()}.${ext}`;
+        const path = `${userId}/${crypto.randomUUID()}`;
 
-        // Compress before upload (GIFs skipped inside compressImage)
+        // Compress before upload (resize + WebP/JPEG encode).
         let blob: Blob;
         try {
           blob = await compressImage(file);
@@ -117,9 +121,13 @@ export function ImageUploader({ userId, value, onChange, disabled }: Props) {
           blob = file;
         }
 
+        // Keep extension aligned with content type (helps debugging + CDN caching).
+        const ext = blob.type === "image/webp" ? "webp" : "jpg";
+        const objectName = `${path}.${ext}`;
+
         const { data, error: uploadError } = await supabase.storage
           .from("post-images")
-          .upload(path, blob, { upsert: false, contentType: blob.type });
+          .upload(objectName, blob, { upsert: false, contentType: blob.type });
 
         setUploading((prev) => prev.filter((u) => u.id !== tempId));
         URL.revokeObjectURL(preview);
@@ -129,7 +137,9 @@ export function ImageUploader({ userId, value, onChange, disabled }: Props) {
           return null;
         }
 
-        const { data: { publicUrl } } = supabase.storage.from("post-images").getPublicUrl(data.path);
+        const {
+          data: { publicUrl },
+        } = supabase.storage.from("post-images").getPublicUrl(data.path);
         return publicUrl;
       })
     );
