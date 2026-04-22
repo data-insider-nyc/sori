@@ -92,7 +92,6 @@ export default function NicknamePage() {
     const { error: upsertError } = await supabase.from("profiles").upsert({
       id: user.id,
       nickname: finalDisplayName,
-      display_name: finalDisplayName,
       handle: handle.toLowerCase(),
       location,
     });
