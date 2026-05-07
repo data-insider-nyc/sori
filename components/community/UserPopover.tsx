@@ -24,9 +24,15 @@ interface Props {
   userId: string;
   nickname: string;
   children: React.ReactNode;
+  onOpenChange?: (open: boolean) => void;
 }
 
-export function UserPopover({ userId, nickname, children }: Props) {
+export function UserPopover({
+  userId,
+  nickname,
+  children,
+  onOpenChange,
+}: Props) {
   const [open, setOpen] = useState(false);
   const [profile, setProfile] = useState<PopoverState | null>(null);
   const [loading, setLoading] = useState(false);
@@ -127,6 +133,10 @@ export function UserPopover({ userId, nickname, children }: Props) {
     document.addEventListener("keydown", onKey);
     return () => document.removeEventListener("keydown", onKey);
   }, [open]);
+
+  useEffect(() => {
+    onOpenChange?.(open);
+  }, [onOpenChange, open]);
 
   useEffect(
     () => () => {
