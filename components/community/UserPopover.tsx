@@ -36,10 +36,8 @@ export function UserPopover({
   const [open, setOpen] = useState(false);
   const [profile, setProfile] = useState<PopoverState | null>(null);
   const [loading, setLoading] = useState(false);
-  const [pos, setPos] = useState({ top: 0, left: 0 });
 
   const triggerRef = useRef<HTMLDivElement>(null);
-  const popoverRef = useRef<HTMLDivElement>(null);
   const openTimerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
   const closeTimerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
   const fetchedRef = useRef(false);
@@ -54,14 +52,6 @@ export function UserPopover({
   function scheduleOpen() {
     cancelClose();
     openTimerRef.current = setTimeout(() => {
-      if (!triggerRef.current) return;
-      const rect = triggerRef.current.getBoundingClientRect();
-      const popoverWidth = 260;
-      const left = Math.max(
-        8,
-        Math.min(rect.left, window.innerWidth - popoverWidth - 8),
-      );
-      setPos({ top: rect.bottom + 6, left });
       setOpen(true);
       if (!fetchedRef.current) {
         fetchedRef.current = true;
@@ -108,13 +98,6 @@ export function UserPopover({
     cancelOpen();
     cancelClose();
     if (!open) {
-      const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
-      const popoverWidth = 260;
-      const left = Math.max(
-        8,
-        Math.min(rect.left, window.innerWidth - popoverWidth - 8),
-      );
-      setPos({ top: rect.bottom + 6, left });
       setOpen(true);
       if (!fetchedRef.current) {
         fetchedRef.current = true;
@@ -153,73 +136,70 @@ export function UserPopover({
         onMouseEnter={scheduleOpen}
         onMouseLeave={scheduleClose}
         onClick={handleClick}
-        className="cursor-pointer select-none"
+        className="relative cursor-pointer select-none"
       >
         {children}
-      </div>
-
-      {open && (
-        <div
-          ref={popoverRef}
-          onMouseEnter={cancelClose}
-          onMouseLeave={scheduleClose}
-          className="fixed z-50 w-64 bg-white rounded-2xl shadow-xl border border-gray-100 p-4"
-          style={{ top: pos.top, left: pos.left }}
-        >
-          {loading || !profile ? (
-            <div className="space-y-3 animate-pulse">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-gray-100 flex-shrink-0" />
-                <div className="flex-1 space-y-1.5">
-                  <div className="h-4 bg-gray-100 rounded w-3/4" />
-                  <div className="h-3 bg-gray-100 rounded w-1/2" />
+        {open && (
+          <div
+            onMouseEnter={cancelClose}
+            onMouseLeave={scheduleClose}
+            className="absolute left-0 top-full z-50 mt-2 w-64 rounded-2xl border border-gray-100 bg-white p-4 shadow-xl"
+          >
+            {loading || !profile ? (
+              <div className="space-y-3 animate-pulse">
+                <div className="flex items-center gap-3">
+                  <div className="h-10 w-10 flex-shrink-0 rounded-xl bg-gray-100" />
+                  <div className="flex-1 space-y-1.5">
+                    <div className="h-4 w-3/4 rounded bg-gray-100" />
+                    <div className="h-3 w-1/2 rounded bg-gray-100" />
+                  </div>
                 </div>
+                <div className="h-3 rounded bg-gray-100" />
+                <div className="h-3 w-4/5 rounded bg-gray-100" />
               </div>
-              <div className="h-3 bg-gray-100 rounded" />
-              <div className="h-3 bg-gray-100 rounded w-4/5" />
-            </div>
-          ) : (
-            <>
-              <ProfileCard
-                nickname={profile.nickname}
-                handle={profile.handle}
-                location={profile.location}
-                avatarUrl={profile.avatar_url}
-                size="md"
-                className="mb-3"
-              />
+            ) : (
+              <>
+                <ProfileCard
+                  nickname={profile.nickname}
+                  handle={profile.handle}
+                  location={profile.location}
+                  avatarUrl={profile.avatar_url}
+                  size="md"
+                  className="mb-3"
+                />
 
-              {profile.location && profile.locationLabel && (() => {
-                const LocIcon = getRegionIcon(profile.location!);
-                return (
-                  <p className="text-xs text-gray-600 border-t border-gray-50 pt-3 mb-3 flex items-center gap-1">
-                    <span className="text-gray-400">활동지역:</span>
-                    <LocIcon className="w-3 h-3" strokeWidth={2} />
-                    {profile.locationLabel}
+                {profile.location && profile.locationLabel && (() => {
+                  const LocIcon = getRegionIcon(profile.location!);
+                  return (
+                    <p className="mb-3 flex items-center gap-1 border-t border-gray-50 pt-3 text-xs text-gray-600">
+                      <span className="text-gray-400">활동지역:</span>
+                      <LocIcon className="h-3 w-3" strokeWidth={2} />
+                      {profile.locationLabel}
+                    </p>
+                  );
+                })()}
+
+                {profile.bio && (
+                  <p className="mb-3 border-t border-gray-50 pt-3 text-xs leading-relaxed text-gray-600">
+                    {profile.bio}
                   </p>
-                );
-              })()}
+                )}
 
-              {profile.bio && (
-                <p className="text-xs text-gray-600 leading-relaxed border-t border-gray-50 pt-3 mb-3">
-                  {profile.bio}
-                </p>
-              )}
-
-              <div className="flex items-center gap-3 text-[11px] text-gray-400 border-t border-gray-50 pt-3">
-                <span className="flex items-center gap-1">
-                  <Calendar className="w-3 h-3" />
-                  {new Date(profile.joined_at).toLocaleDateString("ko-KR", {
-                    year: "numeric",
-                    month: "short",
-                  })}
-                </span>
-                <span>게시글 {profile.post_count}개</span>
-              </div>
-            </>
-          )}
-        </div>
-      )}
+                <div className="flex items-center gap-3 border-t border-gray-50 pt-3 text-[11px] text-gray-400">
+                  <span className="flex items-center gap-1">
+                    <Calendar className="h-3 w-3" />
+                    {new Date(profile.joined_at).toLocaleDateString("ko-KR", {
+                      year: "numeric",
+                      month: "short",
+                    })}
+                  </span>
+                  <span>게시글 {profile.post_count}개</span>
+                </div>
+              </>
+            )}
+          </div>
+        )}
+      </div>
     </>
   );
 }
