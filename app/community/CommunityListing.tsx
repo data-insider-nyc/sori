@@ -68,6 +68,9 @@ export function CommunityListing() {
   const [loading, setLoading] = useState(!fresh);
   const [loadingMore, setLoadingMore] = useState(false);
   const [hasMore, setHasMore] = useState(fresh ? cached.hasMore : false);
+  const [activePopoverPostId, setActivePopoverPostId] = useState<string | null>(
+    null,
+  );
   const [cursor, setCursor] = useState<{
     createdAt: string;
     id: string;
@@ -611,12 +614,18 @@ export function CommunityListing() {
                     left: 0,
                     width: "100%",
                     paddingBottom: "16px",
+                    zIndex: activePopoverPostId === post.id ? 20 : 0,
                     transform: `translateY(${virtualItem.start - virtualizer.options.scrollMargin}px)`,
                   }}
                 >
                   <PostCard
                     post={post}
                     userId={userId}
+                    onPopoverOpenChange={(postId, open) => {
+                      setActivePopoverPostId((current) =>
+                        open ? postId : current === postId ? null : current,
+                      );
+                    }}
                     onPostEdited={handlePostEdited}
                     onPostDeleted={handlePostDeleted}
                   />

@@ -15,6 +15,7 @@ import { ImageLightbox } from "@/components/ui/ImageLightbox";
 interface Props {
   post: Post;
   userId?: string | null;
+  onPopoverOpenChange?: (postId: string, open: boolean) => void;
   onPostEdited?: (
     postId: string,
     updated: {
@@ -31,6 +32,7 @@ interface Props {
 export const PostCard = React.memo(function PostCard({
   post,
   userId = null,
+  onPopoverOpenChange,
   onPostEdited,
   onPostDeleted,
 }: Props) {
@@ -49,7 +51,11 @@ export const PostCard = React.memo(function PostCard({
       <div className="bg-white border border-gray-100 rounded-2xl p-5 shadow-sm hover:border-[#FF5C5C]/30 transition-colors">
         {/* Author row */}
         <div className="flex items-center mb-3">
-          <UserPopover userId={post.author.id} nickname={post.author.nickname}>
+          <UserPopover
+            userId={post.author.id}
+            nickname={post.author.nickname}
+            onOpenChange={(open) => onPopoverOpenChange?.(post.id, open)}
+          >
             <ProfileCard
               nickname={post.author.nickname}
               handle={post.author.handle}
