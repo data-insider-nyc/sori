@@ -157,50 +157,49 @@ ON CONFLICT (id) DO NOTHING;
 -- 2. profiles
 --    location_id = 1 (NYC Metro)
 --    nickname    = short display name shown in UI
---    display_name = full name / longer label
 --    handle      = @username (unique)
 -- =============================================================================
-INSERT INTO profiles (id, nickname, display_name, handle, bio, location_id, joined_at) VALUES
+INSERT INTO profiles (id, nickname, handle, bio, location_id, joined_at) VALUES
   -- ── 남성 5명 ─────────────────────────────────────────────────────────────────
   (u_junseo,
-  'David', 'NYU David',
+  'David',
   'nyu_david',
   'NYU/컬럼비아 연구 교류 프로젝트 하는 CS 박사생 📚 논문 쓰다 지치면 모닝사이드 카페 투어. 한/영 섞어서 편하게 대화해요.',
    1, '2025-11-01 00:00:00+00'),
 
   (u_jaewon,
-  'John', 'John Doe',
+  'John',
   'john_doe_wallst',
   'Wall St 금융권 3년차 📈 평일은 숫자, 주말은 러닝. 시민권 준비/커리어 고민 같이 나눠요. 영어 댓글도 환영!',
    1, '2025-11-15 00:00:00+00'),
 
   (u_dohoon,
-  '도훈K', 'Dohoon Kim',
+  '도훈K',
   'dohoon_kim',
   'NYU Stern MBA 1학년 🎓 전 스타트업 PM. 비자/취업 현실 정보 모으는 중. 케이스 인터뷰 같이 연습할 분 찾습니다.',
    1, '2025-12-01 00:00:00+00'),
 
   (u_hyunsoo,
-  'Alex', 'Alex Park',
+  'Alex',
   'alex_hypark',
   'NYC 시니어 개발자 5년차 💻 React/Python. Hell''s Kitchen 거주. 퇴근 후 맥주와 사이드프로젝트가 취미입니다.',
    1, '2025-12-10 00:00:00+00'),
 
   (u_minho,
-  '민호', 'Minho Jang MD',
+  '민호',
   'dr_minho_jang',
   'NYU 내과 레지던트 🏥 교대근무 중에도 버티는 중. 의료/비자/뉴욕 생존팁 서로 공유해요. 플러싱 국밥 러버.',
    1, '2025-12-20 00:00:00+00'),
 
   -- ── 여성 5명 ─────────────────────────────────────────────────────────────────
   (u_ayeon,
-  'Ari', 'Ari Seo',
+  'Ari',
   'ari_seo_nyc',
   '컬럼비아 국제관계학 석사 🌍 낮엔 논문, 밤엔 뉴욕 산책. 해외생활 외로움과 커리어 고민 같이 이야기하고 싶어요.',
    1, '2026-01-05 00:00:00+00'),
 
   (u_yujin,
-  'Yujin', 'Yujin Han',
+  'Yujin',
   'yujin_han',
   'SoHo 마케팅 직장인 🗞️ K-패션/브랜딩 덕후. 평일은 일, 주말은 갤러리 투어. 뉴욕 생활 4년차.',
    1, '2026-01-15 00:00:00+00'),

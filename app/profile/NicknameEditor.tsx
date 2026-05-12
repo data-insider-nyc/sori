@@ -71,7 +71,6 @@ export function NicknameEditor({
       .from("profiles")
       .update({
         nickname: name,
-        display_name: name,
         nickname_changed_at: new Date().toISOString(),
       })
       .eq("id", userId);

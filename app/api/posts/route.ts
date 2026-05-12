@@ -11,6 +11,8 @@ type CreatePostBody = {
   is_announcement?: boolean;
 };
 
+const MAX_IMAGES = 8;
+
 export async function POST(req: Request) {
   const supabase = await createClient();
   const {
@@ -25,6 +27,14 @@ export async function POST(req: Request) {
   const content = (json.content ?? "").trim();
   if (!content) {
     return NextResponse.json({ error: "Missing content" }, { status: 400 });
+  }
+
+  const images = Array.isArray(json.images) ? json.images : [];
+  if (images.length > MAX_IMAGES) {
+    return NextResponse.json(
+      { error: `Too many images (max ${MAX_IMAGES})` },
+      { status: 400 },
+    );
   }
 
   const payload: {
@@ -42,7 +52,7 @@ export async function POST(req: Request) {
     content,
     category: json.category ?? "general",
     region: json.region ?? null,
-    images: Array.isArray(json.images) ? json.images : [],
+    images,
     tags: [],
   };
 

@@ -66,7 +66,8 @@ supabase migration repair --status applied <migration_name>
 | `104_soft_delete_posts_comments.sql` | soft delete (deleted_at) |
 | `105_filter_deleted_posts_comments.sql` | 삭제된 글 RLS 필터 |
 | `106_indexes.sql` | 성능 인덱스 |
-| `107_handle_display_name.sql` | handle, display_name 추가 |
+| `107_handle_display_name.sql` | handle 추가 (초기에는 display_name도 추가) |
+| `20260420000034_drop_profiles_display_name.sql` | profiles.display_name 제거 (nickname으로 단일화) |
 | `108_update_comment_trigger.sql` | 댓글 카운트 트리거 개선 |
 | `109_indexes_deleted_at.sql` | soft delete 인덱스 |
 | `110_metro_areas.sql` | 메트로 지역 초기 마이그레이션 |

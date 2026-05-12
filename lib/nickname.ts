@@ -142,8 +142,8 @@ const ENTITIES: string[] = [
 //   return `${go} ${han} ${ent}`;
 // }
 
-// 기존 generateNickname() 유지 (display_name용)
-// handle 자동 생성 추가
+// generateNickname(): UI 표시용 nickname 생성
+// generateHandle(): 이메일 기반/랜덤 handle 생성
 
 const HANDLE_ADJECTIVES = [
   "happy",

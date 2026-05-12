@@ -27,7 +27,6 @@
  INSERT INTO profiles (
    id,
    nickname,
-   display_name,
    handle,
    bio,
    location,
@@ -36,7 +35,6 @@
  ) VALUES (
    'd1b48f0a-d1a4-4a8f-9f77-5f7f0ff8d522',
    '제니',
-   '제니 더 뷰티',
    'golfer_beauty',
   'LA에서 혼자 지내는 50대 골퍼예요. 낮에는 라운딩과 레슨, 저녁에는 스킨케어와 메이크업',
    'la',
@@ -84,7 +82,6 @@
  INSERT INTO profiles (
    id,
    nickname,
-   display_name,
    handle,
    bio,
    location,
@@ -92,7 +89,6 @@
    joined_at
  ) VALUES (
    '6f4b8f0f-6df1-4d2f-9d9d-4c41b6d24a11',
-   '서린',
    '서린',
    'nightletters',
    '뉴욕에서 오래 살았지만 아직도 마음 둘 곳을 찾는 중. 오늘은 괜찮은 척 말고 진짜 이야기를 해보고 싶어요.',
@@ -134,7 +130,6 @@
  INSERT INTO profiles (
    id,
    nickname,
-   display_name,
    handle,
    bio,
    location,
@@ -142,7 +137,6 @@
    joined_at
  ) VALUES (
    'c2bb8d0a-d1a4-4a8f-9f77-5f7f0ff8d522',
-   '윤하',
    '윤하',
    'scrubsandregret',
    '뉴욕 온 지 1년 된 RN. 커리어는 잡았는데 삶은 자꾸 무너지는 느낌이라 솔직한 얘기를 나누고 싶어요.',
